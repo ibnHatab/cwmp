@@ -1,8 +1,6 @@
-*.app
-*.beam
-*.boot
-*.huc
-*.log
-*.script
+ebin/
+*~
 .eunit/
-erl_crash.dump
+test/
+*beam
+
