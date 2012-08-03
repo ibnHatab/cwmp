@@ -23,6 +23,8 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 
+-export([tst/0]).
+
 -define(SERVER, ?MODULE). 
 -define(DEFAULT_PORT, 7547).
 
@@ -41,6 +43,7 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
+    lager:info("STARTED"),
     start_link(?DEFAULT_PORT).
 
 %%--------------------------------------------------------------------
@@ -134,7 +137,7 @@ handle_cast(stop, State) ->
 %% @end
 %%--------------------------------------------------------------------
 handle_info({tcp, _Socket, RawData}, State) ->
-    io:format(user, ">> rcv: ~p~n", [RawData]),
+    lager:info("rcv: ~p~n", [RawData]),
     {noreply, State};
 handle_info(timeout, #state{lsock = LSock} = State) ->
     {ok, _Sock} = gen_tcp:accept(LSock, infinity),
@@ -172,6 +175,12 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %%%===================================================================
 
--ifdef(EUNIT).
+tst () ->
+    Term = [a,b,c],
+    lager:error("Some message"),
+    lager:warning("Some message with a term: ~p", [Term]),
+    {RequestID, Vhost, User} = {15, "archon", vlad},
+    lager:warning([{request, RequestID},{vhost, Vhost}], "Permission denied to ~s", [User]).
 
+-ifdef(EUNIT).
 -endif.
