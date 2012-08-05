@@ -2,81 +2,39 @@
 %%% @author vlad <lib.aca55a@gmail.com>
 %%% @copyright (C) 2012, vlad
 %%% @doc
-%%%
+%%% MM (Middle Manager) for SOAP envelop processing.
 %%% @end
-%%% Created :  7 Jul 2012 by vlad <lib.aca55a@gmail.com>
+%%% Created :  4 Aug 2012 by vlad <lib.aca55a@gmail.com>
 %%%-------------------------------------------------------------------
--module(tr_server).
+-module(tr_soap).
 
 -behaviour(gen_server).
 
--include("tr69.hrl").
-
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--endif.
-
-
 %% API
--export([start_link/0,start_link/1,
-	 get_count/0, stop/0]).
+-export([start_link/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 
--export([tst/0]).
-
 -define(SERVER, ?MODULE). 
--define(DEFAULT_PORT, 7547).
 
--record(state, {port, lsock, request_count = 42}).
+-record(state, {channel :: pid(),
+		process :: pid()}).
 
 %%%===================================================================
 %%% API
 %%%===================================================================
 
-
 %%--------------------------------------------------------------------
 %% @doc
 %% Starts the server
 %%
-%% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
+%% @spec start_link(Pid, Pid) -> {ok, Pid} | ignore | {error, Error}
 %% @end
 %%--------------------------------------------------------------------
-start_link() ->
-    ?INFO("STARTED"),
-    start_link(?DEFAULT_PORT).
-
-%%--------------------------------------------------------------------
-%% @doc
-%% Start the server on given port
-%%
-%% @end
-%%--------------------------------------------------------------------
--spec start_link(non_neg_integer()) ->  {'ok', pid()} | {'error', atom()}.
-start_link(Port) -> 
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [Port], []).
-
-%%--------------------------------------------------------------------
-%% @doc
-%% Fetch the number of request made to this server
-%%
-%% @end
-%%--------------------------------------------------------------------
--spec get_count() ->  integer().
-get_count() -> 
-    gen_server:call(?SERVER, get_count).
-
-%%--------------------------------------------------------------------
-%% @doc
-%% Stop the server
-%%
-%% @end
-%%--------------------------------------------------------------------
--spec stop() ->  ok.
-stop() -> 
-    gen_server:cast(?SERVER, stop).
+start_link(Channel, Process) ->
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [Channel, Process], []).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -93,9 +51,8 @@ stop() ->
 %%                     {stop, Reason}
 %% @end
 %%--------------------------------------------------------------------
-init([Port]) ->
-    {ok, LSock} = gen_tcp:listen(Port, [{active, true}]),
-    {ok, #state{port = Port, lsock = LSock}, 0}.
+init([Channel, Process]) ->
+    {ok, #state{channel = Channel, process = Process}}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -111,8 +68,8 @@ init([Port]) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_call(get_count, _From, State) ->
-    Reply = {ok, State#state.request_count},
+handle_call(_Request, _From, State) ->
+    Reply = ok,
     {reply, Reply, State}.
 
 %%--------------------------------------------------------------------
@@ -125,8 +82,8 @@ handle_call(get_count, _From, State) ->
 %%                                  {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_cast(stop, State) ->
-    {stop, normal, State}.
+handle_cast(_Msg, State) ->
+    {noreply, State}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -138,15 +95,8 @@ handle_cast(stop, State) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_info({tcp, _Socket, RawData}, State) ->
-    ?INFO("rcv: ~p~n", [RawData]),
-    {noreply, State};
-handle_info(timeout, #state{lsock = LSock} = State) ->
-    {ok, _Sock} = gen_tcp:accept(LSock, infinity),
-    {noreply, State};
-handle_info({tcp_closed, _Sock}, State) ->
-    {noreply, State, 0}.
-
+handle_info(_Info, State) ->
+    {noreply, State}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -176,13 +126,3 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
-
-tst () ->
-    Term = [a,b,c],
-    ?ERROR("Some message"),
-    ?WARNING("Some message with a term: ~p", [Term]),
-    {RequestID, Vhost, User} = {15, "archon", vlad},
-    ok = lager:warning([{request, RequestID},{vhost, Vhost}], "Permission denied to ~s", [User]).
-
--ifdef(EUNIT).
--endif.

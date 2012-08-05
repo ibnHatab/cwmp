@@ -1,0 +1,23 @@
+
+
+* RPC protocol Unitary tests
+
+** Protocol
+   list_to_atom(split_ns("soap:Envelope").snd).
+
+** SOAP encoding [/]
+   - [ ] Parse SOAP format
+   - [ ] Parse SOAP types
+   - [ ] Check SOAP version from envelop
+   
+
+** ACS location update [1/1]
+   - [X] Parse URI / xmerl_tests:parse_URI_test
+
+
+* System tests
+** Application state management [0/3]
+   - [ ] GProc cookies
+        http://rustyklophaus.com/articles/20090916-GProcErlangGlobalProcessRegistry.html
+   - [ ] ETS save
+   - [ ] Application:get_env/2
