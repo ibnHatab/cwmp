@@ -1,5 +1,8 @@
 
 
+* RUN
+	watchfs '*/*.erl' 'rebar eunit -v skip_deps=true suite=xmerl'
+
 * RPC protocol Unitary tests
 
 ** Protocol
