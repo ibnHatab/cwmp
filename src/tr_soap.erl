@@ -2,7 +2,9 @@
 %%% @author vlad <lib.aca55a@gmail.com>
 %%% @copyright (C) 2012, vlad
 %%% @doc
-%%% MM (Middle Manager) for SOAP envelop processing.
+%%%  Middle Manager for SOAP envelop processing.
+%%%  A standard XML-based syntax used here to encode remote procedure calls.
+%%%  Specifically SOAP 1.1, as specified in [9].
 %%% @end
 %%% Created :  4 Aug 2012 by vlad <lib.aca55a@gmail.com>
 %%%-------------------------------------------------------------------

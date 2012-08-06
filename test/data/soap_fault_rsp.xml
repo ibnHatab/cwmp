@@ -1,0 +1,19 @@
+<soap:Envelope 
+  xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" 
+  xmlns:cwmp="urn:dslforum-org:cwmp-1-0"> 
+    <soap:Header> 
+        <cwmp:ID soap:mustUnderstand="1">1234</cwmp:ID> 
+    </soap:Header> 
+    <soap:Body> 
+        <soap:Fault> 
+            <faultcode>Client</faultcode> 
+            <faultstring>CWMP fault</faultstring> 
+            <detail> 
+                <cwmp:Fault> 
+                    <FaultCode>9000</FaultCode> 
+                    <FaultString>Upload method not supported</FaultString> 
+                </cwmp:Fault> 
+            </detail> 
+        </soap:Fault> 
+    </soap:Body> 
+</soap:Envelope>

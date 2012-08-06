@@ -1,0 +1,33 @@
+<soap:Envelope 
+  xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" 
+  xmlns:cwmp="urn:dslforum-org:cwmp-1-0"> 
+    <soap:Header> 
+        <cwmp:ID soap:mustUnderstand="1">1234</cwmp:ID> 
+    </soap:Header> 
+    <soap:Body> 
+        <soap:Fault> 
+            <faultcode>Client</faultcode> 
+            <faultstring>CWMP fault</faultstring>
+            <detail> 
+                <cwmp:Fault> 
+                    <FaultCode>9003</FaultCode> 
+                    <FaultString>Invalid arguments</FaultString> 
+                    <SetParameterValuesFault> 
+                        <ParameterName> 
+                            InternetGatewayDevice.Time.LocalTimeZone 
+                        </ParameterName> 
+                        <FaultCode>9012</FaultCode> 
+                        <FaultString>Not a valid time zone value</FaultString> 
+                    </SetParameterValuesFault> 
+                    <SetParameterValuesFault> 
+                        <ParameterName> 
+                            InternetGatewayDevice.Time.LocalTimeZoneName 
+                        </ParameterName> 
+                        <FaultCode>9012</FaultCode> 
+                        <FaultString>String too long</FaultString> 
+                    </SetParameterValuesFault> 
+                </cwmp:Fault> 
+            </detail> 
+        </soap:Fault> 
+    </soap:Body> 
+</soap:Envelope>
