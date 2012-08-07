@@ -6,14 +6,19 @@
 
 -include_lib("xmerl/include/xmerl.hrl").
 
+-include("proto.hrl").
+
+
+
 -export([import/1, export/1]).
 
-%-type xmlElement() :: #xmlElement{}.
-
-%-spec(import(xmlElement()) -> ,
 
 export(_SOAP_Envelop) ->
     ok.
 
+%-spec import(#xmlElement{}) -> {ok, rpcData ()}.
+
+-spec import(#xmlElement{}) -> {ok, #rpcData{}} | {error, any()}.
 import(_CWMP_Method) ->
-    ok.
+    {ok, ok}.
+

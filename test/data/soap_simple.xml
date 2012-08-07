@@ -1,0 +1,9 @@
+<soap:Envelope
+  xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:cwmp="urn:dslforum-org:cwmp-1-0">
+    <soap:Body>
+        <cwmp:Request>
+            <argument>value</argument>
+        </cwmp:Request>
+    </soap:Body>
+</soap:Envelope>

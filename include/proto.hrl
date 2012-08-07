@@ -2,51 +2,63 @@
 %%% Use is subject to License terms.
 %%%-----------------------------------------------------------------------------
 
--type cpe_method () ::
-	'cwmp:GetRPCMethods'  
-      | 'cwmp:SetParameterValues'  
-      | 'cwmp:GetParameterValues'  
-      | 'cwmp:GetParameterNames'  
-      | 'cwmp:SetParameterAttributes'  
-      | 'cwmp:GetParameterAttributes'  
-      | 'cwmp:AddObject'  
-      | 'cwmp:DeleteObject'  
-      | 'cwmp:Reboot'  
-      | 'cwmp:Download'
-      | 'cwmp:ScheduleDownload'
-      | 'cwmp:Upload'  
-      | 'cwmp:FactoryReset'  
-%% Deprecated         | 'cwmp:GetQueuedTransfers'  
-      | 'cwmp:GetAllQueuedTransfers'
-      | 'CancelTransfer'
-      | 'cwmp:ScheduleInform'
-      | 'ChangeDUState'
-%% Deprecated      | 'cwmp:SetVouchers'  
-%% Deprecated      | 'cwmp:GetOptions' 
-	.
+-define(SUPPORTED_CPE_METHODS, ['cwmp:GetRPCMethods'
+				, 'cwmp:SetParameterValues'
+				, 'cwmp:GetParameterValues'
+				, 'cwmp:GetParameterNames'
+				, 'cwmp:SetParameterAttributes'
+				, 'cwmp:GetParameterAttributes'
+				, 'cwmp:AddObject'
+				, 'cwmp:DeleteObject'
+				, 'cwmp:Reboot'
+				, 'cwmp:Download'
+				, 'cwmp:ScheduleDownload'
+				, 'cwmp:Upload'
+				, 'cwmp:FactoryReset'
+				, 'cwmp:GetQueuedTransfers'
+				, 'cwmp:GetAllQueuedTransfers'
+				, 'CancelTransfer'
+				, 'cwmp:ScheduleInform'
+				, 'ChangeDUState'
+				, 'cwmp:SetVouchers'
+				, 'cwmp:GetOptions'
+			       ]).
 
--type acs_method () ::
-	'cwmp:GetRPCMethods'  
-      | 'cwmp:Inform'  
-      | 'cwmp:TransferComplete'  
-      | 'cwmp:AutonomousTransferComplete'
-      | 'cwmp:DUStateChangeComplete'
-      | 'AutonomousDUStateChangeComplete'
-      | 'cwmp:RequestDownload'  
-%% Deprecated      | 'cwmp:Kicked'
-	.
+-define(SUPPORTED_CPE_DEPRECATED_METHODS, ['cwmp:GetQueuedTransfers'
+					   , 'cwmp:SetVouchers'
+					   , 'cwmp:GetOptions'
+					  ]).
 
 
--type rpc_data () :: string | int | unsignedInt | boolean | dateTime | base64 | anySimpleType.
+-define(SUPPORTED_ACS_METHODS, ['cwmp:GetRPCMethods'
+				, 'cwmp:Inform'
+				, 'cwmp:TransferComplete'
+				, 'cwmp:AutonomousTransferComplete'
+				, 'cwmp:DUStateChangeComplete'
+				, 'AutonomousDUStateChangeComplete'
+				, 'cwmp:RequestDownload'
+				, 'cwmp:Kicked'
+			       ]).
+
+-define(SUPPORTED_ACS_DEPRECATED_METHODS, ['cwmp:Kicked']).
 
 
+-type rpc_data_type() :: string | int | unsignedInt | boolean | dateTime | base64 | anySimpleType.
+
+
+
+
+-record(rpcData, {}).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -type packet_type() :: st_data | st_fin | st_state | st_reset | st_syn.
 
 -record(connection, {
-          pid :: pid(),
-          socket :: port(),
-          version :: integer(),
-          role = equal :: role()
+          pid		:: pid(),
+          socket	:: port(),
+          version	:: integer(),
+          role = equal	:: role()
          }).
 
 -type connection() :: #connection{}.
