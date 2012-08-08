@@ -9,12 +9,11 @@
 -include("proto.hrl").
 
 
-
 -export([import/1, export/1]).
 
 
-export(_SOAP_Envelop) ->
-    ok.
+export(SOAP_Envelop) ->
+    {ok, RPC_Data} = parseSoapMessage(SOAP_Envelop).
 
 %-spec import(#xmlElement{}) -> {ok, rpcData ()}.
 
@@ -22,3 +21,12 @@ export(_SOAP_Envelop) ->
 import(_CWMP_Method) ->
     {ok, ok}.
 
+
+
+parseSoapMessage(SOAP) ->
+    ok.
+
+    %% Child = getFirstChild (SOAP),
+    %% case getNodeName (SOAP) of
+    %% 	"soap:Header" -> parseHeader ()
+    %% end.
