@@ -6,7 +6,7 @@
 * RPC protocol Unitary tests
 
 ** Protocol
-   list_to_atom(split_ns("soap:Envelope").snd).
+   list_to_atom(element(2, split_ns("soap:Envelope"))).
 
 ** SOAP encoding [/]
    - [ ] Parse SOAP format
@@ -20,7 +20,9 @@
 
 * System tests
 ** Application state management [0/3]
-   - [ ] GProc cookies
+   - [ ] GProc cookies OFO
         http://rustyklophaus.com/articles/20090916-GProcErlangGlobalProcessRegistry.html
    - [ ] ETS save
-   - [ ] Application:get_env/2
+
+   - [ ] Application:get_env/2 
+     oriv/sys.config
