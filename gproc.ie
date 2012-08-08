@@ -1,0 +1,50 @@
+%%% Welcome to the Distel Interactive Erlang Shell.
+%%
+%% C-j evaluates an expression and prints the result in-line.
+%% C-M-x evaluates a whole function definition.
+
+
+code:add_path("/udir/andreeni/repos/tr69/deps/gproc/ebin").
+% -:-> true
+
+% -:-> true
+
+    application:start(sasl),
+    application:start(gproc).
+% -:-> ok
+
+% -:-> {error,{"no such file or directory","gproc.app"}}
+
+% -:-> {error,{"no such file or directory","gproc.app"}}
+
+
+gproc:get_value({n,l,me},self()).
+
+gproc:reg( {n,l,answer1}, 42).
+% -:-> true
+
+
+gproc:get_value({n,l,answer1}, self()).
+% -:-> 42
+
+gproc:get_value({n,l,answer1}, self()).
+% -:-> 42
+self().
+Error: {{error,{2,erl_parse,["syntax error before: ","':'"]}},
+ {error,{4,erl_parse,["syntax error before: ","self"]}}}
+
+self().
+% -:-> <0.45.0>
+
+gproc:get_value({n,l,answer1}, self()).
+% -:-> 42
+
+gproc:lookup_pids({n,l,answer1}).
+% -:-> [<0.45.0>]
+
+Error: {{error,{2,erl_parse,["syntax error before: ","':'"]}},
+ {error,{4,erl_parse,["syntax error before: ","'receive'"]}}}
+
+receive  B   -> B end.
+
+
