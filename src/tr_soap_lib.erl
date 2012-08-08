@@ -22,7 +22,6 @@ import(_CWMP_Method) ->
     {ok, ok}.
 
 
-
 parseSoapMessage(SOAP) ->
     ok.
 
