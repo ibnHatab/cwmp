@@ -93,4 +93,7 @@ soap_decode(LS, S) ->
 	 end     
      || E <- LS],
     #rpc_data{header = H, type = T, message = M}.
+
+parse_element(E = #xmlElement{name='soap:Envelope'}, S) ->
+    ok. 
 -endif.
