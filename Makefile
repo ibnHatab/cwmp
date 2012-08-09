@@ -42,5 +42,15 @@ dialyzer: all
 	  ./ebin
 
 #	  --src ./src
+#	  -Wbehaviours 		
 
-#	  -Wbehaviours 		\
+.PHONY: check-data
+
+DATA_XML=$(wildcard test/data/*.xml)
+
+check-data: $(DATA_XML)
+	@for file in $(DATA_XML) ; do 	\
+		echo ; 			\
+		echo "-------------- $$file ----------------" ; \
+		xmllint --noout --path doc --schema cwmp-1-1.xsd $$file; \
+	done
