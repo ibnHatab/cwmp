@@ -9,40 +9,40 @@
    list_to_atom(element(2, split_ns("soap:Envelope"))).
    
 
-*** TODO SOAP Parse tests
+*** TODO SOAP Parse tests [/]
     File souces are in: [[%20https://github.com/dpavlin/perl-cwmp.git][perl-cwmp]]
 
-    | CPE methods                        | Responding | Calling  |   
-    | GetRPCMethods                      | REQUIRED   | OPTIONAL |   
-    | SetParameterValues                 | REQUIRED   | REQUIRED |   
-    | GetParameterValues                 | REQUIRED   | REQUIRED |   
-    | GetParameterNames                  | REQUIRED   | REQUIRED |   
-    | SetParameterAttributes             | REQUIRED   | OPTIONAL |   
-    | GetParameterAttributes             | REQUIRED   | OPTIONAL |   
-    | AddObject                          | REQUIRED   | OPTIONAL |   
-    | DeleteObject                       | REQUIRED   | OPTIONAL |   
-    | Reboot                             | REQUIRED   | OPTIONAL |   
-    | Download                           | REQUIRED   | REQUIRED |   
-    | ScheduleDownload                   | OPTIONAL   | OPTIONAL |   
-    | Upload                             | OPTIONAL   | OPTIONAL |   
-    | FactoryReset                       | OPTIONAL   | OPTIONAL |   
-    | GetQueuedTransfers  (DEPRECATED)   | OPTIONAL   | OPTIONAL |   
-    | GetAllQueuedTransfers              | OPTIONAL   | OPTIONAL |   
-    | CancelTransfer                     | OPTIONAL   | OPTIONAL |   
-    | ScheduleInform                     | OPTIONAL   | OPTIONAL |   
-    | ChangeDUState                      | OPTIONAL   | OPTIONAL |   
-    | SetVouchers           (DEPRECATED) | OPTIONAL   | OPTIONAL |   
-    | GetOptions            (DEPRECATED) | OPTIONAL   | OPTIONAL |   
+  - [ ] | CPE methods                        | Responding | Calling  |    
+  - [X] | GetRPCMethods                      | REQUIRED   | OPTIONAL |   
+  - [X] | SetParameterValues                 | REQUIRED   | REQUIRED |   
+  - [X] | GetParameterValues                 | REQUIRED   | REQUIRED |   
+  - [X] | GetParameterNames                  | REQUIRED   | REQUIRED |   
+  - [ ] | SetParameterAttributes             | REQUIRED   | OPTIONAL |   
+  - [X] | GetParameterAttributes             | REQUIRED   | OPTIONAL |   
+  - [ ] | AddObject                          | REQUIRED   | OPTIONAL |   
+  - [ ] | DeleteObject                       | REQUIRED   | OPTIONAL |   
+  - [X] | Reboot                             | REQUIRED   | OPTIONAL |   
+  - [ ] | Download                           | REQUIRED   | REQUIRED |   
+  - [ ] | ScheduleDownload                   | OPTIONAL   | OPTIONAL |   
+  - [ ] | Upload                             | OPTIONAL   | OPTIONAL |   
+  - [ ] | FactoryReset                       | OPTIONAL   | OPTIONAL |   
+  - [ ] | GetQueuedTransfers  (DEPRECATED)   | OPTIONAL   | OPTIONAL |   
+  - [ ] | GetAllQueuedTransfers              | OPTIONAL   | OPTIONAL |   
+  - [ ] | CancelTransfer                     | OPTIONAL   | OPTIONAL |   
+  - [ ] | ScheduleInform                     | OPTIONAL   | OPTIONAL |   
+  - [ ] | ChangeDUState                      | OPTIONAL   | OPTIONAL |   
+  - [ ] | SetVouchers           (DEPRECATED) | OPTIONAL   | OPTIONAL |   
+  - [ ] | GetOptions            (DEPRECATED) | OPTIONAL   | OPTIONAL |   
 
-    | ACS methods                        | Calling  | Responding |
-    | GetRPCMethods                      | OPTIONAL | REQUIRED   |
-    | Inform                             | REQUIRED | REQUIRED   |
-    | TransferComplete                   | REQUIRED | REQUIRED   |
-    | AutonomousTransferComplete         | OPTIONAL | REQUIRED   |
-    | DUStateChangeComplete              | OPTIONAL | OPTIONAL   |
-    | AutonomousDUStateChangeComplete    | OPTIONAL | OPTIONAL   |
-    | RequestDownload                    | OPTIONAL | OPTIONAL   |
-    | Kicked                (DEPRECATED) | OPTIONAL | OPTIONAL   |
+  - [ ] | ACS methods                        | Calling  | Responding |
+  - [ ] | GetRPCMethods                      | OPTIONAL | REQUIRED   |
+  - [X] | Inform                             | REQUIRED | REQUIRED   |
+  - [ ] | TransferComplete                   | REQUIRED | REQUIRED   |
+  - [ ] | AutonomousTransferComplete         | OPTIONAL | REQUIRED   |
+  - [ ] | DUStateChangeComplete              | OPTIONAL | OPTIONAL   |
+  - [ ] | AutonomousDUStateChangeComplete    | OPTIONAL | OPTIONAL   |
+  - [ ] | RequestDownload                    | OPTIONAL | OPTIONAL   |
+  - [ ] | Kicked                (DEPRECATED) | OPTIONAL | OPTIONAL   |
 
 
 ** SOAP encoding [/]
