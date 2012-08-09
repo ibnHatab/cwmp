@@ -570,7 +570,7 @@
 	   parameter_list :: #parameter_attribute_list{}
 	  }).
 
-%% @doc AddObject message - Annex A.3.2.6 
+%% @doc AddObject message - Annex A.3.2.6 xmlText
 -record (add_object, {
 	   object_name :: object_name_type(),
 	   parameter_key :: parameter_key_type()
@@ -772,7 +772,7 @@
 
 %% @doc TransferCompleteResponse message - Annex A.3.3.2 
 -record (transfer_complete_response, {
-
+	   %% TODO: ref
 	  }).
 
 %% @doc AutonomousTransferComplete message - Annex A.3.3.3 
@@ -846,4 +846,4 @@
 
 
 
--record(rpcData,{}).
+-record(rpc_data,{}).
