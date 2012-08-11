@@ -10,6 +10,9 @@
 -export([encoder/1, encode/1]).
 -export([decoder/1, decode/1]).
 
+-export([read_xml/1, write_xml/1]).
+
+
 
 -type encoder_option() :: {version, 1 | 2 | 3} | {handler, function()}.
 -type decoder_option() :: {version, 1 | 2 | 3} | {object_hook, function()}.
@@ -19,7 +22,6 @@
 
 -record(decoder, {version=1,
                   object_hook=null,
-                  current_xml_element :: #xmlElement{},
                   state=null}).
 
 %% @doc Create an encoder/1 with the given options.
@@ -28,7 +30,7 @@ encoder(Options) ->
     State = parse_encoder_options(Options, #encoder{}),
     fun (O) -> soap_encode(O, State) end.
 
-%% @doc Encode the given as JSON to an iolist.
+%% @doc Encode the given as SOAP to an rpc_data.
 -spec encode(#rpc_data{}) -> #xmlElement{}.
 encode(Any) ->
     soap_encode(Any, #encoder{}).
@@ -40,10 +42,25 @@ decoder(Options) ->
     State = parse_decoder_options(Options, #decoder{}),
     fun (O) -> soap_decode(O, State) end.
 
-%% @doc Decode the given iolist to Erlang terms.
+%% @doc Decode the given xmlElement to rpc_data terms.
 -spec decode([#xmlElement{}]) -> #rpc_data{}.
 decode(S) ->
     soap_decode(S, #decoder{}).
+
+%% @doc parse XML document from string
+-spec read_xml(string()) -> {error, string()} | {ok, #xmlElement{}}.		      
+read_xml(Str) ->
+    case catch xmerl_scan:string(Str) of
+	{'EXIT',Reason} ->
+	    {error,Reason};
+	{error,Reason} ->
+	    {error,Reason};
+	{ParsResult, _} ->
+	    {ok, ParsResult}
+	end.
+
+write_xml(Doc) ->
+    "".
 
 
 
@@ -90,10 +107,10 @@ soap_decode(LS, S) ->
     [
      case parse_element(E, S) of
 	 {}
-	 end     
+	 end
      || E <- LS],
     #rpc_data{header = H, type = T, message = M}.
 
 parse_element(E = #xmlElement{name='soap:Envelope'}, S) ->
-    ok. 
+    ok.
 -endif.

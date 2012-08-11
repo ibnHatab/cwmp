@@ -1,13 +1,13 @@
-<soap-env:Envelope 
+<soapenv:Envelope 
     xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/" 
-    xmlns:soap-env="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
     xmlns:cwmp="urn:dslforum-org:cwmp-1-0">
    
-  <soap-env:Header>
+  <soapenv:Header>
     <cwmp:ID mustUnderstand="1">42</cwmp:ID>
     <cwmp:NoMoreRequests>0</cwmp:NoMoreRequests>
-  </soap-env:Header>
-  <soap-env:Body>
+  </soapenv:Header>
+  <soapenv:Body>
     <Reboot />
-  </soap-env:Body>
-</soap-env:Envelope>
+  </soapenv:Body>
+</soapenv:Envelope>

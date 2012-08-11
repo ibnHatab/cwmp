@@ -7,6 +7,7 @@ all:
 
 clean:
 	$(REBAR) clean 
+	@rm -rf logs/*
 
 dist-clean:
 	$(REBAR) clean delete-deps
