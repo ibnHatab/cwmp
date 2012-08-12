@@ -1,9 +1,15 @@
-TR_VSN = $(shell sed -n 's/.*{vsn,.*"\(.*\)"}.*/\1/p' src/tr.app.src)
-REBAR='./rebar'
+
+#TR_VSN = $(shell sed -n 's/.*{vsn,.*"\(.*\)"}.*/\1/p' src/tr.app.src)
+REBAR='./rebar' 
 # || which rebar`
+
+.PHONY: deps clean
 
 all:
 	$(REBAR) -v compile
+
+deps:
+	$(REBAR) check-deps || $(REBAR) get-deps
 
 clean:
 	$(REBAR) clean 
@@ -16,14 +22,11 @@ install: all
 	mkdir -p $(DESTDIR)/lib/tr-$(IBROWSE_VSN)/
 	cp -r ebin $(DESTDIR)/lib/tr-$(IBROWSE_VSN)/
 
-test: all
+utest:
 	$(REBAR) skip_deps=true eunit
 
-# (cd test; make) 
-# erl -noshell -pa ebin -pa test -s tr -s tr_test unit_tests \
-# -s tr_test verify_chunked_streaming \
-# -s tr_test test_chunked_streaming_once \
-# -s erlang halt
+test: all
+	$(REBAR) skip_deps=true ct
 
 dialyzer-build:
 	dialyzer --build_plt --verbose			\
@@ -42,8 +45,9 @@ dialyzer: all
 	  -Wunderspecs		\
 	  ./ebin
 
-#	  --src ./src
-#	  -Wbehaviours 		
+# hardcheck
+#	  -Wspecdiffs		\
+#	  -Woverspecs 		\
 
 .PHONY: check-data
 

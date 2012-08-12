@@ -2,50 +2,80 @@
 %%% Use is subject to License terms.
 %%%-----------------------------------------------------------------------------
 
+-define(CWMP_VERSION_1_URL,'urn:dslforum-org:cwmp-1-0').
+-define(CWMP_VERSION_2_URL,'urn:dslforum-org:cwmp-1-2').
+-define(SOAPENV_URL,'http://schemas.xmlsoap.org/soap/envelope/').
+-define(XSD_URL,"http://www.w3.org/2001/XMLSchema-instance").
+
 -type rpc_data_type() :: string | int | unsignedInt | boolean | dateTime | base64 | anySimpleType.
 
 -type url() :: string().
 -type date_time() :: string().
 
+-type cwmp_method() :: 'AddObject'
+                     | 'AutonomousDUStateChangeComplete'
+                     | 'AutonomousTransferComplete'
+                     | 'CancelTransfer'
+                     | 'ChangeDUState'
+                     | 'DeleteObject'
+                     | 'Download'
+                     | 'DUStateChangeComplete'
+                     | 'FactoryReset'
+                     | 'GetAllQueuedTransfers'
+                     | 'GetOptions'
+                     | 'GetParameterAttributes'
+                     | 'GetParameterNames'
+                     | 'GetParameterValues'
+                     | 'GetQueuedTransfers'
+                     | 'GetRPCMethods'
+                     | 'Inform'
+                     | 'Kicked'
+                     | 'Reboot'
+                     | 'RequestDownload'
+                     | 'ScheduleDownload'
+                     | 'ScheduleInform'
+                     | 'SetParameterAttributes'
+                     | 'SetParameterValues'
+                     | 'SetVouchers'
+                     | 'TransferComplete'
+                     | 'Upload'
+                       .
 
-
-
--define(SUPPORTED_CPE_METHODS, ['cwmp:GetRPCMethods'
-				, 'cwmp:SetParameterValues'
-				, 'cwmp:GetParameterValues'
-				, 'cwmp:GetParameterNames'
-				, 'cwmp:SetParameterAttributes'
-				, 'cwmp:GetParameterAttributes'
-				, 'cwmp:AddObject'
-				, 'cwmp:DeleteObject'
-				, 'cwmp:Reboot'
-				, 'cwmp:Download'
-				, 'cwmp:ScheduleDownload'
-				, 'cwmp:Upload'
-				, 'cwmp:FactoryReset'
-				, 'cwmp:GetQueuedTransfers'
-				, 'cwmp:GetAllQueuedTransfers'
+-define(SUPPORTED_CPE_METHODS, ['GetRPCMethods'
+				, 'SetParameterValues'
+				, 'GetParameterValues'
+				, 'GetParameterNames'
+				, 'SetParameterAttributes'
+				, 'GetParameterAttributes'
+				, 'AddObject'
+				, 'DeleteObject'
+				, 'Reboot'
+				, 'Download'
+				, 'ScheduleDownload'
+				, 'Upload'
+				, 'FactoryReset'
+				, 'GetQueuedTransfers'
+				, 'GetAllQueuedTransfers'
 				, 'CancelTransfer'
-				, 'cwmp:ScheduleInform'
+				, 'ScheduleInform'
 				, 'ChangeDUState'
-				, 'cwmp:SetVouchers'
-				, 'cwmp:GetOptions'
+				, 'SetVouchers'
+				, 'GetOptions'
 			       ]).
 
--define(SUPPORTED_CPE_DEPRECATED_METHODS, ['cwmp:GetQueuedTransfers'
-					   , 'cwmp:SetVouchers'
-					   , 'cwmp:GetOptions'
+-define(SUPPORTED_CPE_DEPRECATED_METHODS, ['GetQueuedTransfers'
+					   , 'SetVouchers'
+					   , 'GetOptions'
 					  ]).
 
-
--define(SUPPORTED_ACS_METHODS, ['cwmp:GetRPCMethods'
-				, 'cwmp:Inform'
-				, 'cwmp:TransferComplete'
-				, 'cwmp:AutonomousTransferComplete'
-				, 'cwmp:DUStateChangeComplete'
+-define(SUPPORTED_ACS_METHODS, ['GetRPCMethods'
+				, 'Inform'
+				, 'TransferComplete'
+				, 'AutonomousTransferComplete'
+				, 'DUStateChangeComplete'
 				, 'AutonomousDUStateChangeComplete'
-				, 'cwmp:RequestDownload'
-				, 'cwmp:Kicked'
+				, 'RequestDownload'
+				, 'Kicked'
 			       ]).
 
 -define(SUPPORTED_ACS_DEPRECATED_METHODS, ['cwmp:Kicked']).
@@ -465,13 +495,35 @@
 
 %% @doc  
 -record (id, {
-	   required :: string()
+           mustUnderstand :: boolean(),
+	   value :: string()
 	  }).
 
 %% @doc  
 -record (hold_requests, {
-	   required :: string()
+           mustUnderstand :: boolean(),
+	   value :: boolean()
 	  }).
+
+-record(header,{
+          id :: #id{},
+          hold_requests :: #hold_requests{}
+         }).
+
+-record(envelope,{
+          header :: #header{},
+          body   :: tuple()
+         }).
+
+
+%%%-----------------------------------------------------------------------------
+%%%        RPC Message
+%%%-----------------------------------------------------------------------------
+
+-record(rpc_data, {
+          type :: cwmp_method(),
+          data :: #envelope{}
+         }).
 
 %%%-----------------------------------------------------------------------------
 %%% Fault Definition
@@ -844,6 +896,3 @@
 
 	  }).
 
-
-
--record(rpc_data,{}).

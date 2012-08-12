@@ -22,6 +22,13 @@
 -define(ERROR(Msg, Args),
         ok = lager:error(Msg, Args)).
 
+%% Trace macro
+-ifdef(TEST).
+-define(DBG(ARG), io:format(user, "~n>> ~p: ~p~n", [??ARG, ARG])).
+-else.
+-define(DBG(ARG), true).
+-endif.
+
 -ifndef(TIMEON).
 %% Yes, these need to be on a single line to work...
 %% ?TIMEON,
