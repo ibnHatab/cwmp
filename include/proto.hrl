@@ -7,39 +7,43 @@
 -define(SOAPENV_URL,'http://schemas.xmlsoap.org/soap/envelope/').
 -define(XSD_URL,"http://www.w3.org/2001/XMLSchema-instance").
 
+-type cwmp_version() :: 1 | 2.
+
 -type rpc_data_type() :: string | int | unsignedInt | boolean | dateTime | base64 | anySimpleType.
 
 -type url() :: string().
 -type date_time() :: string().
 
--type cwmp_method() :: 'AddObject'
-                     | 'AutonomousDUStateChangeComplete'
-                     | 'AutonomousTransferComplete'
-                     | 'CancelTransfer'
-                     | 'ChangeDUState'
-                     | 'DeleteObject'
-                     | 'Download'
-                     | 'DUStateChangeComplete'
-                     | 'FactoryReset'
-                     | 'GetAllQueuedTransfers'
-                     | 'GetOptions'
-                     | 'GetParameterAttributes'
-                     | 'GetParameterNames'
-                     | 'GetParameterValues'
-                     | 'GetQueuedTransfers'
-                     | 'GetRPCMethods'
-                     | 'Inform'
-                     | 'Kicked'
-                     | 'Reboot'
-                     | 'RequestDownload'
-                     | 'ScheduleDownload'
-                     | 'ScheduleInform'
-                     | 'SetParameterAttributes'
-                     | 'SetParameterValues'
-                     | 'SetVouchers'
-                     | 'TransferComplete'
-                     | 'Upload'
-                       .
+-type cwmp_method() ::
+        'AddObject'                       | 'AddObjectResponse' 
+      | 'AutonomousDUStateChangeComplete' | 'AutonomousDUStateChangeCompleteResponse' 
+      | 'AutonomousTransferComplete'      | 'AutonomousTransferCompleteResponse' 
+      | 'CancelTransfer'                  | 'CancelTransferResponse' 
+      | 'ChangeDUState'                   | 'ChangeDUStateResponse' 
+      | 'DeleteObject'                    | 'DeleteObjectResponse' 
+      | 'Download'                        | 'DownloadResponse' 
+      | 'DUStateChangeComplete'           | 'DUStateChangeCompleteResponse' 
+      | 'FactoryReset'                    | 'FactoryResetResponse' 
+      | 'Fault'                           
+      | 'GetAllQueuedTransfers'           | 'GetAllQueuedTransfersResponse' 
+      | 'GetOptions'                      | 'GetOptionsResponse' 
+      | 'GetParameterAttributes'          | 'GetParameterAttributesResponse' 
+      | 'GetParameterNames'               | 'GetParameterNamesResponse' 
+      | 'GetParameterValues'              | 'GetParameterValuesResponse' 
+      | 'GetQueuedTransfers'              | 'GetQueuedTransfersResponse' 
+      | 'GetRPCMethods'                   | 'GetRPCMethodsResponse' 
+      | 'Inform'                          | 'InformResponse' 
+      | 'Kicked'                          | 'KickedResponse' 
+      | 'Reboot'                          | 'RebootResponse' 
+      | 'RequestDownload'                 | 'RequestDownloadResponse' 
+      | 'ScheduleDownload'                | 'ScheduleDownloadResponse' 
+      | 'ScheduleInform'                  | 'ScheduleInformResponse' 
+      | 'SetParameterAttributes'          | 'SetParameterAttributesResponse' 
+      | 'SetParameterValues'              | 'SetParameterValuesResponse' 
+      | 'SetVouchers'                     | 'SetVouchersResponse' 
+      | 'TransferComplete'                | 'TransferCompleteResponse' 
+      | 'Upload'                          | 'UploadResponse'
+        .
 
 -define(SUPPORTED_CPE_METHODS, ['GetRPCMethods'
 				, 'SetParameterValues'
@@ -489,41 +493,6 @@
 
 
 
-%%%-----------------------------------------------------------------------------
-%%%        SOAP Header Elements
-%%%-----------------------------------------------------------------------------
-
-%% @doc  
--record (id, {
-           mustUnderstand :: boolean(),
-	   value :: string()
-	  }).
-
-%% @doc  
--record (hold_requests, {
-           mustUnderstand :: boolean(),
-	   value :: boolean()
-	  }).
-
--record(header,{
-          id :: #id{},
-          hold_requests :: #hold_requests{}
-         }).
-
--record(envelope,{
-          header :: #header{},
-          body   :: tuple()
-         }).
-
-
-%%%-----------------------------------------------------------------------------
-%%%        RPC Message
-%%%-----------------------------------------------------------------------------
-
--record(rpc_data, {
-          type :: cwmp_method(),
-          data :: #envelope{}
-         }).
 
 %%%-----------------------------------------------------------------------------
 %%% Fault Definition
@@ -896,3 +865,68 @@
 
 	  }).
 
+%%%-----------------------------------------------------------------------------
+%%%        SOAP Header Elements
+%%%-----------------------------------------------------------------------------
+
+%% @doc  
+-record (id, {
+           mustUnderstand :: boolean(),
+	   value :: string()
+	  }).
+
+%% @doc  
+-record (hold_requests, {
+           mustUnderstand :: boolean(),
+	   value :: boolean()
+	  }).
+
+-record(header,{
+          id :: #id{},
+          hold_requests :: #hold_requests{}
+         }).
+
+-type body_type() ::
+        #add_object{}                          | #add_object_response{}
+      | #autonomous_du_state_change_complete{} | #autonomous_du_state_change_complete_response{}
+      | #autonomous_transfer_complete{}        | #autonomous_transfer_complete_response{}
+      | #cancel_transfer{}                     | #cancel_transfer_response{}
+      | #change_du_state{}                     | #change_du_state_response{}
+      | #delete_object{}                       | #delete_object_response{}
+      | #download{}                            | #download_response{}
+      | #du_state_change_complete{}            | #du_state_change_complete_response{}
+      | #factory_reset{}                       | #factory_reset_response{}
+      | #fault{}                          
+      | #get_all_queued_transfers{}            | #get_all_queued_transfers_response{}
+      | #get_options{}                         | #get_options_response{}
+      | #get_parameter_attributes{}            | #get_parameter_attributes_response{}
+      | #get_parameter_names{}                 | #get_parameter_names_response{}
+      | #get_parameter_values{}                | #get_parameter_values_response{}
+      | #get_queued_transfers{}                | #get_queued_transfers_response{}
+      | #get_rpc_methods{}                     | #get_rpc_methods_response{}
+      | #inform{}                              | #inform_response{}
+      | #kicked{}                              | #kicked_response{}
+      | #reboot{}                              | #reboot_response{}
+      | #request_download{}                    | #request_download_response{}
+      | #schedule_download{}                   | #schedule_download_response{}
+      | #schedule_inform{}                     | #schedule_inform_response{}
+      | #set_parameter_attributes{}            | #set_parameter_attributes_response{}
+      | #set_parameter_values{}                | #set_parameter_values_response{}
+      | #set_vouchers{}                        | #set_vouchers_response{}
+      | #transfer_complete{}                   | #transfer_complete_response{}
+      | #upload{}                              | #upload_response{}
+        .
+        
+-record(envelope,{
+          header :: #header{},
+          body   :: body_type()
+         }).
+
+
+%%%-----------------------------------------------------------------------------
+%%%        RPC Message
+%%%-----------------------------------------------------------------------------
+-record(rpc_data, {
+%          type :: cwmp_method(),
+          data :: #envelope{}
+         }).

@@ -49,13 +49,15 @@ decoder(Options) ->
     fun (O) -> soap_decode(O, State) end.
 
 %% @doc Decode the given xmlElement to rpc_data terms.
--spec decode([#xmlElement{}]) -> #rpc_data{}.
+%-spec decode([#xmlElement{}]) -> #envelope{}.% | {error, any()}.
+-spec decode(#xmlElement{}) -> #rpc_data{}.
 decode(S) ->
+%    #envelope{}.
     soap_decode(S, #decoder{}).
 
 %% @doc parse XML document from string
 -spec read_xml(string()) -> Result when
-      Result :: #xmlElement{} | {error, string()}.
+      Result :: #xmlElement{} | {error, any()}.
 read_xml(Str) ->
     case catch xmerl_scan:string(Str) of
 	{'EXIT',Reason} ->
@@ -75,7 +77,8 @@ write_xml(Doc) ->
 %%%-----------------------------------------------------------------------------
 %% Internal API
 %%%-----------------------------------------------------------------------------
-
+-spec parse_encoder_options([Option],#encoder{}) -> #encoder{} when
+      Option :: {'handler', term()} | {'version', cwmp_version()}.
 parse_encoder_options([], State) ->
     State;
 parse_encoder_options([{version, Version} | Rest], State) ->
@@ -83,6 +86,8 @@ parse_encoder_options([{version, Version} | Rest], State) ->
 parse_encoder_options([{handler, Handler} | Rest], State) ->
     parse_encoder_options(Rest, State#encoder{handler=Handler}).
 
+-spec parse_decoder_options([Option], #decoder{}) -> #decoder{} when
+      Option :: {'object_hook', term()} | {'version', cwmp_version()}.
 parse_decoder_options([], State) ->
     State;
 parse_decoder_options([{version, Version} | Rest], State) ->
@@ -108,22 +113,32 @@ soap_encode(_Any, #encoder{}) ->
 %%%        SOAP Decoder
 %%%-----------------------------------------------------------------------------
 
--spec soap_decode(#xmlElement{}, #decoder{}) -> #rpc_data{} | {error, any()}.
-soap_decode(Doc, S) ->
-    try parseMessage(Doc, S)
-    catch
-        error: Error ->
-            Stacktrace = erlang:get_stacktrace(),
-            erlang:raise(error, Error, Stacktrace);
-        %% Probably thrown from return_error/2:
-        throw: {error, {_Tag, ?MODULE, _M}} = Error ->
-            Error
-    end.
+-spec parse_error(#xmlElement{}, #decoder{}) -> no_return().
+parse_error(Elem, State) ->
+    return_error(Elem#xmlElement.name,
+                 {State#decoder.state, "Unknown element"}).
 
+-spec soap_decode(#xmlElement{}, #decoder{}) -> #rpc_data{}.
+%-spec soap_decode(#xmlElement{}, #decoder{}) -> #envelope{} | {error, any()}.
+soap_decode(Doc, S) ->
+    try
+        parseMessage(Doc, S)
+     catch
+         error: Error ->
+            Stacktrace = erlang:get_stacktrace(),
+             erlang:raise(error, Error, Stacktrace)
+         %% Probably thrown from return_error/2:
+         %% throw: {error, {Tag, ?MODULE, M}} ->
+         %%     Stacktrace = erlang:get_stacktrace(),
+         %%     erlang:raise(error, {Tag, M}, Stacktrace)
+     end.
+
+-spec get_qualified_name(atom(),string()) -> atom().
 -compile({nowarn_unused_function, get_qualified_name/2}).
 get_qualified_name(Name, Ns) when is_atom(Name)->    
     list_to_atom(Ns ++ ":" ++ atom_to_list(Name)).
 
+-spec get_local_name(atom(), string()) -> atom().
 get_local_name(Name, Ns) when is_atom(Name), Ns =:= "" ->
     Name;
 get_local_name(Name, Ns) when is_atom(Name)->
@@ -141,27 +156,19 @@ parseMessage(#xmlElement{namespace = Namespace} = Doc, State) when is_tuple(Doc)
                   'Envelope' ->
                       parseEnvelope(Doc, RefinedState);
                   _ ->
-                      return_error(Doc#xmlElement.name,
-                                   {RefinedState#decoder.state, "Unknown element"})
+                      parse_error(Doc, RefinedState)
               end,
     #rpc_data{data = Envelop}.
 
--spec parseEnvelope(#xmlElement{}, #decoder{}) -> #envelope{}.
-parseEnvelope(#xmlElement{content = Content} = Doc,
-              #decoder{ns=Ns} = State) ->
-    Envelop = lists:foldl(fun(Elem, Envelop) ->
-                                  Envelop
-                          end, #envelope{}, Content),
-    Envelop.
-
-
--spec parseNamespace(#xmlNamespace{}) -> {#rpc_ns{}, Version} when Version :: 1 | 2.
+-spec parseNamespace(#xmlNamespace{}) -> {#rpc_ns{}, cwmp_version()}.
 parseNamespace(#xmlNamespace{nodes = Nss}) ->
     {NsCwmp, CwmpVersion} = match_cwmp_ns_and_version(Nss),
     {#rpc_ns{ns_xsd = find_ns_aux(Nss, ?XSD_URL),
              ns_envelop = find_ns_aux(Nss, ?SOAPENV_URL),
-             ns_cwmp = NsCwmp},   CwmpVersion}.
+             ns_cwmp = NsCwmp},
+     CwmpVersion}.
 
+-spec match_cwmp_ns_and_version([tuple()]) -> {string(), cwmp_version()}.
 match_cwmp_ns_and_version(Nss) ->
     Mapped = lists:map(fun({Ns, Uri}) ->
                                case re:split(atom_to_list(Uri), "-", [{return,list}]) of
@@ -173,11 +180,12 @@ match_cwmp_ns_and_version(Nss) ->
                                (_) -> true end, Mapped),
     {NsCwmp, CwmpVersion} =  case Filtered of
                                  [{NsC,"1","0"}] -> {NsC, 1};
-                                 [{NsC,"1","2"}] -> {NsC, 1};
+                                 [{NsC,"1","2"}] -> {NsC, 2};
                                  _ -> {"", 1}
                              end,
     {NsCwmp, CwmpVersion}.
 
+-spec find_ns_aux([tuple()], term()) -> string().
 find_ns_aux(Nss, URL) ->
     case lists:keyfind(URL, 2, Nss) of
         {NsX, _} ->
@@ -185,6 +193,32 @@ find_ns_aux(Nss, URL) ->
         false ->
             ""
     end.
+
+-spec parseEnvelope(#xmlElement{}, #decoder{}) -> #envelope{}.
+parseEnvelope(#xmlElement{content = Content} = _Doc,
+              #decoder{ns=Nss} = State) ->
+    Result = lists:foldl(fun(Elem, Envelop) ->
+                                 case get_local_name(Elem, Nss#rpc_ns.ns_envelop) of
+                                     'Header' ->
+                                         Header = parseHeader(Elem, State),
+                                         Envelop#envelope{header = Header};
+                                     %% 'Body' ->
+                                     %%     Body = parseBody(Elem, State),
+                                     %%     Envelop#envelope{body = Body};
+                                     _ ->
+                                         parse_error(Elem, State)
+                                 end
+                         end, #envelope{}, Content),
+    Result.
+
+
+-spec parseHeader(atom(),#decoder{}) -> #header{}.
+parseHeader(_Elem, _State) ->
+    #header{}.
+
+%-spec parseBody(#xmlElement{}, #decoder{}) -> body_type().
+%% parseBody(Elem, State) ->
+%%     ok.
 
 %%%-----------------------------------------------------------------------------
 %%% Unitary tetsts
