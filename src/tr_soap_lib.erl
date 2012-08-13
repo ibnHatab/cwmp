@@ -220,11 +220,44 @@ parseEnvelope(#xmlElement{content = Content} = _Doc,
                 #envelope{},
                 lists:filter(fun xmlElement/1, Content)).
 
-
 -spec parseHeader(#xmlElement{},#decoder{}) -> #header{}.
-parseHeader(_Elem, _State) ->
-    #header{}.
+parseHeader(#xmlElement{content = Content} = _Elems,
+            #decoder{ns=Nss} = State) ->
+    lists:foldl(fun(Elem, Header) ->
+                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                            'ID' ->
+                                Header#header{id = parseID(Elem, State)};
+                            'HoldRequests' ->
+                                Header#header{hold_requests = parseHoldRequests(Elem, State)};
+                            'NoMoreRequests' ->
+                                Header#header{no_more_requests = parseBoolean(Elem)};
+                            _ ->
+                                parse_error(Elem, State)
+                        end
+                end,
+                #header{},
+                lists:filter(fun xmlElement/1, Content)).
 
+-spec parseID(#xmlElement{},#decoder{}) -> #id{}.
+parseID(#xmlElement{content = Content} = _Elems,
+        #decoder{ns=Nss} = State) ->
+    #id{}.
+
+-spec parseHoldRequests(#xmlElement{},#decoder{}) -> #hold_requests{}.
+parseHoldRequests(#xmlElement{content = Content} = _Elems,
+        #decoder{ns=Nss} = State) ->
+    #hold_requests{}.
+
+
+-spec parseBoolean(#xmlElement{content::[any()]}) -> boolean().
+%FIXME: do exhausive test
+parseBoolean(#xmlElement{name=Name, content = Content}) ->
+    case lists:filter(fun xmlText/1, Content) of
+        []-> false;
+        [#xmlText{value="1"} |_] -> true;
+        [#xmlText{value="0"} |_] -> false;
+        [#xmlText{value=Value} |_] -> return_error(Name, {Value, "Value"})
+    end.
 
 
 %-spec parseBody(#xmlElement{}, #decoder{}) -> body_type().
@@ -301,13 +334,32 @@ get_ns_orts(#xmlElement{namespace = Namespace} = Doc) ->
             ok
     end.
 
-name_namespace_test() ->
+name_namespace_test_fixme() ->
     ?assertEqual('name', get_local_name('name', "")),
     ?assertEqual('name', get_local_name('ns:name', "ns")),
     
     {Name, Ns} = {'ns:name', "ns"},
     ?assertEqual(Name, get_QName(get_local_name(Name, Ns), Ns)),
     ok.
+
+
+parseBoolean_test() ->
+    E =
+        {xmlElement,'cwmp:NoMoreRequests','cwmp:NoMoreRequests',
+         {"cwmp","NoMoreRequests"},
+         {xmlNamespace,[],
+          [{"soap-enc",'http://schemas.xmlsoap.org/soap/encoding/'},
+           {"soap-env",'http://schemas.xmlsoap.org/soap/envelope/'},
+           {"cwmp",'urn:dslforum-org:cwmp-1-0'}]},
+         [{'soap-env:Header',2},{'soap-env:Envelope',1}],
+         4,[],
+         [{xmlText,
+           [{'cwmp:NoMoreRequests',4},
+            {'soap-env:Header',2},
+            {'soap-env:Envelope',1}],
+           1,[],"0",text}],
+         [],"/local/vlad/repos/otp/tr69/src",undeclared},
+    ?assertEqual(false, parseBoolean(E)).
 
 -define(WHENEVER, "Hello meck").
 meck_test_no()->

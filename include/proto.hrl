@@ -883,7 +883,10 @@
 
 -record(header,{
           id :: #id{},
-          hold_requests :: #hold_requests{}
+          hold_requests :: #hold_requests{},
+          %% Configurable Amendment 1 Session Termination
+          %% NoMoreRequests header element is deprecated
+          no_more_requests :: boolean()
          }).
 
 -type body_type() ::
