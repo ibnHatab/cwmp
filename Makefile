@@ -5,7 +5,9 @@ REBAR='./rebar'
 
 .PHONY: deps clean
 
-all:
+all: compile
+
+compile:
 	$(REBAR) -v compile
 
 deps:
@@ -25,7 +27,13 @@ install: all
 utest:
 	$(REBAR) skip_deps=true eunit
 
-test: all
+test.spec: test.spec.in
+	cat test.spec.in | sed -e "s,@PATH@,$(PWD)," > $(PWD)/test.spec
+
+ctest:  test.spec compile
+	run_test -pa $(PWD)/lib/*/ebin -spec test.spec
+
+test: 
 	$(REBAR) skip_deps=true ct
 
 dialyzer-build:

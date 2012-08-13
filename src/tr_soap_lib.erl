@@ -343,8 +343,8 @@ name_namespace_test_fixme() ->
     ok.
 
 
-parseBoolean_test() ->
-    E =
+make_NoMoreRequests(Text) ->
+    Elem =
         {xmlElement,'cwmp:NoMoreRequests','cwmp:NoMoreRequests',
          {"cwmp","NoMoreRequests"},
          {xmlNamespace,[],
@@ -353,13 +353,23 @@ parseBoolean_test() ->
            {"cwmp",'urn:dslforum-org:cwmp-1-0'}]},
          [{'soap-env:Header',2},{'soap-env:Envelope',1}],
          4,[],
-         [{xmlText,
+         [],
+         [],"/local/vlad/repos/otp/tr69/src",undeclared},
+    Text = {xmlText,
            [{'cwmp:NoMoreRequests',4},
             {'soap-env:Header',2},
-            {'soap-env:Envelope',1}],
-           1,[],"0",text}],
-         [],"/local/vlad/repos/otp/tr69/src",undeclared},
+            {'soap-env:Envelope',1}],               
+            1,[],"0",text},
+    NeeText = Text#xmlText{value = Text},
+    NewElem = Elem#{contenet = [NewText]},
+    NewElem.
+
+    
+parseBoolean_test() ->
+
     ?assertEqual(false, parseBoolean(E)).
+
+
 
 -define(WHENEVER, "Hello meck").
 meck_test_no()->
