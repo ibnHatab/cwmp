@@ -272,7 +272,7 @@
 %%    GetRPCMethods Type Definition
 
 -record(method_list,{
-	 methods :: [string()]
+	 string :: [string()]
 	 }).
 
 -record(device_id_struct,{
@@ -327,6 +327,7 @@
 
 
 -record(parameter_attribute_struct, {
+	  name :: string(),
 	  notification :: parameter_attribute_notification_value_type(),
 	  access_list :: access_list
 	  }).
@@ -456,7 +457,7 @@
 
 %%   Voucher and Option Type Definitions
 -record(voucher_list, {
-	  voucher_list :: [binary()]
+	  base64 :: [binary()]
 	 }).
 
 -record(option_struct, {
@@ -839,7 +840,6 @@
 
 %% @doc RequestDownloadResponse message - Annex A.4.2.2 
 -record (request_download_response, {
-
 	  }).
 
 %% @doc A message indicating a prior ChangeDUState request to perform
@@ -851,7 +851,6 @@
 
 %% @doc Response to a DUStateChangeComplete message
 -record (du_state_change_complete_response, {
-
 	  }).
 
 %% @doc A message indicating an autonomous action for a Deployment
@@ -862,8 +861,7 @@
 
 %% @doc Response to a AutonomousDUStateChangeComplete message
 -record (autonomous_du_state_change_complete_response, {
-
-	  }).
+}).
 
 %%%-----------------------------------------------------------------------------
 %%%        SOAP Header Elements
@@ -933,3 +931,23 @@
 %          type :: cwmp_method(),
           data :: #envelope{}
          }).
+
+%%%-----------------------------------------------------------------------------
+%%%        Parser context
+%%%-----------------------------------------------------------------------------
+
+-type encoder_option() :: {version, cwmp_version()} | {handler, function()}.
+-type decoder_option() :: {version, cwmp_version()} | {object_hook, function()}.
+
+-record(encoder, {version = 1  :: cwmp_version(),
+                  handler = null}).
+
+-record(rpc_ns, {ns_xsd     = "",
+                 ns_envelop = "",
+                 ns_cwmp    = ""}).
+
+-record(decoder, {version   = 1 :: cwmp_version(),
+                  object_hook = null,
+                  state       = null,
+                  ns :: #rpc_ns{}
+                 }).

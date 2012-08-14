@@ -14,21 +14,6 @@
 
 -export([read_xml/1, write_xml/1]).
 
--type encoder_option() :: {version, cwmp_version()} | {handler, function()}.
--type decoder_option() :: {version, cwmp_version()} | {object_hook, function()}.
-
--record(encoder, {version = 1  :: cwmp_version(),
-                  handler = null}).
-
--record(rpc_ns, {ns_xsd     = "",
-                 ns_envelop = "",
-                 ns_cwmp    = ""}).
-
--record(decoder, {version   = 1 :: cwmp_version(),
-                  object_hook = null,
-                  state       = null,
-                  ns :: #rpc_ns{}
-                 }).
 
 %% @doc Create an encoder/1 with the given options.
 -spec encoder([encoder_option()]) -> function().
