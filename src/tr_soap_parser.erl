@@ -1,4 +1,5 @@
 
+
 -module(tr_soap_parser).
 
 -compile(export_all).
@@ -9,117 +10,155 @@
 -include("proto.hrl").
 
 -import(tr_soap_lib, [get_local_name/2,
-		      parse_error/2,
+		      parse_error/2]).
 		      
-		      parse_anySimpleType/2,
-		      xmlElement/1,
+-import(tr_soap_types, [
+
+
+    
+                      parse_AccessListChange/2,   
+                      parse_AccessListValueType/2,    
+                      parse_ACSFaultCodeType/2,    
+                      parse_ACSVendorFaultCodeType/2,    
+                      parse_AnnounceURL/2,   
+                      parse_Arg/2,   
+                      parse_Command/2,   
+                      parse_CommandKeyType/2,    
+                      parse_CompleteTime/2,   
+                      parse_CPEExtensionFaultCodeType/2,    
+                      parse_CPEFaultCodeType/2,    
+                      parse_CPEVendorFaultCodeType/2,    
+                      parse_CurrentTime/2,   
+                      parse_DeploymentUnitOperationType/2,   %FIEME
+                      parse_DefaultDeploymentUnitOperationType/2,   
+                      parse_DelaySeconds/2,   
+                      parse_DeploymentUnitCPEFaultCodeType/2,    
+                      parse_DeploymentUnitRef/2,   
+                      parse_DeploymentUnitState/2,    
+                      parse_DeploymentUnitUUID/2,    
+                      parse_DownloadFileType/2,    
+                      parse_EventCodeType/2,    
+                      parse_ExecutionEnvRef/2,   
+                      parse_ExecutionUnitRefList/2,   
+                      parse_ExpirationDate/2,   
+                      parse_FailureURL/2,   
+                      parse_FaultCode/2,   
+                      parse_FaultString/2,   
+                      parse_FileSize/2,   
+                      parse_InstanceNumber/2,   
+                      parse_IsDownload/2,   
+                      parse_IsTransferable/2,   
+                      parse_Manufacturer/2,   
+                      parse_MaxEnvelopes/2,   
+                      parse_MaxRetries/2,   
+                      parse_Mode/2,   
+                      parse_Name/2,   
+                      parse_Next/2,   
+                      parse_NextLevel/2,   
+                      parse_NextURL/2,   
+                      parse_NotificationChange/2,   
+                      parse_ObjectNameType/2,    
+                      parse_OptionName/2,   
+                      parse_OUI/2,   
+                      parse_ParameterAttributeNotificationValueType/2,    
+                      parse_ParameterKeyType/2,    
+                      parse_ParameterName/2,   
+                      parse_ParameterPath/2,   
+                      parse_Password/2,   
+                      parse_ProductClass/2,   
+                      parse_Referer/2,   
+                      parse_Resolved/2,   
+                      parse_RetryCount/2,   
+                      parse_SerialNumber/2,   
+                      parse_StartDate/2,   
+                      parse_StartTime/2,   
+                      parse_State/2,   
+                      parse_Status/2,   
+                      parse_string/2,   
+                      parse_SuccessURL/2,   
+                      parse_TargetFileName/2,   
+                      parse_TimeWindowModeValueType/2,    
+                      parse_TransferCompleteCPEFaultCodeType/2,    
+                      parse_TransferFileType/2,    
+                      parse_TransferStateType/2,    
+                      parse_TransferURL/2,   
+                      parse_UploadFileType/2,    
+                      parse_URL/2,   
+                      parse_UserMessage/2,   
+                      parse_Username/2,   
+                      parse_Value/2,   
+                      parse_Version/2,   
+                      parse_VoucherSN/2,   
+                      parse_WindowEnd/2,   
+                      parse_WindowStart/2,   
+                      parse_Writable/2,   
+
 		      parse_unsignedInt/1,
-		      parse_unsignedInt/2,
 		      parse_string/1,
-		      parse_boolean/2,
+		      parse_boolean/1,
 		      parse_int/1,
-		      parse_int/2,
-		      parse_dateTime/2,
-		      parse_base64/2,
-
-		      parse_SetParameterValuesFault/2,
-		      parse_ParameterName/2,
-		      parse_ParameterList/2,
-		      parse_ParameterKey/2,
-		      parse_Status/2,
-		      parse_ParameterPath/2,
-		      parse_NextLevel/2,
-		      parse_ObjectName/2,
-		      parse_InstanceNumber/2,
-		      
-		      parse_CommandKey/2,
-		      parse_FileType/2,
-		      parse_URL/2,
-		      parse_Username/2,
-		      parse_Password/2,
-		      parse_FileSize/2,
-		      parse_TargetFileName/2,
-		      parse_DelaySeconds/2,
-		      parse_SuccessURL/2,
-		      parse_FailureURL/2,
-		      parse_StartTime/2,
-		      parse_CompleteTime/2,
-		      parse_OptionName/2,
-		      parse_Operations/2,
-		      parse_CommandKey/2,
-		      parse_DeviceId/2,
-		      parse_Event/2,
-		      parse_MaxEnvelopes/2,
-		      parse_CurrentTime/2,
-		      parse_RetryCount/2,
-		      parse_FaultStruct/2,
-		      parse_AnnounceURL/2,
-		      parse_TransferURL/2,
-		      parse_IsDownload/2,
-		      parse_Command/2,
-		      parse_Referer/2,
-		      parse_Arg/2,
-		      parse_Next/2,
-		      parse_NextURL/2,
-		      parse_Results/2
-
-]).
+		      parse_dateTime/1,
+		      parse_base64/1,
+		      parse_anySimpleType/1
+		      ]).
 
 
-    
+ 
+%% Complex Type Mapping
 
-parse_FaultCode(E, _) -> parse_unsignedInt(E).
-parse_FaultString(E, _) -> parse_string(E).
+%%%parse_AccessList(E,_S) -> parse_AccessList(E,_S). 
+%%%parse_AllQueuedTransferStruct(E,_S) -> parse_AllQueuedTransferStruct(E,_S). 
+%parse_ArgStruct(E,_S) -> parse_ArgStruct(E,_S). 
+parse_base64(E,_S) -> parse_base64(E). 
+parse_CommandKey(E,_S) -> parse_CommandKeyType(E,_S). 
+parse_CurrentState(E,_S) -> parse_DeploymentUnitState(E,_S). 
+parse_DeviceId(E,_S) -> parse_DeviceIdStruct(E,_S). 
+parse_EventCode(E,_S) -> parse_EventCodeType(E,_S). 
+parse_Event(E,_S) -> parse_EventList(E,_S). 
+%%%parse_EventStruct(E,_S) -> parse_EventStruct(E,_S). 
+%parse_Fault(E,_S) -> parse_DeploymentUnitFaultStruct(E,_S). 
+parse_FaultStruct(E,_S) -> parse_TransferCompleteFaultStruct(E,_S). 
+%% parse_FileTypeArg(E,_S) -> parse_FileTypeArg(E,_S). 
+parse_FileType(E,_S) -> parse_DownloadFileType(E,_S). 
+%% parse_FileType(E,_S) -> parse_TransferFileType(E,_S). 
+%% parse_FileType(E,_S) -> parse_UploadFileType(E,_S). 
+%%%parse_MethodList(E,_S) -> parse_MethodList(E,_S). 
+parse_Notification(E,_S) -> parse_ParameterAttributeNotificationValueType(E,_S). 
+parse_ObjectName(E,_S) -> parse_ObjectNameType(E,_S). 
+parse_OperationPerformed(E,_S) -> parse_DeploymentUnitOperationType(E,_S). 
+parse_Operations(E,_S) -> parse_OperationStruct(E,_S). 
+%% parse_OptionList(E,_S) -> parse_OptionList(E,_S). 
+%parse_OptionStruct(E,_S) -> parse_OptionStruct(E,_S). 
+%%parse_ParameterAttributeStruct(E,_S) -> parse_ParameterAttributeStruct(E,_S). 
+%%%parse_ParameterInfoStruct(E,_S) -> parse_ParameterInfoStruct(E,_S). 
+parse_ParameterKey(E,_S) -> parse_ParameterKeyType(E,_S). 
+parse_ParameterList(E,_S) -> parse_ParameterAttributeList(E,_S). 
+%% parse_ParameterList(E,_S) -> parse_ParameterInfoList(E,_S). 
+%% parse_ParameterList(E,_S) -> parse_ParameterValueList(E,_S). 
+%% parse_ParameterList(E,_S) -> parse_SetParameterAttributesList(E,_S). 
+%%%parse_ParameterNames(E,_S) -> parse_ParameterNames(E,_S). 
+%%%parse_ParameterValueStruct(E,_S) -> parse_ParameterValueStruct(E,_S). 
+%%%parse_QueuedTransferStruct(E,_S) -> parse_QueuedTransferStruct(E,_S). 
+parse_Results(E,_S) -> parse_AutonOpResultStruct(E,_S). 
+%% parse_Results(E,_S) -> parse_OpResultStruct(E,_S). 
+%%parse_SetParameterAttributesStruct(E,_S) -> parse_SetParameterAttributesStruct(E,_S). 
+%parse_State(E,_S) -> parse_TransferStateType(E,_S). 
+%%parse_string(E,_S) -> parse_AccessListValueType(E,_S). 
+%%parse_TimeWindowList(E,_S) -> parse_TimeWindowList(E,_S). 
+%%parse_TimeWindowStruct(E,_S) -> parse_TimeWindowStruct(E,_S). 
+%%parse_TransferList(E,_S) -> parse_AllTransferList(E,_S). 
+%parse_TransferList(E,_S) -> parse_TransferList(E,_S). 
+parse_UUID(E,_S) -> parse_DeploymentUnitUUID(E,_S). 
+%parse_Value(E,_S) -> parse_anySimpleType(E,_S). 
+%%%parse_VoucherList(E,_S) -> parse_VoucherList(E,_S). 
+parse_WindowMode(E,_S) -> parse_TimeWindowModeValueType(E,_S). 
 
-parse_string(E, _) -> parse_string(E).
-parse_Name(E, _) -> parse_string(E).
-parse_Value(E, S) -> parse_anySimpleType(E, S).
 
-parse_Manufacturer(E, _) -> parse_string(E).
-parse_OUI(E, _) -> parse_string(E).
-parse_ProductClass(E, _) -> parse_string(E).
-parse_SerialNumber(E, _) -> parse_string(E).
-
-    
 %% -spec parse_ID(#xmlElement{},#decoder{}) -> #i_d{}.
 parse_ID(_, _) -> #id{}.
     
 %% -spec parse_HoldRequests(#xmlElement{},#decoder{}) -> #hold_requests{}.
 parse_HoldRequests(_, _) -> #hold_requests{}.
-    
-%% Simple type
-parse_CPEFaultCodeType(E,_S) -> parse_unsignedInt(E).
-parse_CPEFaultCodeType(E) -> parse_unsignedInt(E).
-    
-%% Simple type
-parse_CPEExtensionFaultCodeType(E,_S) -> parse_unsignedInt(E).
-    
-%% Simple type
-parse_CPEVendorFaultCodeType(E,_S) -> parse_unsignedInt(E).
-    
-%% Simple type
-parse_ACSFaultCodeType(E,_S) -> parse_unsignedInt(E).
-    
-%% Simple type
-parse_ACSVendorFaultCodeType(E,_S) -> parse_unsignedInt(E).
-    
-%% Simple type
-parse_TransferFileType(E,_S) -> parse_string(E).
-    
-%% Simple type
-parse_DownloadFileType(E,_S) -> parse_string(E).
-    
-%% Simple type
-parse_UploadFileType(E,_S) -> parse_string(E).
-    
-%% Simple type
-parse_EventCodeType(E,_S) -> parse_string(E).
-    
-%% Simple type
-parse_TimeWindowModeValueType(E,_S) -> parse_string(E).
-    
-%% Simple type
-parse_TransferCompleteCPEFaultCodeType(E,_S) -> parse_CPEFaultCodeType(E).
     
 %% -spec parse_TransferCompleteFaultStruct(#xmlElement{},#decoder{}) -> #transfer_complete_fault_struct{}.
 parse_TransferCompleteFaultStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
@@ -127,19 +166,16 @@ parse_TransferCompleteFaultStruct(#xmlElement{content = Content} = _Elems, #deco
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'FaultCode' ->
-                                TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_code = parse_string(Elem, State)};
+                                TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_code = parse_FaultCode(Elem, State)};
     
                             'FaultString' ->
-                                TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_string = parse_string(Elem, State)};
+                                TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_string = parse_FaultString(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #transfer_complete_fault_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% Simple type
-parse_DeploymentUnitCPEFaultCodeType(E,_S) -> parse_CPEFaultCodeType(E).
     
 %% -spec parse_DeploymentUnitFaultStruct(#xmlElement{},#decoder{}) -> #deployment_unit_fault_struct{}.
 parse_DeploymentUnitFaultStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
@@ -147,25 +183,16 @@ parse_DeploymentUnitFaultStruct(#xmlElement{content = Content} = _Elems, #decode
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'FaultCode' ->
-                                DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_code = parse_string(Elem, State)};
+                                DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_code = parse_FaultCode(Elem, State)};
     
                             'FaultString' ->
-                                DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_string = parse_string(Elem, State)};
+                                DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_string = parse_FaultString(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #deployment_unit_fault_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% Simple type
-parse_CommandKeyType(E,_S) -> parse_string(E).
-    
-%% Simple type
-parse_ObjectNameType(E,_S) -> parse_string(E).
-    
-%% Simple type
-parse_ParameterKeyType(E,_S) -> parse_string(E).
     
 %% -spec parse_ParameterNames(#xmlElement{},#decoder{}) -> #parameter_names{}.
 parse_ParameterNames(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
@@ -180,24 +207,24 @@ parse_ParameterNames(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} =
                         end
                 end,
                 #parameter_names{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_ParameterValueStruct(#xmlElement{},#decoder{}) -> #parameter_value_struct{}.
 parse_ParameterValueStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ParameterValueStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'Name' ->
-                                ParameterValueStruct#parameter_value_struct{name = parse_string(Elem, State)};
+                                ParameterValueStruct#parameter_value_struct{name = parse_Name(Elem, State)};
     
                             'Value' ->
-                                ParameterValueStruct#parameter_value_struct{value = parse_anySimpleType(Elem, State)};
+                                ParameterValueStruct#parameter_value_struct{value = parse_Value(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #parameter_value_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_ParameterValueList(#xmlElement{},#decoder{}) -> #parameter_value_list{}.
 parse_ParameterValueList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ParameterValueList) ->
@@ -211,7 +238,7 @@ parse_ParameterValueList(#xmlElement{content = Content} = _Elems, #decoder{ns=Ns
                         end
                 end,
                 #parameter_value_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_MethodList(#xmlElement{},#decoder{}) -> #method_list{}.
 parse_MethodList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, MethodList) ->
@@ -225,47 +252,47 @@ parse_MethodList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = Sta
                         end
                 end,
                 #method_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_DeviceIdStruct(#xmlElement{},#decoder{}) -> #device_id_struct{}.
 parse_DeviceIdStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, DeviceIdStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'Manufacturer' ->
-                                DeviceIdStruct#device_id_struct{manufacturer = parse_string(Elem, State)};
+                                DeviceIdStruct#device_id_struct{manufacturer = parse_Manufacturer(Elem, State)};
     
                             'OUI' ->
-                                DeviceIdStruct#device_id_struct{oui = parse_string(Elem, State)};
+                                DeviceIdStruct#device_id_struct{oui = parse_OUI(Elem, State)};
     
                             'ProductClass' ->
-                                DeviceIdStruct#device_id_struct{product_class = parse_string(Elem, State)};
+                                DeviceIdStruct#device_id_struct{product_class = parse_ProductClass(Elem, State)};
     
                             'SerialNumber' ->
-                                DeviceIdStruct#device_id_struct{serial_number = parse_string(Elem, State)};
+                                DeviceIdStruct#device_id_struct{serial_number = parse_SerialNumber(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #device_id_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_EventStruct(#xmlElement{},#decoder{}) -> #event_struct{}.
 parse_EventStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, EventStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'EventCode' ->
-                                EventStruct#event_struct{event_code = parse_EventCodeType(Elem, State)};
+                                EventStruct#event_struct{event_code = parse_EventCode(Elem, State)};
     
                             'CommandKey' ->
-                                EventStruct#event_struct{command_key = parse_CommandKeyType(Elem, State)};
+                                EventStruct#event_struct{command_key = parse_CommandKey(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #event_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_EventList(#xmlElement{},#decoder{}) -> #event_list{}.
 parse_EventList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, EventList) ->
@@ -279,24 +306,24 @@ parse_EventList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = Stat
                         end
                 end,
                 #event_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_ParameterInfoStruct(#xmlElement{},#decoder{}) -> #parameter_info_struct{}.
 parse_ParameterInfoStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ParameterInfoStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'Name' ->
-                                ParameterInfoStruct#parameter_info_struct{name = parse_string(Elem, State)};
+                                ParameterInfoStruct#parameter_info_struct{name = parse_Name(Elem, State)};
     
                             'Writable' ->
-                                ParameterInfoStruct#parameter_info_struct{writable = parse_boolean(Elem, State)};
+                                ParameterInfoStruct#parameter_info_struct{writable = parse_Writable(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #parameter_info_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_ParameterInfoList(#xmlElement{},#decoder{}) -> #parameter_info_list{}.
 parse_ParameterInfoList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ParameterInfoList) ->
@@ -310,9 +337,6 @@ parse_ParameterInfoList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss
                         end
                 end,
                 #parameter_info_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% Simple type
-parse_AccessListValueType(E,_S) -> parse_string(E).
     
 %% -spec parse_AccessList(#xmlElement{},#decoder{}) -> #access_list{}.
 parse_AccessList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
@@ -320,16 +344,13 @@ parse_AccessList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = Sta
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'string' ->
-                                AccessList#access_list{string = parse_AccessListValueType(Elem, State)};
+                                AccessList#access_list{string = parse_string(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #access_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% Simple type
-parse_ParameterAttributeNotificationValueType(E,_S) -> parse_int(E).
     
 %% -spec parse_SetParameterAttributesStruct(#xmlElement{},#decoder{}) -> #set_parameter_attributes_struct{}.
 parse_SetParameterAttributesStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
@@ -337,16 +358,16 @@ parse_SetParameterAttributesStruct(#xmlElement{content = Content} = _Elems, #dec
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'Name' ->
-                                SetParameterAttributesStruct#set_parameter_attributes_struct{name = parse_string(Elem, State)};
+                                SetParameterAttributesStruct#set_parameter_attributes_struct{name = parse_Name(Elem, State)};
     
                             'NotificationChange' ->
-                                SetParameterAttributesStruct#set_parameter_attributes_struct{notification_change = parse_boolean(Elem, State)};
+                                SetParameterAttributesStruct#set_parameter_attributes_struct{notification_change = parse_NotificationChange(Elem, State)};
     
                             'Notification' ->
-                                SetParameterAttributesStruct#set_parameter_attributes_struct{notification = parse_ParameterAttributeNotificationValueType(Elem, State)};
+                                SetParameterAttributesStruct#set_parameter_attributes_struct{notification = parse_Notification(Elem, State)};
     
                             'AccessListChange' ->
-                                SetParameterAttributesStruct#set_parameter_attributes_struct{access_list_change = parse_boolean(Elem, State)};
+                                SetParameterAttributesStruct#set_parameter_attributes_struct{access_list_change = parse_AccessListChange(Elem, State)};
     
                             'AccessList' ->
                                 SetParameterAttributesStruct#set_parameter_attributes_struct{access_list = parse_AccessList(Elem, State)};
@@ -356,7 +377,7 @@ parse_SetParameterAttributesStruct(#xmlElement{content = Content} = _Elems, #dec
                         end
                 end,
                 #set_parameter_attributes_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_SetParameterAttributesList(#xmlElement{},#decoder{}) -> #set_parameter_attributes_list{}.
 parse_SetParameterAttributesList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, SetParameterAttributesList) ->
@@ -370,17 +391,17 @@ parse_SetParameterAttributesList(#xmlElement{content = Content} = _Elems, #decod
                         end
                 end,
                 #set_parameter_attributes_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_ParameterAttributeStruct(#xmlElement{},#decoder{}) -> #parameter_attribute_struct{}.
 parse_ParameterAttributeStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ParameterAttributeStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'Name' ->
-                                ParameterAttributeStruct#parameter_attribute_struct{name = parse_string(Elem, State)};
+                                ParameterAttributeStruct#parameter_attribute_struct{name = parse_Name(Elem, State)};
     
                             'Notification' ->
-                                ParameterAttributeStruct#parameter_attribute_struct{notification = parse_ParameterAttributeNotificationValueType(Elem, State)};
+                                ParameterAttributeStruct#parameter_attribute_struct{notification = parse_Notification(Elem, State)};
     
                             'AccessList' ->
                                 ParameterAttributeStruct#parameter_attribute_struct{access_list = parse_AccessList(Elem, State)};
@@ -390,7 +411,7 @@ parse_ParameterAttributeStruct(#xmlElement{content = Content} = _Elems, #decoder
                         end
                 end,
                 #parameter_attribute_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_ParameterAttributeList(#xmlElement{},#decoder{}) -> #parameter_attribute_list{}.
 parse_ParameterAttributeList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ParameterAttributeList) ->
@@ -404,33 +425,33 @@ parse_ParameterAttributeList(#xmlElement{content = Content} = _Elems, #decoder{n
                         end
                 end,
                 #parameter_attribute_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_TimeWindowStruct(#xmlElement{},#decoder{}) -> #time_window_struct{}.
 parse_TimeWindowStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, TimeWindowStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'WindowStart' ->
-                                TimeWindowStruct#time_window_struct{window_start = parse_unsignedInt(Elem, State)};
+                                TimeWindowStruct#time_window_struct{window_start = parse_WindowStart(Elem, State)};
     
                             'WindowEnd' ->
-                                TimeWindowStruct#time_window_struct{window_end = parse_unsignedInt(Elem, State)};
+                                TimeWindowStruct#time_window_struct{window_end = parse_WindowEnd(Elem, State)};
     
                             'WindowMode' ->
-                                TimeWindowStruct#time_window_struct{window_mode = parse_TimeWindowModeValueType(Elem, State)};
+                                TimeWindowStruct#time_window_struct{window_mode = parse_WindowMode(Elem, State)};
     
                             'UserMessage' ->
-                                TimeWindowStruct#time_window_struct{user_message = parse_string(Elem, State)};
+                                TimeWindowStruct#time_window_struct{user_message = parse_UserMessage(Elem, State)};
     
                             'MaxRetries' ->
-                                TimeWindowStruct#time_window_struct{max_retries = parse_int(Elem, State)};
+                                TimeWindowStruct#time_window_struct{max_retries = parse_MaxRetries(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #time_window_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_TimeWindowList(#xmlElement{},#decoder{}) -> #time_window_list{}.
 parse_TimeWindowList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, TimeWindowList) ->
@@ -444,9 +465,6 @@ parse_TimeWindowList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} =
                         end
                 end,
                 #time_window_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% Simple type
-parse_TransferStateType(E,_S) -> parse_int(E).
     
 %% -spec parse_QueuedTransferStruct(#xmlElement{},#decoder{}) -> #queued_transfer_struct{}.
 parse_QueuedTransferStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
@@ -454,17 +472,17 @@ parse_QueuedTransferStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'CommandKey' ->
-                                QueuedTransferStruct#queued_transfer_struct{command_key = parse_CommandKeyType(Elem, State)};
+                                QueuedTransferStruct#queued_transfer_struct{command_key = parse_CommandKey(Elem, State)};
     
                             'State' ->
-                                QueuedTransferStruct#queued_transfer_struct{state = parse_TransferStateType(Elem, State)};
+                                QueuedTransferStruct#queued_transfer_struct{state = parse_State(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #queued_transfer_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_TransferList(#xmlElement{},#decoder{}) -> #transfer_list{}.
 parse_TransferList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, TransferList) ->
@@ -478,36 +496,36 @@ parse_TransferList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = S
                         end
                 end,
                 #transfer_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_AllQueuedTransferStruct(#xmlElement{},#decoder{}) -> #all_queued_transfer_struct{}.
 parse_AllQueuedTransferStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, AllQueuedTransferStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'CommandKey' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{command_key = parse_CommandKeyType(Elem, State)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{command_key = parse_CommandKey(Elem, State)};
     
                             'State' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{state = parse_TransferStateType(Elem, State)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{state = parse_State(Elem, State)};
     
                             'IsDownload' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{is_download = parse_boolean(Elem, State)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{is_download = parse_IsDownload(Elem, State)};
     
                             'FileType' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{file_type = parse_TransferFileType(Elem, State)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{file_type = parse_FileType(Elem, State)};
     
                             'FileSize' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{file_size = parse_unsignedInt(Elem, State)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{file_size = parse_FileSize(Elem, State)};
     
                             'TargetFileName' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{target_file_name = parse_string(Elem, State)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{target_file_name = parse_TargetFileName(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #all_queued_transfer_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_AllTransferList(#xmlElement{},#decoder{}) -> #all_transfer_list{}.
 parse_AllTransferList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, AllTransferList) ->
@@ -521,18 +539,6 @@ parse_AllTransferList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} 
                         end
                 end,
                 #all_transfer_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% Simple type
-parse_DeploymentUnitUUID(E,_S) -> parse_string(E).
-    
-%% Simple type
-parse_DeploymentUnitState(E,_S) -> parse_string(E).
-    
-%% Simple type
-parse_DefaultDeploymentUnitOperationType(E,_S) -> parse_string(E).
-    
-%% Simple type
-parse_DeploymentUnitOperationType(E,_S) -> parse_string(E).
     
 %% -spec parse_OperationStruct(#xmlElement{},#decoder{}) -> #operation_struct{}.
 parse_OperationStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
@@ -544,131 +550,131 @@ parse_OperationStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} 
                         end
                 end,
                 #operation_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_InstallOpStruct(#xmlElement{},#decoder{}) -> #install_op_struct{}.
 parse_InstallOpStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, InstallOpStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'URL' ->
-                                InstallOpStruct#install_op_struct{url = parse_string(Elem, State)};
+                                InstallOpStruct#install_op_struct{url = parse_URL(Elem, State)};
     
                             'UUID' ->
-                                InstallOpStruct#install_op_struct{uuid = parse_DeploymentUnitUUID(Elem, State)};
+                                InstallOpStruct#install_op_struct{uuid = parse_UUID(Elem, State)};
     
                             'Username' ->
-                                InstallOpStruct#install_op_struct{username = parse_string(Elem, State)};
+                                InstallOpStruct#install_op_struct{username = parse_Username(Elem, State)};
     
                             'Password' ->
-                                InstallOpStruct#install_op_struct{password = parse_string(Elem, State)};
+                                InstallOpStruct#install_op_struct{password = parse_Password(Elem, State)};
     
                             'ExecutionEnvRef' ->
-                                InstallOpStruct#install_op_struct{execution_env_ref = parse_string(Elem, State)};
+                                InstallOpStruct#install_op_struct{execution_env_ref = parse_ExecutionEnvRef(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #install_op_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_UpdateOpStruct(#xmlElement{},#decoder{}) -> #update_op_struct{}.
 parse_UpdateOpStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, UpdateOpStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'UUID' ->
-                                UpdateOpStruct#update_op_struct{uuid = parse_DeploymentUnitUUID(Elem, State)};
+                                UpdateOpStruct#update_op_struct{uuid = parse_UUID(Elem, State)};
     
                             'Version' ->
-                                UpdateOpStruct#update_op_struct{version = parse_string(Elem, State)};
+                                UpdateOpStruct#update_op_struct{version = parse_Version(Elem, State)};
     
                             'URL' ->
-                                UpdateOpStruct#update_op_struct{url = parse_string(Elem, State)};
+                                UpdateOpStruct#update_op_struct{url = parse_URL(Elem, State)};
     
                             'Username' ->
-                                UpdateOpStruct#update_op_struct{username = parse_string(Elem, State)};
+                                UpdateOpStruct#update_op_struct{username = parse_Username(Elem, State)};
     
                             'Password' ->
-                                UpdateOpStruct#update_op_struct{password = parse_string(Elem, State)};
+                                UpdateOpStruct#update_op_struct{password = parse_Password(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #update_op_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_UninstallOpStruct(#xmlElement{},#decoder{}) -> #uninstall_op_struct{}.
 parse_UninstallOpStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, UninstallOpStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'UUID' ->
-                                UninstallOpStruct#uninstall_op_struct{uuid = parse_DeploymentUnitUUID(Elem, State)};
+                                UninstallOpStruct#uninstall_op_struct{uuid = parse_UUID(Elem, State)};
     
                             'Version' ->
-                                UninstallOpStruct#uninstall_op_struct{version = parse_string(Elem, State)};
+                                UninstallOpStruct#uninstall_op_struct{version = parse_Version(Elem, State)};
     
                             'ExecutionEnvRef' ->
-                                UninstallOpStruct#uninstall_op_struct{execution_env_ref = parse_string(Elem, State)};
+                                UninstallOpStruct#uninstall_op_struct{execution_env_ref = parse_ExecutionEnvRef(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #uninstall_op_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_OpResultStruct(#xmlElement{},#decoder{}) -> #op_result_struct{}.
 parse_OpResultStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, OpResultStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'UUID' ->
-                                OpResultStruct#op_result_struct{uuid = parse_DeploymentUnitUUID(Elem, State)};
+                                OpResultStruct#op_result_struct{uuid = parse_UUID(Elem, State)};
     
                             'DeploymentUnitRef' ->
-                                OpResultStruct#op_result_struct{deployment_unit_ref = parse_string(Elem, State)};
+                                OpResultStruct#op_result_struct{deployment_unit_ref = parse_DeploymentUnitRef(Elem, State)};
     
                             'Version' ->
-                                OpResultStruct#op_result_struct{version = parse_string(Elem, State)};
+                                OpResultStruct#op_result_struct{version = parse_Version(Elem, State)};
     
                             'CurrentState' ->
-                                OpResultStruct#op_result_struct{current_state = parse_DeploymentUnitState(Elem, State)};
+                                OpResultStruct#op_result_struct{current_state = parse_CurrentState(Elem, State)};
     
                             'Resolved' ->
-                                OpResultStruct#op_result_struct{resolved = parse_boolean(Elem, State)};
+                                OpResultStruct#op_result_struct{resolved = parse_Resolved(Elem, State)};
     
                             'ExecutionUnitRefList' ->
-                                OpResultStruct#op_result_struct{execution_unit_ref_list = parse_string(Elem, State)};
+                                OpResultStruct#op_result_struct{execution_unit_ref_list = parse_ExecutionUnitRefList(Elem, State)};
     
                             'StartTime' ->
-                                OpResultStruct#op_result_struct{start_time = parse_dateTime(Elem, State)};
+                                OpResultStruct#op_result_struct{start_time = parse_StartTime(Elem, State)};
     
                             'CompleteTime' ->
-                                OpResultStruct#op_result_struct{complete_time = parse_dateTime(Elem, State)};
+                                OpResultStruct#op_result_struct{complete_time = parse_CompleteTime(Elem, State)};
     
                             'Fault' ->
-                                OpResultStruct#op_result_struct{fault = parse_DeploymentUnitFaultStruct(Elem, State)};
+                                OpResultStruct#op_result_struct{fault = parse_Fault(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #op_result_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_AutonOpResultStruct(#xmlElement{},#decoder{}) -> #auton_op_result_struct{}.
 parse_AutonOpResultStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, AutonOpResultStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'OperationPerformed' ->
-                                AutonOpResultStruct#auton_op_result_struct{operation_performed = parse_DeploymentUnitOperationType(Elem, State)};
+                                AutonOpResultStruct#auton_op_result_struct{operation_performed = parse_OperationPerformed(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #auton_op_result_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_VoucherList(#xmlElement{},#decoder{}) -> #voucher_list{}.
 parse_VoucherList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, VoucherList) ->
@@ -682,39 +688,39 @@ parse_VoucherList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = St
                         end
                 end,
                 #voucher_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_OptionStruct(#xmlElement{},#decoder{}) -> #option_struct{}.
 parse_OptionStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, OptionStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'OptionName' ->
-                                OptionStruct#option_struct{option_name = parse_string(Elem, State)};
+                                OptionStruct#option_struct{option_name = parse_OptionName(Elem, State)};
     
                             'VoucherSN' ->
-                                OptionStruct#option_struct{voucher_sn = parse_unsignedInt(Elem, State)};
+                                OptionStruct#option_struct{voucher_sn = parse_VoucherSN(Elem, State)};
     
                             'State' ->
-                                OptionStruct#option_struct{state = parse_string(Elem, State)};
+                                OptionStruct#option_struct{state = parse_State(Elem, State)};
     
                             'Mode' ->
-                                OptionStruct#option_struct{mode = parse_string(Elem, State)};
+                                OptionStruct#option_struct{mode = parse_Mode(Elem, State)};
     
                             'StartDate' ->
-                                OptionStruct#option_struct{start_date = parse_dateTime(Elem, State)};
+                                OptionStruct#option_struct{start_date = parse_StartDate(Elem, State)};
     
                             'ExpirationDate' ->
-                                OptionStruct#option_struct{expiration_date = parse_dateTime(Elem, State)};
+                                OptionStruct#option_struct{expiration_date = parse_ExpirationDate(Elem, State)};
     
                             'IsTransferable' ->
-                                OptionStruct#option_struct{is_transferable = parse_string(Elem, State)};
+                                OptionStruct#option_struct{is_transferable = parse_IsTransferable(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #option_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_OptionList(#xmlElement{},#decoder{}) -> #option_list{}.
 parse_OptionList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, OptionList) ->
@@ -728,24 +734,24 @@ parse_OptionList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = Sta
                         end
                 end,
                 #option_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_ArgStruct(#xmlElement{},#decoder{}) -> #arg_struct{}.
 parse_ArgStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ArgStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
     
                             'Name' ->
-                                ArgStruct#arg_struct{name = parse_string(Elem, State)};
+                                ArgStruct#arg_struct{name = parse_Name(Elem, State)};
     
                             'Value' ->
-                                ArgStruct#arg_struct{value = parse_string(Elem, State)};
+                                ArgStruct#arg_struct{value = parse_Value(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #arg_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_FileTypeArg(#xmlElement{},#decoder{}) -> #file_type_arg{}.
 parse_FileTypeArg(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, FileTypeArg) ->
@@ -759,7 +765,7 @@ parse_FileTypeArg(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = St
                         end
                 end,
                 #file_type_arg{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+    
 %% -spec parse_Fault(#xmlElement{},#decoder{}) -> #fault{}.
 parse_Fault(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, Fault) ->
@@ -771,17 +777,17 @@ parse_Fault(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) -
                             'FaultString' ->
                                 Fault#fault{fault_string = parse_FaultString(Elem, State)};
     
-                            'SetParameterValuesFault' ->
-                                Fault#fault{set_parameter_values_fault = parse_SetParameterValuesFault(Elem, State)};
+                            %% 'SetParameterValuesFault' ->
+                            %%     Fault#fault{set_parameter_values_fault = parse_SetParameterValuesFault(Elem, State)};
     
                             %% 'ParameterName' ->
                             %%     Fault#fault{parameter_name = parse_ParameterName(Elem, State)};
     
-                            %% 'FaultCode' ->
-                            %%     Fault#fault{fault_code = parse_FaultCode(Elem, State)};
+                            'FaultCode' ->
+                                Fault#fault{fault_code = parse_FaultCode(Elem, State)};
     
-                            %% 'FaultString' ->
-                            %%     Fault#fault{fault_string = parse_FaultString(Elem, State)};
+                            'FaultString' ->
+                                Fault#fault{fault_string = parse_FaultString(Elem, State)};
     
                             _ ->
                                 parse_error(Elem, State)
@@ -1293,7 +1299,7 @@ parse_CancelTransfer(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} =
 %% -spec parse_CancelTransferResponse(#xmlElement{},#decoder{}) -> #cancel_transfer_response{}.
 parse_CancelTransferResponse(_, _) -> #cancel_transfer_response{}.
     
-%% -spec parse_ChangeDUState(#xmlElement{},#decoder{}) -> #change_du_state{}.
+%% -spec parse_ChangeDUState(#xmlElement{},#decoder{}) -> #change_d_u_state{}.
 parse_ChangeDUState(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ChangeDUState) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
@@ -1516,6 +1522,6 @@ parse_AutonomousDUStateChangeComplete(#xmlElement{content = Content} = _Elems, #
     
 %% -spec parse_AutonomousDUStateChangeCompleteResponse(#xmlElement{},#decoder{}) -> #autonomous_du_state_change_complete_response{}.
 parse_AutonomousDUStateChangeCompleteResponse(_, _) -> #autonomous_du_state_change_complete_response{}.
-    
+     
 %% end
-    
+  

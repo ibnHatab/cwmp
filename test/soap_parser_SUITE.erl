@@ -46,8 +46,11 @@ end_per_suite(_Config) ->
 %% Reason = term()
 %% @end
 %%--------------------------------------------------------------------
-init_per_group(_GroupName, Config) ->
+init_per_group(soap_parse_doc, Config) ->
+    Config;
+init_per_group(_Group, Config) ->
     Config.
+
 
 %%--------------------------------------------------------------------
 %% @spec end_per_group(GroupName, Config0) ->
@@ -56,7 +59,9 @@ init_per_group(_GroupName, Config) ->
 %% Config0 = Config1 = [tuple()]
 %% @end
 %%--------------------------------------------------------------------
-end_per_group(_GroupName, _Config) ->
+end_per_group(soap_parse_doc, _Config) ->
+    ok;
+end_per_group(_Group, _Config) ->
     ok.
 
 %%--------------------------------------------------------------------
@@ -95,7 +100,11 @@ end_per_testcase(_TestCase, _Config) ->
 %% @end
 %%--------------------------------------------------------------------
 groups() ->
-    [].
+    [{soap_parse_types, [sequence], [parse_Boolean_tc
+				    ]},
+     {soap_parse_doc, [sequence], [
+				  ]}
+    ].
 
 %%--------------------------------------------------------------------
 %% @spec all() -> GroupsAndTestCases | {skip,Reason}
@@ -106,14 +115,16 @@ groups() ->
 %% @end
 %%--------------------------------------------------------------------
 all() -> 
-    [parseBoolean_test_case].
+    [{group, soap_parse_types},
+     {group, soap_parse_doc}].
+
 
 %%--------------------------------------------------------------------
 %% @spec TestCase() -> Info
 %% Info = [tuple()]
 %% @end
 %%--------------------------------------------------------------------
-parseBoolean_test_case() -> 
+pars_eBoolean_tc() -> 
     [].
 
 %%--------------------------------------------------------------------
@@ -125,6 +136,6 @@ parseBoolean_test_case() ->
 %% Comment = term()
 %% @end
 %%--------------------------------------------------------------------
-parseBoolean_test_case(_Config) ->
-    ?line 1=2,
-    nok.
+parse_Boolean_tc(_Config) ->
+    ?line 1=1,
+    ok.
