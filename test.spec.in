@@ -1,0 +1,4 @@
+
+{logdir, "@PATH@/logs"}.
+{alias, tr_app, "@PATH@/."}.
+{suites, tr_app, [soap_parser_SUITE]}.

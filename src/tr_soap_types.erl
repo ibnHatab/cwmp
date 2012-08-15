@@ -8,11 +8,19 @@
 -include("tr69.hrl").
 -include("proto.hrl").
 
--import(tr_soap_lib, [get_local_name/2,
-		      parse_error/2
-		      ]).
+-import(tr_soap_lib, [return_error/2,
+		      get_QName/2]).
 
-parse_boolean(_E) -> ok.
+-spec parse_boolean(#xmlElement{content::[any()]}) -> boolean().
+%FIXME: do exhausive test
+parse_boolean(#xmlElement{name=Name, content = Content}) ->
+    case lists:filter(fun tr_soap_lib:xmlText/1, Content) of
+        []-> false;
+        [#xmlText{value="1"} |_] -> true;
+        [#xmlText{value="0"} |_] -> false;
+        [#xmlText{value=Value} |_] -> return_error(Name, {Value, "Value"})
+    end.
+
 parse_dateTime(_E) -> ok.
 parse_int(_E) -> ok.
 parse_string(_E) -> ok.
@@ -102,3 +110,37 @@ parse_Writable(E,_S) -> parse_boolean(E).
 
 %% end
   
+%%%-----------------------------------------------------------------------------
+%%% Unitary tetsts
+%%%-----------------------------------------------------------------------------
+
+-ifdef(TEST).
+
+-include_lib("eunit/include/eunit.hrl").
+
+make_Element(Name, Text) when is_list(Name) ->
+    QName = get_QName(Name, "cwmp"),
+ %   ?DBG(QName),    
+    {xmlElement, QName, QName,
+     {"cwmp", Name},
+         {xmlNamespace,[],
+          [{"soap-enc",'http://schemas.xmlsoap.org/soap/encoding/'},
+           {"soap-env",'http://schemas.xmlsoap.org/soap/envelope/'},
+           {"cwmp",'urn:dslforum-org:cwmp-1-0'}]},
+     [{'soap-env:Header',2},{'soap-env:Envelope',1}], 4,[],
+     [
+      {xmlText,
+       [{QName,4},{'soap-env:Header',2},{'soap-env:Envelope',1}],1,[],
+       Text
+       ,text}
+     ], [],"/local/vlad/repos/otp/tr69/src",undeclared}.
+
+    
+parse_boolean_test() ->
+    E = make_Element("NoMoreRequests", "0"),
+%    ?DBG(E),
+    ?assertEqual(false, parse_boolean(E)),
+    ok.
+
+
+-endif.
