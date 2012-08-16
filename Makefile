@@ -31,7 +31,7 @@ test.spec: test.spec.in
 	cat test.spec.in | sed -e "s,@PATH@,$(PWD)," > $(PWD)/test.spec
 
 ctest:  test.spec compile
-	run_test -pa $(PWD)/lib/*/ebin -spec test.spec
+	run_test -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
 
 test: 
 	$(REBAR) skip_deps=true ct
