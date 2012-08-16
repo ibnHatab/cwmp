@@ -1687,5 +1687,4 @@ decode_root_test() ->
     ?DBG(Rpc),
     ok.
 
-
 -endif.

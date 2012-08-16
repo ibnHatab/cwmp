@@ -47,10 +47,10 @@
 
 
 
-** SOAP encoding [/]
+** SOAP encoding [2/3]
    - [ ] Parse SOAP format
-   - [ ] Parse SOAP types
-   - [ ] Check SOAP version from envelop
+   - [X] Parse SOAP types
+   - [X] Check SOAP version from envelop
    
 
 ** ACS location update [1/1]
