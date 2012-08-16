@@ -12,6 +12,10 @@
 
 -include_lib("common_test/include/ct.hrl").
 
+-import(tr_soap_lib, [get_QName/2]).
+
+
+
 %%--------------------------------------------------------------------
 %% @spec suite() -> Info
 %% Info = [tuple()]
@@ -61,8 +65,11 @@ init_per_group(_Group, Config) ->
 %%--------------------------------------------------------------------
 end_per_group(soap_parse_doc, _Config) ->
     ok;
+end_per_group(soap_parse_types, _Config) ->
+    ok;
 end_per_group(_Group, _Config) ->
     ok.
+
 
 %%--------------------------------------------------------------------
 %% @spec init_per_testcase(TestCase, Config0) ->
@@ -100,7 +107,7 @@ end_per_testcase(_TestCase, _Config) ->
 %% @end
 %%--------------------------------------------------------------------
 groups() ->
-    [{soap_parse_types, [sequence], [parse_Boolean_tc
+    [{soap_parse_types, [sequence], [parse_boolean_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -114,9 +121,11 @@ groups() ->
 %% Reason = term()
 %% @end
 %%--------------------------------------------------------------------
-all() -> 
-    [{group, soap_parse_types},
-     {group, soap_parse_doc}].
+all() ->    
+    [parse_boolean_tc].
+     %% 	,
+     %% {group, soap_parse_types},
+     %% {group, soap_parse_doc}].
 
 
 %%--------------------------------------------------------------------
@@ -124,7 +133,7 @@ all() ->
 %% Info = [tuple()]
 %% @end
 %%--------------------------------------------------------------------
-pars_eBoolean_tc() -> 
+parse_boolean_tc() -> 
     [].
 
 %%--------------------------------------------------------------------
@@ -136,6 +145,44 @@ pars_eBoolean_tc() ->
 %% Comment = term()
 %% @end
 %%--------------------------------------------------------------------
-parse_Boolean_tc(_Config) ->
-    ?line 1=1,
+parse_boolean_tc(_Config) ->
+    [parse_boolean_check(Expect, String)
+     || {Expect, String} <- [
+			     {false, "0"}
+			     , {false, "false"}
+			     %% , {true,   "1"}
+			     %% , {true,  "true"}
+			    ]],
     ok.
+
+
+parse_boolean_check(Expect, String) ->
+    %% setup
+    E = make_Element("NoMoreRequests", String),
+    ct:print(">> ~p~n",[unicode:characters_to_list(xmerl:export_simple([E],xmerl_xml))]),
+    %% execute
+    ?line Res = tr_soap_types:parse_boolean(E),
+    %assert
+    Expect = Res.
+
+
+%%--------------------------------------------------------------------
+%%% Local API
+%%--------------------------------------------------------------------
+
+make_Element(Name, Text) when is_list(Name) ->
+    QName = get_QName(Name, "cwmp"),
+ %   ?DBG(QName),    
+    {xmlElement, QName, QName,
+     {"cwmp", Name},
+         {xmlNamespace,[],
+          [{"soap-enc",'http://schemas.xmlsoap.org/soap/encoding/'},
+           {"soap-env",'http://schemas.xmlsoap.org/soap/envelope/'},
+           {"cwmp",'urn:dslforum-org:cwmp-1-0'}]},
+     [{'soap-env:Header',2},{'soap-env:Envelope',1}], 4,[],
+     [
+      {xmlText,
+       [{QName,4},{'soap-env:Header',2},{'soap-env:Envelope',1}],1,[],
+       Text
+       ,text}
+     ], [],"/local/vlad/repos/otp/tr69/src",undeclared}.
