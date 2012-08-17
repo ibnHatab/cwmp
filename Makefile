@@ -27,7 +27,7 @@ install: all
 	cp -r ebin $(DESTDIR)/lib/tr-$(IBROWSE_VSN)/
 
 utest:
-	$(REBAR) skip_deps=true eunit
+	$(REBAR) -v eunit skip_deps=true
 
 test.spec: test.spec.in
 	cat test.spec.in | sed -e "s,@PATH@,$(PWD)," > $(PWD)/test.spec
@@ -36,7 +36,7 @@ ctest:  test.spec compile
 	run_test -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
 
 test: 
-	$(REBAR) skip_deps=true ct
+	$(REBAR) -v ct skip_deps=true
 
 dialyzer-build:
 	dialyzer --build_plt --verbose			\

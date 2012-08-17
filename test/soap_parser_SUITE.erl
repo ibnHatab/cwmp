@@ -13,6 +13,7 @@
 -include_lib("common_test/include/ct.hrl").
 
 -import(tr_soap_lib, [get_QName/2]).
+-import(tr_soap_types, [convert_iso8601_date/1]).
 
 
 
@@ -109,7 +110,8 @@ end_per_testcase(_TestCase, _Config) ->
 %% @end
 %%--------------------------------------------------------------------
 groups() ->
-    [{soap_parse_types, [sequence], [parse_boolean_tc
+    [{soap_parse_types, [sequence], [parse_boolean_tc,
+				     parse_iso8601_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -137,6 +139,10 @@ all() ->
 %%--------------------------------------------------------------------
 parse_boolean_tc() -> 
     [].
+
+
+parse_iso8601_tc() ->
+    [].
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
 %%               ok | exit() | {skip,Reason} | {comment,Comment} |
@@ -160,7 +166,6 @@ parse_boolean_tc(_Config) ->
 parse_boolean_check(Expect, String) ->
     %% setup
     E = make_Element("NoMoreRequests", String),
-    ct:print(">> ~p~n",[unicode:characters_to_list(xmerl:export_simple([E],xmerl_xml))]),
     %% execute
     ?line Res = tr_soap_types:parse_boolean(E),
     %assert
@@ -168,7 +173,27 @@ parse_boolean_check(Expect, String) ->
 
 
 parse_iso8601_tc(_Config) ->
-    ok.
+     [
+     begin
+	%% ?DBG({DT, Str, convert_iso8601_date(Str)}),
+	 ct:print(">> ~p : ~p~n",[DT,  convert_iso8601_date(Str)]),
+	 DT = convert_iso8601_date(Str)
+     end
+      ||
+	{DT, Str} <- lists:zip([{{2004, 11, 01}, {04, 40, 35}},
+				{{2004, 11, 01}, {04, 40, 35}},
+				{{-2000, 01, 12}, {12, 13, 14}},
+				{{2000, 01, 12}, {0,   0,  0}},
+				{{2009, 06, 25}, {04, 32, 31}}
+			       ],
+
+			       [ "2004-10-31T21:40:35.5-07:00",
+				 "2004-11-01T04:40:35.5Z",
+				 "-2000-01-12T12:13:14Z",
+				 "2000-01-12T00:00:00Z",
+				 "2009-06-25T05:32:31+01:00"
+			       ])
+    ].
 
 %%--------------------------------------------------------------------
 %%% Local API
