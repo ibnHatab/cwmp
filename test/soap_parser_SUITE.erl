@@ -52,6 +52,8 @@ end_per_suite(_Config) ->
 %%--------------------------------------------------------------------
 init_per_group(soap_parse_doc, Config) ->
     Config;
+init_per_group(soap_parse_types, Config) ->
+    Config;
 init_per_group(_Group, Config) ->
     Config.
 
@@ -122,10 +124,10 @@ groups() ->
 %% @end
 %%--------------------------------------------------------------------
 all() ->    
-    [parse_boolean_tc].
+    [parse_boolean_tc, parse_iso8601_tc].
      %% 	,
-     %% {group, soap_parse_types},
-     %% {group, soap_parse_doc}].
+    %% [{group, soap_parse_types},
+    %%  {group, soap_parse_doc}].
 
 
 %%--------------------------------------------------------------------
@@ -135,7 +137,6 @@ all() ->
 %%--------------------------------------------------------------------
 parse_boolean_tc() -> 
     [].
-
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
 %%               ok | exit() | {skip,Reason} | {comment,Comment} |
@@ -148,10 +149,10 @@ parse_boolean_tc() ->
 parse_boolean_tc(_Config) ->
     [parse_boolean_check(Expect, String)
      || {Expect, String} <- [
-			     {false, "0"}
+			     {false,   "0"}
 			     , {false, "false"}
-			     %% , {true,   "1"}
-			     %% , {true,  "true"}
+			     , {true,  "1"}
+			     , {true,  "true"}
 			    ]],
     ok.
 
@@ -165,6 +166,9 @@ parse_boolean_check(Expect, String) ->
     %assert
     Expect = Res.
 
+
+parse_iso8601_tc(_Config) ->
+    ok.
 
 %%--------------------------------------------------------------------
 %%% Local API

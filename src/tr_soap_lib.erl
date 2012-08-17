@@ -12,13 +12,12 @@
 
 -export([read_xml/1, write_xml/1]).
 
--export([get_QName/2,
+-export([return_error/2, parse_error/2,
+	 get_QName/2,
 	 get_local_name/2,
 	 xmlText/1,
 	 xmlElement/1
 	]).
-
-
 
 -export([encoder/1, encode/1]).
 %% @doc parse XML document from string
@@ -43,6 +42,17 @@ write_xml(Doc) ->
 %%%-----------------------------------------------------------------------------
 %% Internal API
 %%%-----------------------------------------------------------------------------
+
+-compile({nowarn_unused_function, return_error/2}).
+-spec return_error(term(), any()) -> no_return().
+return_error(Tag, Message) ->
+    throw({error, {Tag, ?MODULE, Message}}).
+
+-spec parse_error(#xmlElement{}, #decoder{}) -> no_return().
+parse_error(Elem, State) ->
+    return_error(Elem#xmlElement.name,
+                 {State#decoder.state, "Unknown element"}).
+
 
 %% Usefull filtering predicates
 -compile({nowarn_unused_function, xmlText/1}).
@@ -97,12 +107,6 @@ parse_encoder_options([{version, Version} | Rest], State) ->
     parse_encoder_options(Rest, State#encoder{version=Version});
 parse_encoder_options([{handler, Handler} | Rest], State) ->
     parse_encoder_options(Rest, State#encoder{handler=Handler}).
-
-
--compile({nowarn_unused_function, return_error/2}).
--spec return_error(term(), any()) -> no_return().
-return_error(Tag, Message) ->
-    throw({error, {Tag, ?MODULE, Message}}).
 
 -spec soap_encode(#rpc_data{}, #encoder{}) -> #xmlElement{}.
 soap_encode(_Any, #encoder{}) ->
@@ -178,5 +182,6 @@ meck_test()->
 		hello, 0, ?WHENEVER),
 						%    ?DBG(tr_soap:hello()),
     meck:unload(tr_soap).
+
 
 -endif.

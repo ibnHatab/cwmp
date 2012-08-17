@@ -49,7 +49,12 @@
 
 ** SOAP encoding [2/3]
    - [ ] Parse SOAP format
-   - [X] Parse SOAP types
+   - [X] Parse SOAP boolean types
+   - [ ] Parse SOAP dateTime types 
+     same as boolean
+   - [ ] Parse ISO 8601 date time aka [[http://www.w3.org/TR/xmlschema-2/#dateTime][xs:dateTime]]
+     tr_soap_types.erl/utest
+     
    - [X] Check SOAP version from envelop
    
 

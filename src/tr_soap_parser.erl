@@ -9,8 +9,7 @@
 -include("tr69.hrl").
 -include("proto.hrl").
 
--import(tr_soap_lib, [return_error/2,
-		     get_local_name/2]).
+-import(tr_soap_lib, [return_error/2, parse_error/2, get_local_name/2]).
 
 -import(tr_soap_types, [
 			parse_AccessListChange/2,   
@@ -95,7 +94,8 @@
 			parse_int/1,
 			parse_dateTime/1,
 			parse_base64/1,
-			parse_anySimpleType/1
+%			parse_anySimpleType/1
+			parse_anySimpleType/2
 		       ]).
 
 
@@ -129,12 +129,6 @@ parse_decoder_options([{version, Version} | Rest], State) ->
     parse_decoder_options(Rest, State#decoder{version=Version});
 parse_decoder_options([{object_hook, Hook} | Rest], State) ->
     parse_decoder_options(Rest, State#decoder{object_hook=Hook}).
-
--spec parse_error(#xmlElement{}, #decoder{}) -> no_return().
-parse_error(Elem, State) ->
-    return_error(Elem#xmlElement.name,
-                 {State#decoder.state, "Unknown element"}).
-
 
 -spec soap_decode(#xmlElement{}, #decoder{}) -> #rpc_data{}.
 %-spec soap_decode(#xmlElement{}, #decoder{}) -> #envelope{} | {error, any()}.
@@ -232,7 +226,7 @@ parse_Header(#xmlElement{content = Content} = _Elems,
 
 
 %-spec parseBody(#xmlElement{}, #decoder{}) -> body_type().
-parse_Body(Elem, State) ->
+parse_Body(_Elem, _State) ->
     {body}.
 
 
@@ -296,21 +290,21 @@ parse_ID(_, _) -> #id{}.
 
 %% -spec parse_HoldRequests(#xmlElement{},#decoder{}) -> #hold_requests{}.
 -spec parse_HoldRequests(#xmlElement{},#decoder{}) -> #hold_requests{}.
-parse_HoldRequests(#xmlElement{content = Content} = _Elems,
-        #decoder{ns=Nss} = State) ->
+parse_HoldRequests(#xmlElement{content = _Content} = _Elems,
+        #decoder{ns=_Nss} = _State) ->
     #hold_requests{}.
 
 %% -spec parse_TransferCompleteFaultStruct(#xmlElement{},#decoder{}) -> #transfer_complete_fault_struct{}.
 parse_TransferCompleteFaultStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
-    lists:foldl(fun(Elem, TransferCompleteFaultStruct) ->
+    lists:foldl(fun(Elem, _TransferCompleteFaultStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
 
-                            'FaultCode' ->
-                                TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_code = parse_FaultCode(Elem, State)};
+                            %% 'FaultCode' ->
+                            %%     TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_code = parse_FaultCode(Elem, State)};
 
-                            'FaultString' ->
-                                TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_string = parse_FaultString(Elem, State)};
-
+                            %% 'FaultString' ->
+                            %%     TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_string = parse_FaultString(Elem, State)};
+			    ok -> ok; %typer fix
                             _ ->
                                 parse_error(Elem, State)
                         end
@@ -319,15 +313,16 @@ parse_TransferCompleteFaultStruct(#xmlElement{content = Content} = _Elems, #deco
 
 %% -spec parse_DeploymentUnitFaultStruct(#xmlElement{},#decoder{}) -> #deployment_unit_fault_struct{}.
 parse_DeploymentUnitFaultStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
-    lists:foldl(fun(Elem, DeploymentUnitFaultStruct) ->
+    lists:foldl(fun(Elem, _DeploymentUnitFaultStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
 
-                            'FaultCode' ->
-                                DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_code = parse_FaultCode(Elem, State)};
+                            %% 'FaultCode' ->
+                            %%     DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_code = parse_FaultCode(Elem, State)};
 
-                            'FaultString' ->
-                                DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_string = parse_FaultString(Elem, State)};
+                            %% 'FaultString' ->
+                            %%     DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_string = parse_FaultString(Elem, State)};
 
+			    ok -> ok; %typer fix
                             _ ->
                                 parse_error(Elem, State)
                         end
@@ -357,7 +352,7 @@ parse_ParameterValueStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=
                                 ParameterValueStruct#parameter_value_struct{name = parse_Name(Elem, State)};
 
                             'Value' ->
-                                ParameterValueStruct#parameter_value_struct{value = parse_Value(Elem, State)};
+                                ParameterValueStruct#parameter_value_struct{value = parse_anySimpleType(Elem, State)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -682,7 +677,7 @@ parse_AllTransferList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} 
 
 %% -spec parse_OperationStruct(#xmlElement{},#decoder{}) -> #operation_struct{}.
 parse_OperationStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
-    lists:foldl(fun(Elem, OperationStruct) ->
+    lists:foldl(fun(Elem, _OperationStruct) ->
                         case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
 
                             _ ->
@@ -923,11 +918,11 @@ parse_Fault(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) -
                             %% 'ParameterName' ->
                             %%     Fault#fault{parameter_name = parse_ParameterName(Elem, State)};
 
-                            'FaultCode' ->
-                                Fault#fault{fault_code = parse_FaultCode(Elem, State)};
+                            %% 'FaultCode' ->
+                            %%     Fault#fault{fault_code = parse_FaultCode(Elem, State)};
 
-                            'FaultString' ->
-                                Fault#fault{fault_string = parse_FaultString(Elem, State)};
+                            %% 'FaultString' ->
+                            %%     Fault#fault{fault_string = parse_FaultString(Elem, State)};
 
                             _ ->
                                 parse_error(Elem, State)

@@ -3,7 +3,9 @@
 REBAR='./rebar' 
 # || which rebar`
 
-.PHONY: deps clean
+.PHONY: deps clean test
+
+dir-local: compile
 
 all: compile
 
