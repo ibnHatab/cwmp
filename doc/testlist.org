@@ -1,5 +1,6 @@
 
 
+
 * RUN
 	watchfs '*/*.erl' 'rebar eunit -v skip_deps=true suite=xmerl'
 
@@ -47,12 +48,12 @@
 
 
 
-** SOAP encoding [2/3]
+** SOAP encoding [3/5]
    - [ ] Parse SOAP format
    - [X] Parse SOAP boolean types
    - [ ] Parse SOAP dateTime types 
      same as boolean
-   - [ ] Parse ISO 8601 date time aka [[http://www.w3.org/TR/xmlschema-2/#dateTime][xs:dateTime]]
+   - [X] Parse ISO 8601 date time aka [[http://www.w3.org/TR/xmlschema-2/#dateTime][xs:dateTime]]
      tr_soap_types.erl/utest
      
    - [X] Check SOAP version from envelop

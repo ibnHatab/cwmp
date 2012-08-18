@@ -40,12 +40,13 @@ check_Value(Name, String, Type) ->
 %%
 %% The time zone may be specified as Z (UTC) or (+|-)hh:mm. Time zones
 %% that aren't specified are considered undetermined.
-convert_iso8601_date("-"++DateTime) ->
-    convert_iso8601_date(DateTime);
 convert_iso8601_date(DateTime) ->
-    [Date,Time] = string:tokens(DateTime,"T"),
+    [SDate,Time] = string:tokens(DateTime,"T"),
+    {Sign, Date} = case SDate of
+		       "-" ++ Val -> {-1, Val};
+		       Val -> {1, Val}
+		   end,
     [Y,M,D] = string:tokens(Date,"-"),
-    Sign = +1, %FIXME: implement BC time
     DT = {Sign * list_to_integer(Y),
 	  list_to_integer(M),
 	  list_to_integer(D)
@@ -62,7 +63,7 @@ convert_iso8601_date(DT, Time) ->
 		{T,TZone};
 	    {T,TZone} ->
 		{T,TZone}
-    end,
+	end,
     [H,M,S] = string:tokens(HMS,":"),
     TM = {list_to_integer(H),
 	  list_to_integer(M),
@@ -356,21 +357,19 @@ parse_iso8601_test() ->
      begin
 	 ?DBG({DT, Str, convert_iso8601_date(Str)}),
 	 DT = convert_iso8601_date(Str)
+	     
      end
       ||
 	{DT, Str} <- lists:zip([{{2004, 11, 01}, {04, 40, 35}},
 				{{2004, 11, 01}, {04, 40, 35}},
-				{{2000, 01, 12}, {12, 13, 14}},
-%??				{{2000, 01, 00}, {0,   0,  0}},
-%				{{2000, 01, 12}, {0,   0,  0}},
+				{{-2000, 01, 12}, {12, 13, 14}},
+				{{2000, 01, 12}, {0,   0,  0}},
 				{{2009, 06, 25}, {04, 32, 31}}
 			       ],
-
 			       [ "2004-10-31T21:40:35.5-07:00",
 				 "2004-11-01T04:40:35.5Z",
-				 "-2000-01-12T12:13:14Z", %BUG:sign
-%??				 "2000-01",
-%				 "2000-01-12",
+				 "-2000-01-12T12:13:14Z",
+				 "2000-01-12T00:00:00Z",
 				 "2009-06-25T05:32:31+01:00"
 			       ])
     ].
