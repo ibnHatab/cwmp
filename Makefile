@@ -69,3 +69,6 @@ check-data: $(DATA_XML)
 		echo "-------------- $$file ----------------" ; \
 		xmllint --noout --path doc --schema cwmp-1-1.xsd $$file; \
 	done
+
+cmd:
+	erl -pa ebin -s tr_soap_parser parse_root_test test/data/Fault.xml -run init stop -noshell

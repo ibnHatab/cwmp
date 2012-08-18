@@ -98,11 +98,13 @@ convert_iso8601_date({Syear,Smonth,Sday} = _DT,
 
 -spec parse_boolean(#xmlElement{content::[any()]}) -> boolean().
 parse_boolean(#xmlElement{name=Name, content = Content}) ->
-    String = string:strip(get_xmlText(Content)),
-    case check_Value(Name, String, boolean) of
-        Value when Value =:= "1"; Value =:= "true"-> true;
-        Value when Value =:= "0"; Value =:= "false"-> false
-    end.
+    String = string:strip(get_xmlText(Content)),    
+    list_to_boolean(check_Value(Name, String, boolean)).
+
+list_to_boolean("1") -> true;
+list_to_boolean("true") -> true;
+list_to_boolean("0") -> false;
+list_to_boolean("false") -> false.
 
 -spec parse_string(#xmlElement{content::[any()]}) -> string().
 parse_string(#xmlElement{name=Name, content = Content}) ->
@@ -141,6 +143,46 @@ parse_dateTime(String) when is_list(String) ->
 parse_base64(_E) ->
     <<"aa">>.
 
+-spec parse_attribete(#xmlElement{}, atom(), atom()) -> any() | undefined.
+parse_attribete(Elem, AttrName, boolean) ->
+    case  get_AttributeByName(Elem, AttrName) of
+	undefined ->
+	    undefined;
+	Value ->
+	    list_to_boolean(check_Value(AttrName, Value, boolean))
+    end;
+parse_attribete(Elem, AttrName, string) ->
+    case  get_AttributeByName(Elem, AttrName) of
+	undefined ->
+	    undefined;
+	Value ->
+	    check_Value(AttrName, Value, string)
+    end;
+parse_attribete(Elem, AttrName, int) ->
+    case  get_AttributeByName(Elem, AttrName) of
+	undefined ->
+	    undefined;
+	Value ->
+	    IntS = check_Value(AttrName, Value, int),
+	    string:to_integer(IntS)
+    end;
+parse_attribete(Elem, AttrName, Type) ->
+    case  get_AttributeByName(Elem, AttrName) of
+	undefined ->
+	    undefined;
+	Value ->
+	    check_Value(AttrName, Value, Type)
+    end.
+
+get_AttributeByName(Elem, AttrName) ->
+    case lists:keyfind(AttrName, 2, Elem#xmlElement.attributes) of
+	false ->
+	    undefined;
+	Attr ->
+	    Attr#xmlAttribute.value
+    end.
+%parse_attribete(Elem, AttrName, string) ->
+    
 
 %FIXME: booom !!!
 parse_(_E) ->  ok.
@@ -173,21 +215,57 @@ parse_DeploymentUnitState(E,_S) -> parse_string(E).
 parse_DeploymentUnitUUID(E,_S) -> parse_string(E).
 parse_DownloadFileType(E,_S) -> parse_string(E).
 
--spec parse_EventCodeType(#xmlElement{},#decoder{}) -> event_code_type().
-parse_EventCodeType(_E,_S) -> 1.
 
+match_event_code(Code, Description) ->
+    case Code of
+	"M" ->
+	    Key = Code ++ " " ++ Description, 
+	    case lists:keyfind(Key, 2, ?SUPPORTED_EVENT_CODE_TYPE) of
+		{OpCode, _Key} ->
+		    OpCode;
+		false ->
+		    {error, "Wrong event: " ++ Key}
+	    end;
+	S ->
+	    case string:to_integer(S) of
+		{error, Reason} ->
+		    {error,Reason};
+		OpCode ->
+		    OpCode
+	    end
+    end.
+
+-spec parse_EventCodeType(#xmlElement{},#parser{}) -> event_code_type().
+parse_EventCodeType(Elem, State) ->
+    String = parse_string(Elem),
+    case string:chr(String) of
+	0 ->
+	    parse_error(Elem, State);
+	Space ->
+	    Code = string:substr(String, 1, Space -1),
+	    Description = string:substr(String, Space +1),
+	    case match_event_code(Code, Description) of
+		{error,Reason} ->
+		    parse_error(Elem, Reason);
+		Event ->
+		    Event
+	    end
+    end.
+    
 parse_ExecutionEnvRef(E,_S) -> parse_string(E).
 parse_ExecutionUnitRefList(E,_S) -> parse_string(E).
 parse_ExpirationDate(E,_S) -> parse_dateTime(E).
 parse_FailureURL(E,_S) -> parse_string(E).
-parse_FaultCode(E,_S) -> parse_(E).
-parse_FaultString(E,_S) -> parse_string(E).
+
+parse_FaultCode(E) -> parse_unsignedInt(E).
+parse_FaultString(E) -> parse_string(E).
+
 parse_FileSize(E,_S) -> parse_unsignedInt(E).
 parse_InstanceNumber(E,_S) -> parse_unsignedInt(E).
 parse_IsDownload(E,_S) -> parse_boolean(E).
 parse_IsTransferable(E,_S) -> parse_int(E).
 parse_Manufacturer(E,_S) -> parse_string(E).
-parse_MaxEnvelopes(E,_S) -> parse_unsignedInt(E).
+parse_MaxEnvelopes(E,_S) -> parse_unsignedInt(E). %FIXME: inline
 parse_MaxRetries(E,_S) -> parse_int(E).
 parse_Mode(E,_S) -> parse_int(E).
 parse_Name(E,_S) -> parse_string(E).

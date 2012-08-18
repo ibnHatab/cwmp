@@ -9,12 +9,15 @@
 -include("tr69.hrl").
 -include("proto.hrl").
 
+-import(lists, [map/2, reverse/1]).
+-import(string, [join/2]).
 
 -export([read_xml/1, write_xml/1]).
 
--export([return_error/2, parse_error/2,
+-export([return_error/2, parse_error/2, parse_error/3,
+	 parse_warning/2, parse_warning/3,
 	 get_QName/2,
-	 get_local_name/2,
+	 get_local_name/2, local_name/1,
 	 xmlText/1,
 	 xmlElement/1
 	]).
@@ -46,13 +49,28 @@ write_xml(Doc) ->
 -compile({nowarn_unused_function, return_error/2}).
 -spec return_error(term(), any()) -> no_return().
 return_error(Tag, Message) ->
-    throw({error, {Tag, ?MODULE, Message}}).
+    throw({error, {Tag, Message}}).
 
--spec parse_error(#xmlElement{}, #decoder{}) -> no_return().
+-spec parse_error(#xmlElement{}, #parser{}) -> no_return().
+parse_error(Elem, State, Msg) ->
+%    ?DBG(erlang:get_stacktrace()),
+    Path = [Elem#xmlElement.name | [N || {N, _Id} <- Elem#xmlElement.parents]],
+    XPath = "/" ++ join(map(fun atom_to_list/1, reverse(Path)), "/"),
+    return_error(XPath, {State, Msg}).
+
 parse_error(Elem, State) ->
-    return_error(Elem#xmlElement.name,
-                 {State#decoder.state, "Unknown element"}).
+    parse_error(Elem, State, "Unknown element").
 
+
+-spec parse_warning(#xmlElement{}, #parser{}) -> no_return().
+parse_warning(Elem, State, Msg) ->
+    Path = [Elem#xmlElement.name | [N || {N, _Id} <- Elem#xmlElement.parents]],
+    XPath = "/" ++ join(map(fun atom_to_list/1, reverse(Path)), "/"),
+    ?WARNING(":~p ~n" 
+	     "When ~p ~p ~n", [XPath, State, Msg]).
+
+parse_warning(Elem, State) ->
+    parse_warning(Elem, State, "Unknown element").
 
 %% Usefull filtering predicates
 -compile({nowarn_unused_function, xmlText/1}).
@@ -78,10 +96,12 @@ local_name(Name) when is_list(Name) ->
 	    {"", list_to_atom(Name)}
     end.
 
-get_local_name(Name, Ns) when is_atom(Name)->
+get_local_name(#xmlElement{name = Name} = Elem, Ns) when is_atom(Name)->
     case local_name(Name) of
         {Ns, LocalName} -> LocalName;
-        _ -> return_error(Name, {Ns, "Namespace missmatch"})
+	{NewNs, LocalName} -> 
+	    parse_warning(Elem, NewNs, "Namespace missmatch"),
+	    LocalName
     end.   
 
 

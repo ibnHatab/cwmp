@@ -9,150 +9,108 @@
 -include("tr69.hrl").
 -include("proto.hrl").
 
--import(tr_soap_lib, [return_error/2, parse_error/2, get_local_name/2]).
+-import(lists, [map/2, reverse/1, foldl/3]).
 
--import(tr_soap_types, [
-			parse_AccessListChange/2,   
-			parse_AccessListValueType/2,    
-			parse_ACSFaultCodeType/2,    
-			parse_ACSVendorFaultCodeType/2,    
-			parse_AnnounceURL/2,   
-			parse_Arg/2,   
-			parse_Command/2,   
-			parse_CommandKeyType/2,    
-			parse_CompleteTime/2,   
-			parse_CPEExtensionFaultCodeType/2,    
-			parse_CPEFaultCodeType/2,    
-			parse_CPEVendorFaultCodeType/2,    
-			parse_CurrentTime/2,   
-			parse_DeploymentUnitOperationType/2,   %FIEME
-			parse_DefaultDeploymentUnitOperationType/2,   
-			parse_DelaySeconds/2,   
-			parse_DeploymentUnitCPEFaultCodeType/2,    
-			parse_DeploymentUnitRef/2,   
-			parse_DeploymentUnitState/2,    
-			parse_DeploymentUnitUUID/2,    
-			parse_DownloadFileType/2,    
-			parse_EventCodeType/2,    
-			parse_ExecutionEnvRef/2,   
-			parse_ExecutionUnitRefList/2,   
-			parse_ExpirationDate/2,   
-			parse_FailureURL/2,   
-			parse_FaultCode/2,   
-			parse_FaultString/2,   
-			parse_FileSize/2,   
-			parse_InstanceNumber/2,   
-			parse_IsDownload/2,   
-			parse_IsTransferable/2,   
-			parse_Manufacturer/2,   
-			parse_MaxEnvelopes/2,   
-			parse_MaxRetries/2,   
-			parse_Mode/2,   
-			parse_Name/2,   
-			parse_Next/2,   
-			parse_NextLevel/2,   
-			parse_NextURL/2,   
-			parse_NotificationChange/2,   
-			parse_ObjectNameType/2,    
-			parse_OptionName/2,   
-			parse_OUI/2,   
-			parse_ParameterAttributeNotificationValueType/2,    
-			parse_ParameterKeyType/2,    
-			parse_ParameterName/2,   
-			parse_ParameterPath/2,   
-			parse_Password/2,   
-			parse_ProductClass/2,   
-			parse_Referer/2,   
-			parse_Resolved/2,   
-			parse_RetryCount/2,   
-			parse_SerialNumber/2,   
-			parse_StartDate/2,   
-			parse_StartTime/2,   
-			parse_State/2,   
-			parse_Status/2,   
-			parse_string/2,   
-			parse_SuccessURL/2,   
-			parse_TargetFileName/2,   
-			parse_TimeWindowModeValueType/2,    
-			parse_TransferCompleteCPEFaultCodeType/2,    
-			parse_TransferFileType/2,    
-			parse_TransferStateType/2,    
-			parse_TransferURL/2,   
-			parse_UploadFileType/2,    
-			parse_URL/2,   
-			parse_UserMessage/2,   
-			parse_Username/2,   
-			parse_Value/2,   
-			parse_Version/2,   
-			parse_VoucherSN/2,   
-			parse_WindowEnd/2,   
-			parse_WindowStart/2,   
-			parse_Writable/2,   
-			parse_unsignedInt/1,
-			parse_string/1,
-			parse_boolean/1,
-			parse_int/1,
-			parse_dateTime/1,
-			parse_base64/1,
-%			parse_anySimpleType/1
-			parse_anySimpleType/2
+-import(tr_soap_lib, [parse_error/2, return_error/2,
+		      get_local_name/2, local_name/1, get_QName/2]).
+
+-import(tr_soap_types, [ parse_AccessListChange/2,
+			 parse_AccessListValueType/2, parse_ACSFaultCodeType/2,
+			 parse_ACSVendorFaultCodeType/2, parse_AnnounceURL/2, parse_Arg/2,
+			 parse_Command/2, parse_CommandKeyType/2, parse_CompleteTime/2,
+			 parse_CPEExtensionFaultCodeType/2, parse_CPEFaultCodeType/2,
+			 parse_CPEVendorFaultCodeType/2, parse_CurrentTime/2,
+			 parse_DeploymentUnitOperationType/2, %FIEME
+			 parse_DefaultDeploymentUnitOperationType/2, parse_DelaySeconds/2,
+			 parse_DeploymentUnitCPEFaultCodeType/2, parse_DeploymentUnitRef/2,
+			 parse_DeploymentUnitState/2, parse_DeploymentUnitUUID/2,
+			 parse_DownloadFileType/2, parse_EventCodeType/2,
+			 parse_ExecutionEnvRef/2, parse_ExecutionUnitRefList/2,
+			 parse_ExpirationDate/2, parse_FailureURL/2, parse_FaultCode/1,
+			 parse_FaultString/1, parse_FileSize/2, parse_InstanceNumber/2,
+			 parse_IsDownload/2, parse_IsTransferable/2, parse_Manufacturer/2,
+			 parse_MaxEnvelopes/2, parse_MaxRetries/2, parse_Mode/2, parse_Name/2,
+			 parse_Next/2, parse_NextLevel/2, parse_NextURL/2,
+			 parse_NotificationChange/2, parse_ObjectNameType/2,
+			 parse_OptionName/2, parse_OUI/2,
+			 parse_ParameterAttributeNotificationValueType/2,
+			 parse_ParameterKeyType/2, parse_ParameterName/2,
+			 parse_ParameterPath/2, parse_Password/2, parse_ProductClass/2,
+			 parse_Referer/2, parse_Resolved/2, parse_RetryCount/2,
+			 parse_SerialNumber/2, parse_StartDate/2, parse_StartTime/2,
+			 parse_State/2, parse_Status/2, parse_SuccessURL/2,
+			 parse_TargetFileName/2, parse_TimeWindowModeValueType/2,
+			 parse_TransferCompleteCPEFaultCodeType/2, parse_TransferFileType/2,
+			 parse_TransferStateType/2, parse_TransferURL/2,
+			 parse_UploadFileType/2, parse_URL/2, parse_UserMessage/2,
+			 parse_Username/2, parse_Value/2, parse_Version/2, parse_VoucherSN/2,
+			 parse_WindowEnd/2, parse_WindowStart/2, parse_Writable/2,
+
+			 parse_unsignedInt/1,
+			 parse_string/1,
+			 parse_string/2,
+			 parse_boolean/1,
+			 parse_int/1,
+			 parse_dateTime/1,
+			 parse_base64/1,
+			 parse_anyURI/1,
+						%			parse_anySimpleType/1
+			 parse_attribete/3,
+			 parse_anySimpleType/2
 		       ]).
 
-
--export([decoder/1, decode/1]).
+ 
+-export([parser/1, parse/1]).
 
 %%%-----------------------------------------------------------------------------
 %%%        Local API
 %%%-----------------------------------------------------------------------------
 
-
-
-%%%-----------------------------------------------------------------------------
-%%%        SOAP Decoder
-%%%-----------------------------------------------------------------------------
-
-
-%% @doc Create a decoder/1 with the given options. 
--spec decoder([decoder_option()]) -> function().
-decoder(Options) ->
-    State = parse_decoder_options(Options, #decoder{}),
-    fun (O) -> soap_decode(O, State) end.
-
-%% @doc Decode the given xmlElement to rpc_data terms.
--spec decode(#xmlElement{}) -> #rpc_data{}.
-decode(S) ->
-    soap_decode(S, #decoder{}).
-
-parse_decoder_options([], State) ->
+parse_parser_options([], State) ->
     State;
-parse_decoder_options([{version, Version} | Rest], State) ->
-    parse_decoder_options(Rest, State#decoder{version=Version});
-parse_decoder_options([{object_hook, Hook} | Rest], State) ->
-    parse_decoder_options(Rest, State#decoder{object_hook=Hook}).
+parse_parser_options([{version, Version} | Rest], State) ->
+    parse_parser_options(Rest, State#parser{version=Version});
+parse_parser_options([{object_hook, Hook} | Rest], State) ->
+    parse_parser_options(Rest, State#parser{object_hook=Hook}).
 
--spec soap_decode(#xmlElement{}, #decoder{}) -> #rpc_data{}.
-%-spec soap_decode(#xmlElement{}, #decoder{}) -> #envelope{} | {error, any()}.
-soap_decode(Doc, S) ->
+
+%%%-----------------------------------------------------------------------------
+%%%        SOAP Parser
+%%%-----------------------------------------------------------------------------
+
+%% @doc Create a parser/1 with the given options.
+-spec parser([parser_option()]) -> function().
+parser(Options) ->
+    State = parse_parser_options(Options, #parser{}),
+    fun (O) -> parse(O, State) end.
+
+%% @doc Parse the given xmlElement to rpc_data terms.
+-spec parse(#xmlElement{}) -> #rpc_data{}.
+parse(S) ->
+    parse(S, #parser{}).
+ 
+-spec parse(#xmlElement{}, #parser{}) -> #rpc_data{}.
+parse(Doc, S) ->
     try
-        parse_Message(Doc, S)
-     catch
-         error: Error ->
-            Stacktrace = erlang:get_stacktrace(),
-             erlang:raise(error, Error, Stacktrace);
-         %%FIXME: Probably thrown from return_error/2:
-         throw: {error, {Tag, ?MODULE, M}} ->
-             Stacktrace = erlang:get_stacktrace(),
-             erlang:raise(error, {Tag, M}, Stacktrace)
-     end.
+        parse_Document(Doc, S)
+    catch
+        error:Error ->
+	    Stacktrace = erlang:get_stacktrace(),
+	    erlang:raise(error, Error, Stacktrace);
+        %%FIXME: Probably thrown from return_error/2:
+        throw:{error, {_Line, _Cause}} = Error->
+	    Error
+    end.
 
--spec parse_Message(#xmlElement{}, #decoder{}) -> #rpc_data{}.
-parse_Message(#xmlElement{namespace = Namespace} = Doc, State) when
-is_tuple(Doc) -> {Nss, Version} = parse_Namespace(Namespace),
-RefinedState = State#decoder{version=Version, ns=Nss, state=soap},
-Envelop = case get_local_name(Doc#xmlElement.name,
-Nss#rpc_ns.ns_envelop) of 'Envelope' -> parseEnvelope(Doc,
-RefinedState); _ -> parse_error(Doc, RefinedState) end, #rpc_data{data
-= Envelop}.
+-spec parse_Document(#xmlElement{}, #parser{}) -> #rpc_data{}.
+parse_Document(#xmlElement{namespace = Namespace} = Doc, State) when is_tuple(Doc) ->
+    {Nss, Version} = parse_Namespace(Namespace),
+    RefinedState = State#parser{version=Version, ns=Nss, state=soap},
+    Envelop = case get_local_name(Doc, Nss#rpc_ns.ns_envelop) of
+		  'Envelope' -> parse_Envelope(Doc, RefinedState);
+		  _ -> parse_error(Doc, RefinedState)
+              end,
+    #rpc_data{data = Envelop}.
 
 -spec parse_Namespace(#xmlNamespace{}) -> {#rpc_ns{}, cwmp_version()}.
 parse_Namespace(#xmlNamespace{nodes = Nss}) ->
@@ -166,7 +124,7 @@ parse_Namespace(#xmlNamespace{nodes = Nss}) ->
 match_cwmp_ns_and_version(Nss) ->
     Mapped = lists:map(fun({Ns, Uri}) ->
                                case re:split(atom_to_list(Uri), "-", [{return,list}]) of
-                                   ["urn:dslforum","org:cwmp", R, V] -> {Ns, R, V};
+                                   ["urn:dslforum","org:cwmp", R, V] -> {Ns, R, V}; 
                                    _ -> false
                                end
                        end, Nss),
@@ -180,19 +138,19 @@ match_cwmp_ns_and_version(Nss) ->
     {NsCwmp, CwmpVersion}.
 
 -spec find_ns_aux([tuple()], term()) -> string().
-find_ns_aux(Nss, URL) ->
+find_ns_aux(Nss, URL) when is_atom(URL)->
     case lists:keyfind(URL, 2, Nss) of
-        {NsX, _} ->
+        {NsX, _} -> 
             NsX;
         false ->
             ""
     end.
 
--spec parseEnvelope(#xmlElement{}, #decoder{}) -> #envelope{}.
-parseEnvelope(#xmlElement{content = Content} = _Doc,
-              #decoder{ns=Nss} = State) ->
+-spec parse_Envelope(#xmlElement{}, #parser{}) -> #envelope{}.
+parse_Envelope(#xmlElement{content = Content} = _Doc,
+               #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, Envelop) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_envelop) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_envelop) of
                             'Header' ->
                                 Envelop#envelope{header = parse_Header(Elem, State)};
                             'Body' ->
@@ -204,11 +162,11 @@ parseEnvelope(#xmlElement{content = Content} = _Doc,
                 #envelope{},
                 lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
--spec parse_Header(#xmlElement{},#decoder{}) -> #header{}.
+-spec parse_Header(#xmlElement{},#parser{}) -> #header{}.
 parse_Header(#xmlElement{content = Content} = _Elems,
-            #decoder{ns=Nss} = State) ->
+	     #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, Header) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
                             'ID' ->
                                 Header#header{id = parse_ID(Elem, State)};
                             'HoldRequests' ->
@@ -223,81 +181,117 @@ parse_Header(#xmlElement{content = Content} = _Elems,
                 lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 
+%%%-----------------------------------------------------------------------------
+%%%        SOAP Body
+%%%-----------------------------------------------------------------------------
+get_ns_for_method('Fault', NSS) ->
+    NSS #rpc_ns.ns_envelop;
+get_ns_for_method(_, NSS) ->
+    NSS #rpc_ns.ns_cwmp.
 
+get_method_name(#xmlElement{name = Name} = Elem,
+		Nss) when is_atom(Name) ->
+    {NS1, LName} = local_name(Name),
+    NS2 = get_ns_for_method(LName, Nss),
+    if
+	NS1 == NS2 -> LName;
+	true ->
+	    parse_error(Elem, {NS2, "Namespace missmatch"})
+    end.
 
-%-spec parseBody(#xmlElement{}, #decoder{}) -> body_type().
-parse_Body(_Elem, _State) ->
-    {body}.
+-spec parse_Body(#xmlElement{}, #parser{}) -> [body_type()].
+parse_Body(#xmlElement{content = Content} = _Elems,
+	     #parser{ns=Nss} = State) ->
+    lists:map(fun(Elem) ->
+		      case get_method_name(Elem, Nss) of
+			  'Fault' ->
+			      parse_SoapFault(Elem, State);
+			  Method ->			      
+			      F = list_to_atom("parse_" ++ atom_to_list(Method)),
+			      if is_function({?MODULE, F}, 2) ->
+				      apply(?MODULE, F, [Elem, State]);
+						%FIXME: deprecated tuple function 
+				  true -> 
+				      parse_error(Elem, State)
+			      end
+		      end
+	      end,
+	      lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 
 %%%-----------------------------------------------------------------------------
 %% Complex Type Mapping
 %%%-----------------------------------------------------------------------------
 
-%%%parse_AccessList(E,_S) -> parse_AccessList(E,_S). 
-%%%parse_AllQueuedTransferStruct(E,_S) -> parse_AllQueuedTransferStruct(E,_S). 
-						%parse_ArgStruct(E,_S) -> parse_ArgStruct(E,_S). 
-parse_base64(E,_S) -> parse_base64(E). 
-parse_CommandKey(E,_S) -> parse_CommandKeyType(E,_S). 
-parse_CurrentState(E,_S) -> parse_DeploymentUnitState(E,_S). 
-parse_DeviceId(E,_S) -> parse_DeviceIdStruct(E,_S). 
-parse_EventCode(E,_S) -> parse_EventCodeType(E,_S). 
-parse_Event(E,_S) -> parse_EventList(E,_S). 
-%%%parse_EventStruct(E,_S) -> parse_EventStruct(E,_S). 
-%%parse_Fault(E,_S) -> parse_DeploymentUnitFaultStruct(E,_S). 
-parse_FaultStruct(E,_S) -> parse_TransferCompleteFaultStruct(E,_S). 
-%% parse_FileTypeArg(E,_S) -> parse_FileTypeArg(E,_S). 
-parse_FileType(E,_S) -> parse_DownloadFileType(E,_S). 
-%% parse_FileType(E,_S) -> parse_TransferFileType(E,_S). 
-%% parse_FileType(E,_S) -> parse_UploadFileType(E,_S). 
-%%%parse_MethodList(E,_S) -> parse_MethodList(E,_S). 
-parse_Notification(E,_S) -> parse_ParameterAttributeNotificationValueType(E,_S). 
-parse_ObjectName(E,_S) -> parse_ObjectNameType(E,_S). 
-parse_OperationPerformed(E,_S) -> parse_DeploymentUnitOperationType(E,_S). 
-parse_Operations(E,_S) -> parse_OperationStruct(E,_S). 
-%% parse_OptionList(E,_S) -> parse_OptionList(E,_S). 
-						%parse_OptionStruct(E,_S) -> parse_OptionStruct(E,_S). 
-%%parse_ParameterAttributeStruct(E,_S) -> parse_ParameterAttributeStruct(E,_S). 
-%%%parse_ParameterInfoStruct(E,_S) -> parse_ParameterInfoStruct(E,_S). 
-parse_ParameterKey(E,_S) -> parse_ParameterKeyType(E,_S). 
-parse_ParameterList(E,_S) -> parse_ParameterAttributeList(E,_S). 
-%% parse_ParameterList(E,_S) -> parse_ParameterInfoList(E,_S). 
-%% parse_ParameterList(E,_S) -> parse_ParameterValueList(E,_S). 
-%% parse_ParameterList(E,_S) -> parse_SetParameterAttributesList(E,_S). 
-%%%parse_ParameterNames(E,_S) -> parse_ParameterNames(E,_S). 
-%%%parse_ParameterValueStruct(E,_S) -> parse_ParameterValueStruct(E,_S). 
-%%%parse_QueuedTransferStruct(E,_S) -> parse_QueuedTransferStruct(E,_S). 
-parse_Results(E,_S) -> parse_AutonOpResultStruct(E,_S). 
-%% parse_Results(E,_S) -> parse_OpResultStruct(E,_S). 
-%%parse_SetParameterAttributesStruct(E,_S) -> parse_SetParameterAttributesStruct(E,_S). 
-						%parse_State(E,_S) -> parse_TransferStateType(E,_S). 
-%%parse_string(E,_S) -> parse_AccessListValueType(E,_S). 
-%%parse_TimeWindowList(E,_S) -> parse_TimeWindowList(E,_S). 
-%%parse_TimeWindowStruct(E,_S) -> parse_TimeWindowStruct(E,_S). 
-%%parse_TransferList(E,_S) -> parse_AllTransferList(E,_S). 
-						%parse_TransferList(E,_S) -> parse_TransferList(E,_S). 
-parse_UUID(E,_S) -> parse_DeploymentUnitUUID(E,_S). 
-						%parse_Value(E,_S) -> parse_anySimpleType(E,_S). 
-%%%parse_VoucherList(E,_S) -> parse_VoucherList(E,_S). 
-parse_WindowMode(E,_S) -> parse_TimeWindowModeValueType(E,_S). 
+%%%parse_AccessList(E,_S) -> parse_AccessList(E,_S).
+%%%parse_AllQueuedTransferStruct(E,_S) -> parse_AllQueuedTransferStruct(E,_S).
+						%parse_ArgStruct(E,_S) -> parse_ArgStruct(E,_S).
+parse_base64(E,_S) -> parse_base64(E).
+parse_CommandKey(E,_S) -> parse_CommandKeyType(E,_S). %%FIXME: inline
+parse_CurrentState(E,_S) -> parse_DeploymentUnitState(E,_S).
+parse_DeviceId(E,_S) -> parse_DeviceIdStruct(E,_S).
+parse_EventCode(E,_S) -> parse_EventCodeType(E,_S).
+parse_Event(E,_S) -> parse_EventList(E,_S).
+%%%parse_EventStruct(E,_S) -> parse_EventStruct(E,_S).
+%%parse_Fault(E,_S) -> parse_DeploymentUnitFaultStruct(E,_S).
+parse_FaultStruct(E,_S) -> parse_TransferCompleteFaultStruct(E,_S).
+%% parse_FileTypeArg(E,_S) -> parse_FileTypeArg(E,_S).
+parse_FileType(E,_S) -> parse_DownloadFileType(E,_S).
+%% parse_FileType(E,_S) -> parse_TransferFileType(E,_S).
+%% parse_FileType(E,_S) -> parse_UploadFileType(E,_S).
+%%%parse_MethodList(E,_S) -> parse_MethodList(E,_S).
+parse_Notification(E,_S) -> parse_ParameterAttributeNotificationValueType(E,_S).
+parse_ObjectName(E,_S) -> parse_ObjectNameType(E,_S).
+parse_OperationPerformed(E,_S) -> parse_DeploymentUnitOperationType(E,_S).
+parse_Operations(E,_S) -> parse_OperationStruct(E,_S).
+%% parse_OptionList(E,_S) -> parse_OptionList(E,_S).
+						%parse_OptionStruct(E,_S) -> parse_OptionStruct(E,_S).
+%%parse_ParameterAttributeStruct(E,_S) -> parse_ParameterAttributeStruct(E,_S).
+%%%parse_ParameterInfoStruct(E,_S) -> parse_ParameterInfoStruct(E,_S).
+parse_ParameterKey(E,_S) -> parse_ParameterKeyType(E,_S).
+parse_ParameterList(E,_S) -> parse_ParameterAttributeList(E,_S).
+%% parse_ParameterList(E,_S) -> parse_ParameterInfoList(E,_S).
+%% parse_ParameterList(E,_S) -> parse_ParameterValueList(E,_S).
+%% parse_ParameterList(E,_S) -> parse_SetParameterAttributesList(E,_S).
+%%%parse_ParameterNames(E,_S) -> parse_ParameterNames(E,_S).
+%%%parse_ParameterValueStruct(E,_S) -> parse_ParameterValueStruct(E,_S).
+%%%parse_QueuedTransferStruct(E,_S) -> parse_QueuedTransferStruct(E,_S).
+parse_Results(E,_S) -> parse_AutonOpResultStruct(E,_S).
+%% parse_Results(E,_S) -> parse_OpResultStruct(E,_S).
+%%parse_SetParameterAttributesStruct(E,_S) -> parse_SetParameterAttributesStruct(E,_S).
+						%parse_State(E,_S) -> parse_TransferStateType(E,_S).
+%%parse_string(E,_S) -> parse_AccessListValueType(E,_S).
+%%parse_TimeWindowList(E,_S) -> parse_TimeWindowList(E,_S).
+%%parse_TimeWindowStruct(E,_S) -> parse_TimeWindowStruct(E,_S).
+%%parse_TransferList(E,_S) -> parse_AllTransferList(E,_S).
+						%parse_TransferList(E,_S) -> parse_TransferList(E,_S).
+parse_UUID(E,_S) -> parse_DeploymentUnitUUID(E,_S).
+						%parse_Value(E,_S) -> parse_anySimpleType(E,_S).
+%%%parse_VoucherList(E,_S) -> parse_VoucherList(E,_S).
+parse_WindowMode(E,_S) -> parse_TimeWindowModeValueType(E,_S).
 
 %%%-----------------------------------------------------------------------------
 %%   Complex Data
 %%%-----------------------------------------------------------------------------
 
-%% -spec parse_ID(#xmlElement{},#decoder{}) -> #i_d{}.
-parse_ID(_, _) -> #id{}.
+-spec parse_ID(#xmlElement{},#parser{}) -> #id{}.
+parse_ID(Elem, #parser{ns=Nss} = _State) ->
+    Value = parse_string(Elem),
+    QName = get_QName('mustUnderstand', Nss#rpc_ns.ns_envelop),
+    MustuNderstand = parse_attribete(Elem, QName, boolean),
+    #id{mustUnderstand = MustuNderstand, value = Value}.
 
-%% -spec parse_HoldRequests(#xmlElement{},#decoder{}) -> #hold_requests{}.
--spec parse_HoldRequests(#xmlElement{},#decoder{}) -> #hold_requests{}.
-parse_HoldRequests(#xmlElement{content = _Content} = _Elems,
-        #decoder{ns=_Nss} = _State) ->
-    #hold_requests{}.
+-spec parse_HoldRequests(#xmlElement{},#parser{}) -> #hold_requests{}.
+parse_HoldRequests(Elem, #parser{ns=Nss} = _State) ->
+    Value = parse_boolean(Elem),
+    QName = get_QName('mustUnderstand', Nss#rpc_ns.ns_envelop),
+    MustuNderstand = parse_attribete(Elem, QName, boolean),
+    #id{mustUnderstand = MustuNderstand, value = Value}.
 
-%% -spec parse_TransferCompleteFaultStruct(#xmlElement{},#decoder{}) -> #transfer_complete_fault_struct{}.
-parse_TransferCompleteFaultStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_TransferCompleteFaultStruct(#xmlElement{},#parser{}) -> #transfer_complete_fault_struct{}.
+parse_TransferCompleteFaultStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, _TransferCompleteFaultStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             %% 'FaultCode' ->
                             %%     TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_code = parse_FaultCode(Elem, State)};
@@ -311,10 +305,10 @@ parse_TransferCompleteFaultStruct(#xmlElement{content = Content} = _Elems, #deco
                 end,
                 #transfer_complete_fault_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_DeploymentUnitFaultStruct(#xmlElement{},#decoder{}) -> #deployment_unit_fault_struct{}.
-parse_DeploymentUnitFaultStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_DeploymentUnitFaultStruct(#xmlElement{},#parser{}) -> #deployment_unit_fault_struct{}.
+parse_DeploymentUnitFaultStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, _DeploymentUnitFaultStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             %% 'FaultCode' ->
                             %%     DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_code = parse_FaultCode(Elem, State)};
@@ -329,24 +323,19 @@ parse_DeploymentUnitFaultStruct(#xmlElement{content = Content} = _Elems, #decode
                 end,
                 #deployment_unit_fault_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ParameterNames(#xmlElement{},#decoder{}) -> #parameter_names{}.
-parse_ParameterNames(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
-    lists:foldl(fun(Elem, ParameterNames) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+-spec parse_ParameterNames(#xmlElement{},#parser{}) -> [string()].
+parse_ParameterNames(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+    [case get_local_name(Elem, Nss#rpc_ns.ns_xsd) of			  
+    	 'string' ->
+    	     parse_string(Elem);
+    	 _ ->
+    	     parse_error(Elem, State)
+     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
-                            'string' ->
-                                ParameterNames#parameter_names{string = parse_string(Elem, State)};
-
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #parameter_names{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% -spec parse_ParameterValueStruct(#xmlElement{},#decoder{}) -> #parameter_value_struct{}.
-parse_ParameterValueStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_ParameterValueStruct(#xmlElement{},#parser{}) -> #parameter_value_struct{}.
+parse_ParameterValueStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ParameterValueStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'Name' ->
                                 ParameterValueStruct#parameter_value_struct{name = parse_Name(Elem, State)};
@@ -360,38 +349,28 @@ parse_ParameterValueStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=
                 end,
                 #parameter_value_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ParameterValueList(#xmlElement{},#decoder{}) -> #parameter_value_list{}.
-parse_ParameterValueList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
-    lists:foldl(fun(Elem, ParameterValueList) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+-spec parse_ParameterValueList(#xmlElement{},#parser{}) -> [#parameter_value_struct{}].
+parse_ParameterValueList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+    [case get_local_name(Elem, Nss#rpc_ns.ns_xsd) of			  
+	 'ParameterValueStruct' ->
+	     parse_ParameterValueStruct(Elem, State);
+	 _ ->
+	     parse_error(Elem, State)
+     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
-                            'ParameterValueStruct' ->
-                                ParameterValueList#parameter_value_list{parameter_value_struct = parse_ParameterValueStruct(Elem, State)};
+-spec parse_MethodList(#xmlElement{},#parser{}) -> [string()].
+parse_MethodList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+    [case get_local_name(Elem, Nss#rpc_ns.ns_xsd) of			  
+    	 'string' ->
+    	     parse_string(Elem);
+    	 _ ->
+    	     parse_error(Elem, State)
+     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #parameter_value_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% -spec parse_MethodList(#xmlElement{},#decoder{}) -> #method_list{}.
-parse_MethodList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
-    lists:foldl(fun(Elem, MethodList) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
-
-                            'string' ->
-                                MethodList#method_list{string = parse_string(Elem, State)};
-
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #method_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% -spec parse_DeviceIdStruct(#xmlElement{},#decoder{}) -> #device_id_struct{}.
-parse_DeviceIdStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_DeviceIdStruct(#xmlElement{},#parser{}) -> #device_id_struct{}.
+parse_DeviceIdStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, DeviceIdStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'Manufacturer' ->
                                 DeviceIdStruct#device_id_struct{manufacturer = parse_Manufacturer(Elem, State)};
@@ -411,42 +390,33 @@ parse_DeviceIdStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} =
                 end,
                 #device_id_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_EventStruct(#xmlElement{},#decoder{}) -> #event_struct{}.
-parse_EventStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_EventStruct(#xmlElement{},#parser{}) -> #event_struct{}.
+parse_EventStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, EventStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
-
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
                             'EventCode' ->
                                 EventStruct#event_struct{event_code = parse_EventCode(Elem, State)};
-
                             'CommandKey' ->
                                 EventStruct#event_struct{command_key = parse_CommandKey(Elem, State)};
-
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #event_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_EventList(#xmlElement{},#decoder{}) -> #event_list{}.
-parse_EventList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
-    lists:foldl(fun(Elem, EventList) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+%% -spec parse_EventList(#xmlElement{},#parser{}) -> #event_list{}.
+parse_EventList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+    [case get_local_name(Elem, Nss#rpc_ns.ns_xsd) of			  
+	 'EventStruct' ->
+	     parse_EventStruct(Elem, State);
+	 _ ->
+	     parse_error(Elem, State)
+     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
-                            'EventStruct' ->
-                                EventList#event_list{event_struct = parse_EventStruct(Elem, State)};
-
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #event_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% -spec parse_ParameterInfoStruct(#xmlElement{},#decoder{}) -> #parameter_info_struct{}.
-parse_ParameterInfoStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+-spec parse_ParameterInfoStruct(#xmlElement{},#parser{}) -> #parameter_info_struct{}.
+parse_ParameterInfoStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ParameterInfoStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
-
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
                             'Name' ->
                                 ParameterInfoStruct#parameter_info_struct{name = parse_Name(Elem, State)};
 
@@ -459,24 +429,19 @@ parse_ParameterInfoStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=N
                 end,
                 #parameter_info_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ParameterInfoList(#xmlElement{},#decoder{}) -> #parameter_info_list{}.
-parse_ParameterInfoList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
-    lists:foldl(fun(Elem, ParameterInfoList) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+-spec parse_ParameterInfoList(#xmlElement{},#parser{}) -> [#parameter_info_struct{}].
+parse_ParameterInfoList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+    [case get_local_name(Elem, Nss#rpc_ns.ns_xsd) of			  
+    	 'ParameterInfoStruct' ->
+    	     parse_ParameterInfoStruct(Elem, State);
+    	 _ ->
+    	     parse_error(Elem, State)
+     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
-                            'ParameterInfoStruct' ->
-                                ParameterInfoList#parameter_info_list{parameter_info_struct = parse_ParameterInfoStruct(Elem, State)};
-
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #parameter_info_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% -spec parse_AccessList(#xmlElement{},#decoder{}) -> #access_list{}.
-parse_AccessList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_AccessList(#xmlElement{},#parser{}) -> #access_list{}.
+parse_AccessList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, AccessList) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'string' ->
                                 AccessList#access_list{string = parse_string(Elem, State)};
@@ -487,10 +452,10 @@ parse_AccessList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = Sta
                 end,
                 #access_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetParameterAttributesStruct(#xmlElement{},#decoder{}) -> #set_parameter_attributes_struct{}.
-parse_SetParameterAttributesStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_SetParameterAttributesStruct(#xmlElement{},#parser{}) -> #set_parameter_attributes_struct{}.
+parse_SetParameterAttributesStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, SetParameterAttributesStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'Name' ->
                                 SetParameterAttributesStruct#set_parameter_attributes_struct{name = parse_Name(Elem, State)};
@@ -513,10 +478,10 @@ parse_SetParameterAttributesStruct(#xmlElement{content = Content} = _Elems, #dec
                 end,
                 #set_parameter_attributes_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetParameterAttributesList(#xmlElement{},#decoder{}) -> #set_parameter_attributes_list{}.
-parse_SetParameterAttributesList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_SetParameterAttributesList(#xmlElement{},#parser{}) -> #set_parameter_attributes_list{}.
+parse_SetParameterAttributesList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, SetParameterAttributesList) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'SetParameterAttributesStruct' ->
                                 SetParameterAttributesList#set_parameter_attributes_list{set_parameter_attributes_struct = parse_SetParameterAttributesStruct(Elem, State)};
@@ -527,10 +492,10 @@ parse_SetParameterAttributesList(#xmlElement{content = Content} = _Elems, #decod
                 end,
                 #set_parameter_attributes_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ParameterAttributeStruct(#xmlElement{},#decoder{}) -> #parameter_attribute_struct{}.
-parse_ParameterAttributeStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_ParameterAttributeStruct(#xmlElement{},#parser{}) -> #parameter_attribute_struct{}.
+parse_ParameterAttributeStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ParameterAttributeStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'Name' ->
                                 ParameterAttributeStruct#parameter_attribute_struct{name = parse_Name(Elem, State)};
@@ -547,10 +512,10 @@ parse_ParameterAttributeStruct(#xmlElement{content = Content} = _Elems, #decoder
                 end,
                 #parameter_attribute_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ParameterAttributeList(#xmlElement{},#decoder{}) -> #parameter_attribute_list{}.
-parse_ParameterAttributeList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_ParameterAttributeList(#xmlElement{},#parser{}) -> #parameter_attribute_list{}.
+parse_ParameterAttributeList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ParameterAttributeList) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'ParameterAttributeStruct' ->
                                 ParameterAttributeList#parameter_attribute_list{parameter_attribute_struct = parse_ParameterAttributeStruct(Elem, State)};
@@ -561,10 +526,10 @@ parse_ParameterAttributeList(#xmlElement{content = Content} = _Elems, #decoder{n
                 end,
                 #parameter_attribute_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_TimeWindowStruct(#xmlElement{},#decoder{}) -> #time_window_struct{}.
-parse_TimeWindowStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_TimeWindowStruct(#xmlElement{},#parser{}) -> #time_window_struct{}.
+parse_TimeWindowStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, TimeWindowStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'WindowStart' ->
                                 TimeWindowStruct#time_window_struct{window_start = parse_WindowStart(Elem, State)};
@@ -587,10 +552,10 @@ parse_TimeWindowStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss}
                 end,
                 #time_window_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_TimeWindowList(#xmlElement{},#decoder{}) -> #time_window_list{}.
-parse_TimeWindowList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_TimeWindowList(#xmlElement{},#parser{}) -> #time_window_list{}.
+parse_TimeWindowList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, TimeWindowList) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'TimeWindowStruct' ->
                                 TimeWindowList#time_window_list{time_window_struct = parse_TimeWindowStruct(Elem, State)};
@@ -601,10 +566,10 @@ parse_TimeWindowList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} =
                 end,
                 #time_window_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_QueuedTransferStruct(#xmlElement{},#decoder{}) -> #queued_transfer_struct{}.
-parse_QueuedTransferStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_QueuedTransferStruct(#xmlElement{},#parser{}) -> #queued_transfer_struct{}.
+parse_QueuedTransferStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, QueuedTransferStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'CommandKey' ->
                                 QueuedTransferStruct#queued_transfer_struct{command_key = parse_CommandKey(Elem, State)};
@@ -618,10 +583,10 @@ parse_QueuedTransferStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=
                 end,
                 #queued_transfer_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_TransferList(#xmlElement{},#decoder{}) -> #transfer_list{}.
-parse_TransferList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_TransferList(#xmlElement{},#parser{}) -> #transfer_list{}.
+parse_TransferList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, TransferList) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'QueuedTransferStruct' ->
                                 TransferList#transfer_list{queued_transfer_struct = parse_QueuedTransferStruct(Elem, State)};
@@ -632,10 +597,10 @@ parse_TransferList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = S
                 end,
                 #transfer_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AllQueuedTransferStruct(#xmlElement{},#decoder{}) -> #all_queued_transfer_struct{}.
-parse_AllQueuedTransferStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_AllQueuedTransferStruct(#xmlElement{},#parser{}) -> #all_queued_transfer_struct{}.
+parse_AllQueuedTransferStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, AllQueuedTransferStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'CommandKey' ->
                                 AllQueuedTransferStruct#all_queued_transfer_struct{command_key = parse_CommandKey(Elem, State)};
@@ -661,10 +626,10 @@ parse_AllQueuedTransferStruct(#xmlElement{content = Content} = _Elems, #decoder{
                 end,
                 #all_queued_transfer_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AllTransferList(#xmlElement{},#decoder{}) -> #all_transfer_list{}.
-parse_AllTransferList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_AllTransferList(#xmlElement{},#parser{}) -> #all_transfer_list{}.
+parse_AllTransferList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, AllTransferList) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'AllQueuedTransferStruct' ->
                                 AllTransferList#all_transfer_list{all_queued_transfer_struct = parse_AllQueuedTransferStruct(Elem, State)};
@@ -675,10 +640,10 @@ parse_AllTransferList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} 
                 end,
                 #all_transfer_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_OperationStruct(#xmlElement{},#decoder{}) -> #operation_struct{}.
-parse_OperationStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_OperationStruct(#xmlElement{},#parser{}) -> #operation_struct{}.
+parse_OperationStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, _OperationStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             _ ->
                                 parse_error(Elem, State)
@@ -686,10 +651,10 @@ parse_OperationStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} 
                 end,
                 #operation_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_InstallOpStruct(#xmlElement{},#decoder{}) -> #install_op_struct{}.
-parse_InstallOpStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_InstallOpStruct(#xmlElement{},#parser{}) -> #install_op_struct{}.
+parse_InstallOpStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, InstallOpStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'URL' ->
                                 InstallOpStruct#install_op_struct{url = parse_URL(Elem, State)};
@@ -712,10 +677,10 @@ parse_InstallOpStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} 
                 end,
                 #install_op_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_UpdateOpStruct(#xmlElement{},#decoder{}) -> #update_op_struct{}.
-parse_UpdateOpStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_UpdateOpStruct(#xmlElement{},#parser{}) -> #update_op_struct{}.
+parse_UpdateOpStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, UpdateOpStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'UUID' ->
                                 UpdateOpStruct#update_op_struct{uuid = parse_UUID(Elem, State)};
@@ -738,10 +703,10 @@ parse_UpdateOpStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} =
                 end,
                 #update_op_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_UninstallOpStruct(#xmlElement{},#decoder{}) -> #uninstall_op_struct{}.
-parse_UninstallOpStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_UninstallOpStruct(#xmlElement{},#parser{}) -> #uninstall_op_struct{}.
+parse_UninstallOpStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, UninstallOpStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'UUID' ->
                                 UninstallOpStruct#uninstall_op_struct{uuid = parse_UUID(Elem, State)};
@@ -758,10 +723,10 @@ parse_UninstallOpStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss
                 end,
                 #uninstall_op_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_OpResultStruct(#xmlElement{},#decoder{}) -> #op_result_struct{}.
-parse_OpResultStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_OpResultStruct(#xmlElement{},#parser{}) -> #op_result_struct{}.
+parse_OpResultStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, OpResultStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'UUID' ->
                                 OpResultStruct#op_result_struct{uuid = parse_UUID(Elem, State)};
@@ -796,10 +761,10 @@ parse_OpResultStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} =
                 end,
                 #op_result_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AutonOpResultStruct(#xmlElement{},#decoder{}) -> #auton_op_result_struct{}.
-parse_AutonOpResultStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_AutonOpResultStruct(#xmlElement{},#parser{}) -> #auton_op_result_struct{}.
+parse_AutonOpResultStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, AutonOpResultStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'OperationPerformed' ->
                                 AutonOpResultStruct#auton_op_result_struct{operation_performed = parse_OperationPerformed(Elem, State)};
@@ -810,10 +775,10 @@ parse_AutonOpResultStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=N
                 end,
                 #auton_op_result_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_VoucherList(#xmlElement{},#decoder{}) -> #voucher_list{}.
-parse_VoucherList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_VoucherList(#xmlElement{},#parser{}) -> #voucher_list{}.
+parse_VoucherList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, VoucherList) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'base64' ->
                                 VoucherList#voucher_list{base64 = parse_base64(Elem, State)};
@@ -824,10 +789,10 @@ parse_VoucherList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = St
                 end,
                 #voucher_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_OptionStruct(#xmlElement{},#decoder{}) -> #option_struct{}.
-parse_OptionStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_OptionStruct(#xmlElement{},#parser{}) -> #option_struct{}.
+parse_OptionStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, OptionStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'OptionName' ->
                                 OptionStruct#option_struct{option_name = parse_OptionName(Elem, State)};
@@ -856,10 +821,10 @@ parse_OptionStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = S
                 end,
                 #option_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_OptionList(#xmlElement{},#decoder{}) -> #option_list{}.
-parse_OptionList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_OptionList(#xmlElement{},#parser{}) -> #option_list{}.
+parse_OptionList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, OptionList) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'OptionStruct' ->
                                 OptionList#option_list{option_struct = parse_OptionStruct(Elem, State)};
@@ -870,10 +835,10 @@ parse_OptionList(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = Sta
                 end,
                 #option_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ArgStruct(#xmlElement{},#decoder{}) -> #arg_struct{}.
-parse_ArgStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_ArgStruct(#xmlElement{},#parser{}) -> #arg_struct{}.
+parse_ArgStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ArgStruct) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'Name' ->
                                 ArgStruct#arg_struct{name = parse_Name(Elem, State)};
@@ -887,10 +852,10 @@ parse_ArgStruct(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = Stat
                 end,
                 #arg_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_FileTypeArg(#xmlElement{},#decoder{}) -> #file_type_arg{}.
-parse_FileTypeArg(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_FileTypeArg(#xmlElement{},#parser{}) -> #file_type_arg{}.
+parse_FileTypeArg(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, FileTypeArg) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'ArgStruct' ->
                                 FileTypeArg#file_type_arg{arg_struct = parse_ArgStruct(Elem, State)};
@@ -901,43 +866,82 @@ parse_FileTypeArg(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = St
                 end,
                 #file_type_arg{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_Fault(#xmlElement{},#decoder{}) -> #fault{}.
-parse_Fault(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+
+-spec parse_SoapFaultDetail(#xmlElement{},#parser{}) -> #fault{}.
+parse_SoapFaultDetail(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+    case lists:filter(fun tr_soap_lib:xmlElement/1, Content) of
+	[] ->
+	    undefined;
+	[#xmlElement{name=Name} = Elem | _Rest] ->
+	    QName = get_QName('Fault', Nss#rpc_ns.ns_cwmp),
+	    if
+		Name == QName ->
+		    parse_Fault(Elem, State);
+		true ->
+		    parse_error(Elem, State)
+	    end
+
+	end.
+
+-spec parse_SoapFault(#xmlElement{},#parser{}) -> #soap_fault{}.
+parse_SoapFault(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, Fault) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_envelop) of
+                            'faultcode' ->
+                                Fault#soap_fault{faultcode = parse_string(Elem)};
+                            'faultstring' ->
+                                Fault#soap_fault{faultstring = parse_string(Elem)};
+                            'faultactor' ->
+                                Fault#soap_fault{faultactor = parse_anyURI(Elem)};
+                            'detail' ->
+                                Fault#soap_fault{detail = parse_SoapFaultDetail(Elem, State)};
+                            _ ->
+                                parse_error(Elem, State)
+                        end
+                end,
+                #soap_fault{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
+-spec parse_SetParameterValuesFault(#xmlElement{},#parser{}) -> #set_parameter_values_fault{}.
+parse_SetParameterValuesFault(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+    lists:foldl(fun(Elem, Fault) ->
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                            'ParameterName' ->
+                                Fault#set_parameter_values_fault{parameter_name = parse_string(Elem)};
                             'FaultCode' ->
-                                Fault#fault{fault_code = parse_FaultCode(Elem, State)};
-
+                                Fault#set_parameter_values_fault{fault_code = parse_FaultCode(Elem)};
                             'FaultString' ->
-                                Fault#fault{fault_string = parse_FaultString(Elem, State)};
+                                Fault#set_parameter_values_fault{fault_string = parse_FaultString(Elem)};
+                            _ ->
+                                parse_error(Elem, State)
+                        end
+                end,
+                #set_parameter_values_fault{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-                            %% 'SetParameterValuesFault' ->
-                            %%     Fault#fault{set_parameter_values_fault = parse_SetParameterValuesFault(Elem, State)};
 
-                            %% 'ParameterName' ->
-                            %%     Fault#fault{parameter_name = parse_ParameterName(Elem, State)};
 
-                            %% 'FaultCode' ->
-                            %%     Fault#fault{fault_code = parse_FaultCode(Elem, State)};
-
-                            %% 'FaultString' ->
-                            %%     Fault#fault{fault_string = parse_FaultString(Elem, State)};
-
+-spec parse_Fault(#xmlElement{},#parser{}) -> #fault{}.
+parse_Fault(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+    lists:foldl(fun(Elem, Fault) ->
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                            'FaultCode' ->
+                                Fault#fault{fault_code = parse_FaultCode(Elem)};
+			    'FaultString' ->
+                                Fault#fault{fault_string = parse_FaultString(Elem)};
+			    'SetParameterValuesFault' ->
+                                Fault#fault{set_parameter_values_fault = parse_SetParameterValuesFault(Elem, State)};
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #fault{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetRPCMethods(#xmlElement{},#decoder{}) -> #get_rpc_methods{}.
+%% -spec parse_GetRPCMethods(#xmlElement{},#parser{}) -> #get_rpc_methods{}.
 parse_GetRPCMethods(_, _) -> #get_rpc_methods{}.
 
-%% -spec parse_GetRPCMethodsResponse(#xmlElement{},#decoder{}) -> #get_rpc_methods_response{}.
-parse_GetRPCMethodsResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_GetRPCMethodsResponse(#xmlElement{},#parser{}) -> #get_rpc_methods_response{}.
+parse_GetRPCMethodsResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, GetRPCMethodsResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
-
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
                             'MethodList' ->
                                 GetRPCMethodsResponse#get_rpc_methods_response{method_list = parse_MethodList(Elem, State)};
 
@@ -947,13 +951,13 @@ parse_GetRPCMethodsResponse(#xmlElement{content = Content} = _Elems, #decoder{ns
                 end,
                 #get_rpc_methods_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetParameterValues(#xmlElement{},#decoder{}) -> #set_parameter_values{}.
-parse_SetParameterValues(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_SetParameterValues(#xmlElement{},#parser{}) -> #set_parameter_values{}.
+parse_SetParameterValues(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, SetParameterValues) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'ParameterList' ->
-                                SetParameterValues#set_parameter_values{parameter_list = parse_ParameterList(Elem, State)};
+                                SetParameterValues#set_parameter_values{parameter_list = parse_ParameterValueList(Elem, State)};
 
                             'ParameterKey' ->
                                 SetParameterValues#set_parameter_values{parameter_key = parse_ParameterKey(Elem, State)};
@@ -964,10 +968,10 @@ parse_SetParameterValues(#xmlElement{content = Content} = _Elems, #decoder{ns=Ns
                 end,
                 #set_parameter_values{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetParameterValuesResponse(#xmlElement{},#decoder{}) -> #set_parameter_values_response{}.
-parse_SetParameterValuesResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_SetParameterValuesResponse(#xmlElement{},#parser{}) -> #set_parameter_values_response{}.
+parse_SetParameterValuesResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, SetParameterValuesResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'Status' ->
                                 SetParameterValuesResponse#set_parameter_values_response{status = parse_Status(Elem, State)};
@@ -978,10 +982,10 @@ parse_SetParameterValuesResponse(#xmlElement{content = Content} = _Elems, #decod
                 end,
                 #set_parameter_values_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetParameterValues(#xmlElement{},#decoder{}) -> #get_parameter_values{}.
-parse_GetParameterValues(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_GetParameterValues(#xmlElement{},#parser{}) -> #get_parameter_values{}.
+parse_GetParameterValues(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, GetParameterValues) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'ParameterNames' ->
                                 GetParameterValues#get_parameter_values{parameter_names = parse_ParameterNames(Elem, State)};
@@ -992,13 +996,13 @@ parse_GetParameterValues(#xmlElement{content = Content} = _Elems, #decoder{ns=Ns
                 end,
                 #get_parameter_values{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetParameterValuesResponse(#xmlElement{},#decoder{}) -> #get_parameter_values_response{}.
-parse_GetParameterValuesResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_GetParameterValuesResponse(#xmlElement{},#parser{}) -> #get_parameter_values_response{}.
+parse_GetParameterValuesResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, GetParameterValuesResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'ParameterList' ->
-                                GetParameterValuesResponse#get_parameter_values_response{parameter_list = parse_ParameterList(Elem, State)};
+                                GetParameterValuesResponse#get_parameter_values_response{parameter_list = parse_ParameterValueList(Elem, State)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1006,10 +1010,10 @@ parse_GetParameterValuesResponse(#xmlElement{content = Content} = _Elems, #decod
                 end,
                 #get_parameter_values_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetParameterNames(#xmlElement{},#decoder{}) -> #get_parameter_names{}.
-parse_GetParameterNames(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_GetParameterNames(#xmlElement{},#parser{}) -> #get_parameter_names{}.
+parse_GetParameterNames(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, GetParameterNames) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'ParameterPath' ->
                                 GetParameterNames#get_parameter_names{parameter_path = parse_ParameterPath(Elem, State)};
@@ -1023,24 +1027,22 @@ parse_GetParameterNames(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss
                 end,
                 #get_parameter_names{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetParameterNamesResponse(#xmlElement{},#decoder{}) -> #get_parameter_names_response{}.
-parse_GetParameterNamesResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_GetParameterNamesResponse(#xmlElement{},#parser{}) -> #get_parameter_names_response{}.
+parse_GetParameterNamesResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, GetParameterNamesResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
-
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
                             'ParameterList' ->
-                                GetParameterNamesResponse#get_parameter_names_response{parameter_list = parse_ParameterList(Elem, State)};
-
+                                GetParameterNamesResponse#get_parameter_names_response{parameter_list = parse_ParameterInfoList(Elem, State)};
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #get_parameter_names_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetParameterAttributes(#xmlElement{},#decoder{}) -> #set_parameter_attributes{}.
-parse_SetParameterAttributes(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_SetParameterAttributes(#xmlElement{},#parser{}) -> #set_parameter_attributes{}.
+parse_SetParameterAttributes(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, SetParameterAttributes) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'ParameterList' ->
                                 SetParameterAttributes#set_parameter_attributes{parameter_list = parse_ParameterList(Elem, State)};
@@ -1051,13 +1053,13 @@ parse_SetParameterAttributes(#xmlElement{content = Content} = _Elems, #decoder{n
                 end,
                 #set_parameter_attributes{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetParameterAttributesResponse(#xmlElement{},#decoder{}) -> #set_parameter_attributes_response{}.
+%% -spec parse_SetParameterAttributesResponse(#xmlElement{},#parser{}) -> #set_parameter_attributes_response{}.
 parse_SetParameterAttributesResponse(_, _) -> #set_parameter_attributes_response{}.
 
-%% -spec parse_GetParameterAttributes(#xmlElement{},#decoder{}) -> #get_parameter_attributes{}.
-parse_GetParameterAttributes(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_GetParameterAttributes(#xmlElement{},#parser{}) -> #get_parameter_attributes{}.
+parse_GetParameterAttributes(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, GetParameterAttributes) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'ParameterNames' ->
                                 GetParameterAttributes#get_parameter_attributes{parameter_names = parse_ParameterNames(Elem, State)};
@@ -1068,10 +1070,10 @@ parse_GetParameterAttributes(#xmlElement{content = Content} = _Elems, #decoder{n
                 end,
                 #get_parameter_attributes{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetParameterAttributesResponse(#xmlElement{},#decoder{}) -> #get_parameter_attributes_response{}.
-parse_GetParameterAttributesResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_GetParameterAttributesResponse(#xmlElement{},#parser{}) -> #get_parameter_attributes_response{}.
+parse_GetParameterAttributesResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, GetParameterAttributesResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'ParameterList' ->
                                 GetParameterAttributesResponse#get_parameter_attributes_response{parameter_list = parse_ParameterList(Elem, State)};
@@ -1082,10 +1084,10 @@ parse_GetParameterAttributesResponse(#xmlElement{content = Content} = _Elems, #d
                 end,
                 #get_parameter_attributes_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AddObject(#xmlElement{},#decoder{}) -> #add_object{}.
-parse_AddObject(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_AddObject(#xmlElement{},#parser{}) -> #add_object{}.
+parse_AddObject(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, AddObject) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'ObjectName' ->
                                 AddObject#add_object{object_name = parse_ObjectName(Elem, State)};
@@ -1099,10 +1101,10 @@ parse_AddObject(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = Stat
                 end,
                 #add_object{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AddObjectResponse(#xmlElement{},#decoder{}) -> #add_object_response{}.
-parse_AddObjectResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_AddObjectResponse(#xmlElement{},#parser{}) -> #add_object_response{}.
+parse_AddObjectResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, AddObjectResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'InstanceNumber' ->
                                 AddObjectResponse#add_object_response{instance_number = parse_InstanceNumber(Elem, State)};
@@ -1116,10 +1118,10 @@ parse_AddObjectResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss
                 end,
                 #add_object_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_DeleteObject(#xmlElement{},#decoder{}) -> #delete_object{}.
-parse_DeleteObject(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_DeleteObject(#xmlElement{},#parser{}) -> #delete_object{}.
+parse_DeleteObject(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, DeleteObject) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'ObjectName' ->
                                 DeleteObject#delete_object{object_name = parse_ObjectName(Elem, State)};
@@ -1133,10 +1135,10 @@ parse_DeleteObject(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = S
                 end,
                 #delete_object{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_DeleteObjectResponse(#xmlElement{},#decoder{}) -> #delete_object_response{}.
-parse_DeleteObjectResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_DeleteObjectResponse(#xmlElement{},#parser{}) -> #delete_object_response{}.
+parse_DeleteObjectResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, DeleteObjectResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'Status' ->
                                 DeleteObjectResponse#delete_object_response{status = parse_Status(Elem, State)};
@@ -1147,10 +1149,10 @@ parse_DeleteObjectResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=
                 end,
                 #delete_object_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_Download(#xmlElement{},#decoder{}) -> #download{}.
-parse_Download(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_Download(#xmlElement{},#parser{}) -> #download{}.
+parse_Download(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, Download) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'CommandKey' ->
                                 Download#download{command_key = parse_CommandKey(Elem, State)};
@@ -1188,10 +1190,10 @@ parse_Download(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State
                 end,
                 #download{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_DownloadResponse(#xmlElement{},#decoder{}) -> #download_response{}.
-parse_DownloadResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_DownloadResponse(#xmlElement{},#parser{}) -> #download_response{}.
+parse_DownloadResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, DownloadResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'Status' ->
                                 DownloadResponse#download_response{status = parse_Status(Elem, State)};
@@ -1208,10 +1210,10 @@ parse_DownloadResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss}
                 end,
                 #download_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_Reboot(#xmlElement{},#decoder{}) -> #reboot{}.
-parse_Reboot(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_Reboot(#xmlElement{},#parser{}) -> #reboot{}.
+parse_Reboot(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, Reboot) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'CommandKey' ->
                                 Reboot#reboot{command_key = parse_CommandKey(Elem, State)};
@@ -1222,16 +1224,16 @@ parse_Reboot(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) 
                 end,
                 #reboot{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_RebootResponse(#xmlElement{},#decoder{}) -> #reboot_response{}.
+%% -spec parse_RebootResponse(#xmlElement{},#parser{}) -> #reboot_response{}.
 parse_RebootResponse(_, _) -> #reboot_response{}.
 
-%% -spec parse_GetQueuedTransfers(#xmlElement{},#decoder{}) -> #get_queued_transfers{}.
+%% -spec parse_GetQueuedTransfers(#xmlElement{},#parser{}) -> #get_queued_transfers{}.
 parse_GetQueuedTransfers(_, _) -> #get_queued_transfers{}.
 
-%% -spec parse_GetQueuedTransfersResponse(#xmlElement{},#decoder{}) -> #get_queued_transfers_response{}.
-parse_GetQueuedTransfersResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_GetQueuedTransfersResponse(#xmlElement{},#parser{}) -> #get_queued_transfers_response{}.
+parse_GetQueuedTransfersResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, GetQueuedTransfersResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'TransferList' ->
                                 GetQueuedTransfersResponse#get_queued_transfers_response{transfer_list = parse_TransferList(Elem, State)};
@@ -1242,10 +1244,10 @@ parse_GetQueuedTransfersResponse(#xmlElement{content = Content} = _Elems, #decod
                 end,
                 #get_queued_transfers_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ScheduleInform(#xmlElement{},#decoder{}) -> #schedule_inform{}.
-parse_ScheduleInform(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_ScheduleInform(#xmlElement{},#parser{}) -> #schedule_inform{}.
+parse_ScheduleInform(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ScheduleInform) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'DelaySeconds' ->
                                 ScheduleInform#schedule_inform{delay_seconds = parse_DelaySeconds(Elem, State)};
@@ -1259,13 +1261,13 @@ parse_ScheduleInform(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} =
                 end,
                 #schedule_inform{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ScheduleInformResponse(#xmlElement{},#decoder{}) -> #schedule_inform_response{}.
+%% -spec parse_ScheduleInformResponse(#xmlElement{},#parser{}) -> #schedule_inform_response{}.
 parse_ScheduleInformResponse(_, _) -> #schedule_inform_response{}.
 
-%% -spec parse_SetVouchers(#xmlElement{},#decoder{}) -> #set_vouchers{}.
-parse_SetVouchers(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_SetVouchers(#xmlElement{},#parser{}) -> #set_vouchers{}.
+parse_SetVouchers(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, SetVouchers) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'VoucherList' ->
                                 SetVouchers#set_vouchers{voucher_list = parse_VoucherList(Elem, State)};
@@ -1276,13 +1278,13 @@ parse_SetVouchers(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = St
                 end,
                 #set_vouchers{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetVouchersResponse(#xmlElement{},#decoder{}) -> #set_vouchers_response{}.
+%% -spec parse_SetVouchersResponse(#xmlElement{},#parser{}) -> #set_vouchers_response{}.
 parse_SetVouchersResponse(_, _) -> #set_vouchers_response{}.
 
-%% -spec parse_GetOptions(#xmlElement{},#decoder{}) -> #get_options{}.
-parse_GetOptions(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_GetOptions(#xmlElement{},#parser{}) -> #get_options{}.
+parse_GetOptions(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, GetOptions) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'OptionName' ->
                                 GetOptions#get_options{option_name = parse_OptionName(Elem, State)};
@@ -1293,10 +1295,10 @@ parse_GetOptions(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = Sta
                 end,
                 #get_options{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetOptionsResponse(#xmlElement{},#decoder{}) -> #get_options_response{}.
-parse_GetOptionsResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_GetOptionsResponse(#xmlElement{},#parser{}) -> #get_options_response{}.
+parse_GetOptionsResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, GetOptionsResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'OptionList' ->
                                 GetOptionsResponse#get_options_response{option_list = parse_OptionList(Elem, State)};
@@ -1307,10 +1309,10 @@ parse_GetOptionsResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Ns
                 end,
                 #get_options_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_Upload(#xmlElement{},#decoder{}) -> #upload{}.
-parse_Upload(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_Upload(#xmlElement{},#parser{}) -> #upload{}.
+parse_Upload(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, Upload) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'CommandKey' ->
                                 Upload#upload{command_key = parse_CommandKey(Elem, State)};
@@ -1336,10 +1338,10 @@ parse_Upload(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) 
                 end,
                 #upload{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_UploadResponse(#xmlElement{},#decoder{}) -> #upload_response{}.
-parse_UploadResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_UploadResponse(#xmlElement{},#parser{}) -> #upload_response{}.
+parse_UploadResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, UploadResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'Status' ->
                                 UploadResponse#upload_response{status = parse_Status(Elem, State)};
@@ -1356,19 +1358,19 @@ parse_UploadResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} =
                 end,
                 #upload_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_FactoryReset(#xmlElement{},#decoder{}) -> #factory_reset{}.
+%% -spec parse_FactoryReset(#xmlElement{},#parser{}) -> #factory_reset{}.
 parse_FactoryReset(_, _) -> #factory_reset{}.
 
-%% -spec parse_FactoryResetResponse(#xmlElement{},#decoder{}) -> #factory_reset_response{}.
+%% -spec parse_FactoryResetResponse(#xmlElement{},#parser{}) -> #factory_reset_response{}.
 parse_FactoryResetResponse(_, _) -> #factory_reset_response{}.
 
-%% -spec parse_GetAllQueuedTransfers(#xmlElement{},#decoder{}) -> #get_all_queued_transfers{}.
+%% -spec parse_GetAllQueuedTransfers(#xmlElement{},#parser{}) -> #get_all_queued_transfers{}.
 parse_GetAllQueuedTransfers(_, _) -> #get_all_queued_transfers{}.
 
-%% -spec parse_GetAllQueuedTransfersResponse(#xmlElement{},#decoder{}) -> #get_all_queued_transfers_response{}.
-parse_GetAllQueuedTransfersResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_GetAllQueuedTransfersResponse(#xmlElement{},#parser{}) -> #get_all_queued_transfers_response{}.
+parse_GetAllQueuedTransfersResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, GetAllQueuedTransfersResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'TransferList' ->
                                 GetAllQueuedTransfersResponse#get_all_queued_transfers_response{transfer_list = parse_TransferList(Elem, State)};
@@ -1379,10 +1381,10 @@ parse_GetAllQueuedTransfersResponse(#xmlElement{content = Content} = _Elems, #de
                 end,
                 #get_all_queued_transfers_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ScheduleDownload(#xmlElement{},#decoder{}) -> #schedule_download{}.
-parse_ScheduleDownload(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_ScheduleDownload(#xmlElement{},#parser{}) -> #schedule_download{}.
+parse_ScheduleDownload(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ScheduleDownload) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'CommandKey' ->
                                 ScheduleDownload#schedule_download{command_key = parse_CommandKey(Elem, State)};
@@ -1414,13 +1416,13 @@ parse_ScheduleDownload(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss}
                 end,
                 #schedule_download{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ScheduleDownloadResponse(#xmlElement{},#decoder{}) -> #schedule_download_response{}.
+%% -spec parse_ScheduleDownloadResponse(#xmlElement{},#parser{}) -> #schedule_download_response{}.
 parse_ScheduleDownloadResponse(_, _) -> #schedule_download_response{}.
 
-%% -spec parse_CancelTransfer(#xmlElement{},#decoder{}) -> #cancel_transfer{}.
-parse_CancelTransfer(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_CancelTransfer(#xmlElement{},#parser{}) -> #cancel_transfer{}.
+parse_CancelTransfer(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, CancelTransfer) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'CommandKey' ->
                                 CancelTransfer#cancel_transfer{command_key = parse_CommandKey(Elem, State)};
@@ -1431,13 +1433,13 @@ parse_CancelTransfer(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} =
                 end,
                 #cancel_transfer{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_CancelTransferResponse(#xmlElement{},#decoder{}) -> #cancel_transfer_response{}.
+%% -spec parse_CancelTransferResponse(#xmlElement{},#parser{}) -> #cancel_transfer_response{}.
 parse_CancelTransferResponse(_, _) -> #cancel_transfer_response{}.
 
-%% -spec parse_ChangeDUState(#xmlElement{},#decoder{}) -> #change_d_u_state{}.
-parse_ChangeDUState(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_ChangeDUState(#xmlElement{},#parser{}) -> #change_d_u_state{}.
+parse_ChangeDUState(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, ChangeDUState) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'Operations' ->
                                 ChangeDUState#change_du_state{operations = parse_Operations(Elem, State)};
@@ -1451,56 +1453,47 @@ parse_ChangeDUState(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = 
                 end,
                 #change_du_state{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ChangeDUStateResponse(#xmlElement{},#decoder{}) -> #change_du_state_response{}.
+%% -spec parse_ChangeDUStateResponse(#xmlElement{},#parser{}) -> #change_du_state_response{}.
 parse_ChangeDUStateResponse(_, _) -> #change_du_state_response{}.
 
-%% -spec parse_Inform(#xmlElement{},#decoder{}) -> #inform{}.
-parse_Inform(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_Inform(#xmlElement{},#parser{}) -> #inform{}.
+parse_Inform(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, Inform) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
-
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
                             'DeviceId' ->
                                 Inform#inform{device_id = parse_DeviceId(Elem, State)};
-
                             'Event' ->
                                 Inform#inform{event = parse_Event(Elem, State)};
-
                             'MaxEnvelopes' ->
                                 Inform#inform{max_envelopes = parse_MaxEnvelopes(Elem, State)};
-
                             'CurrentTime' ->
                                 Inform#inform{current_time = parse_CurrentTime(Elem, State)};
-
                             'RetryCount' ->
                                 Inform#inform{retry_count = parse_RetryCount(Elem, State)};
-
                             'ParameterList' ->
-                                Inform#inform{parameter_list = parse_ParameterList(Elem, State)};
-
+                                Inform#inform{parameter_list = parse_ParameterValueList(Elem, State)};
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #inform{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_InformResponse(#xmlElement{},#decoder{}) -> #inform_response{}.
-parse_InformResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+-spec parse_InformResponse(#xmlElement{},#parser{}) -> #inform_response{}.
+parse_InformResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, InformResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
-
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
                             'MaxEnvelopes' ->
                                 InformResponse#inform_response{max_envelopes = parse_MaxEnvelopes(Elem, State)};
-
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #inform_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_TransferComplete(#xmlElement{},#decoder{}) -> #transfer_complete{}.
-parse_TransferComplete(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_TransferComplete(#xmlElement{},#parser{}) -> #transfer_complete{}.
+parse_TransferComplete(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, TransferComplete) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'CommandKey' ->
                                 TransferComplete#transfer_complete{command_key = parse_CommandKey(Elem, State)};
@@ -1520,13 +1513,13 @@ parse_TransferComplete(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss}
                 end,
                 #transfer_complete{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_TransferCompleteResponse(#xmlElement{},#decoder{}) -> #transfer_complete_response{}.
+%% -spec parse_TransferCompleteResponse(#xmlElement{},#parser{}) -> #transfer_complete_response{}.
 parse_TransferCompleteResponse(_, _) -> #transfer_complete_response{}.
 
-%% -spec parse_AutonomousTransferComplete(#xmlElement{},#decoder{}) -> #autonomous_transfer_complete{}.
-parse_AutonomousTransferComplete(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_AutonomousTransferComplete(#xmlElement{},#parser{}) -> #autonomous_transfer_complete{}.
+parse_AutonomousTransferComplete(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, AutonomousTransferComplete) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'AnnounceURL' ->
                                 AutonomousTransferComplete#autonomous_transfer_complete{announce_url = parse_AnnounceURL(Elem, State)};
@@ -1561,13 +1554,13 @@ parse_AutonomousTransferComplete(#xmlElement{content = Content} = _Elems, #decod
                 end,
                 #autonomous_transfer_complete{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AutonomousTransferCompleteResponse(#xmlElement{},#decoder{}) -> #autonomous_transfer_complete_response{}.
+%% -spec parse_AutonomousTransferCompleteResponse(#xmlElement{},#parser{}) -> #autonomous_transfer_complete_response{}.
 parse_AutonomousTransferCompleteResponse(_, _) -> #autonomous_transfer_complete_response{}.
 
-%% -spec parse_Kicked(#xmlElement{},#decoder{}) -> #kicked{}.
-parse_Kicked(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_Kicked(#xmlElement{},#parser{}) -> #kicked{}.
+parse_Kicked(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, Kicked) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'Command' ->
                                 Kicked#kicked{command = parse_Command(Elem, State)};
@@ -1587,10 +1580,10 @@ parse_Kicked(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) 
                 end,
                 #kicked{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_KickedResponse(#xmlElement{},#decoder{}) -> #kicked_response{}.
-parse_KickedResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_KickedResponse(#xmlElement{},#parser{}) -> #kicked_response{}.
+parse_KickedResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, KickedResponse) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'NextURL' ->
                                 KickedResponse#kicked_response{next_url = parse_NextURL(Elem, State)};
@@ -1601,10 +1594,10 @@ parse_KickedResponse(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} =
                 end,
                 #kicked_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_RequestDownload(#xmlElement{},#decoder{}) -> #request_download{}.
-parse_RequestDownload(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_RequestDownload(#xmlElement{},#parser{}) -> #request_download{}.
+parse_RequestDownload(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, RequestDownload) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'FileType' ->
                                 RequestDownload#request_download{file_type = parse_FileType(Elem, State)};
@@ -1618,14 +1611,13 @@ parse_RequestDownload(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} 
                 end,
                 #request_download{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_RequestDownloadResponse(#xmlElement{},#decoder{}) -> #request_download_response{}.
+%% -spec parse_RequestDownloadResponse(#xmlElement{},#parser{}) -> #request_download_response{}.
 parse_RequestDownloadResponse(_, _) -> #request_download_response{}.
 
-%% -spec parse_DUStateChangeComplete(#xmlElement{},#decoder{}) -> #du_state_change_complete{}.
-parse_DUStateChangeComplete(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_DUStateChangeComplete(#xmlElement{},#parser{}) -> #du_state_change_complete{}.
+parse_DUStateChangeComplete(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, DUStateChangeComplete) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
-
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of			    
                             'Results' ->
                                 DUStateChangeComplete#du_state_change_complete{results = parse_Results(Elem, State)};
 
@@ -1638,13 +1630,13 @@ parse_DUStateChangeComplete(#xmlElement{content = Content} = _Elems, #decoder{ns
                 end,
                 #du_state_change_complete{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_DUStateChangeCompleteResponse(#xmlElement{},#decoder{}) -> #du_state_change_complete_response{}.
+%% -spec parse_DUStateChangeCompleteResponse(#xmlElement{},#parser{}) -> #du_state_change_complete_response{}.
 parse_DUStateChangeCompleteResponse(_, _) -> #du_state_change_complete_response{}.
 
-%% -spec parse_AutonomousDUStateChangeComplete(#xmlElement{},#decoder{}) -> #autonomous_du_state_change_complete{}.
-parse_AutonomousDUStateChangeComplete(#xmlElement{content = Content} = _Elems, #decoder{ns=Nss} = State) ->
+%% -spec parse_AutonomousDUStateChangeComplete(#xmlElement{},#parser{}) -> #autonomous_du_state_change_complete{}.
+parse_AutonomousDUStateChangeComplete(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
     lists:foldl(fun(Elem, AutonomousDUStateChangeComplete) ->
-                        case get_local_name(Elem#xmlElement.name, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
 
                             'Results' ->
                                 AutonomousDUStateChangeComplete#autonomous_du_state_change_complete{results = parse_Results(Elem, State)};
@@ -1655,7 +1647,7 @@ parse_AutonomousDUStateChangeComplete(#xmlElement{content = Content} = _Elems, #
                 end,
                 #autonomous_du_state_change_complete{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AutonomousDUStateChangeCompleteResponse(#xmlElement{},#decoder{}) -> #autonomous_du_state_change_complete_response{}.
+%% -spec parse_AutonomousDUStateChangeCompleteResponse(#xmlElement{},#parser{}) -> #autonomous_du_state_change_complete_response{}.
 parse_AutonomousDUStateChangeCompleteResponse(_, _) -> #autonomous_du_state_change_complete_response{}.
 
 %% end
@@ -1674,12 +1666,36 @@ get_ns_orts_test() ->
     ?assertEqual("", Nss#rpc_ns.ns_xsd),
     ?assertEqual("soap-env", Nss#rpc_ns.ns_envelop),
     ?assertEqual("cwmp", Nss#rpc_ns.ns_cwmp),
+    ?assertEqual(CwmpVersion, 1),
     ok.
 
-decode_root_test() ->
-    {Doc, _Rest} = xmerl_scan:file("../test/data/Fault.xml"),
-    Rpc = soap_decode(Doc, #decoder{}),
+parse_root_test() ->
+    {Doc, _Rest} = xmerl_scan:file(
+		     %"../test/data/GetParameterValues.xml"
+		     %"../test/data/FaultResponse.xml"
+		     % "../test/data/Fault.xml"
+		     %"../test/data/GetParameterAttributes.xml"
+		     % "../test/data/GetParameterNamesResponse.xml"
+		     % "../test/data/GetParameterNames.xml"
+		     % "../test/data/GetParameterValues.xml"
+		     %"../test/data/GetRPCMethodsResponse.xml"
+		     %"../test/data/GetRPCMethods.xml"
+		     %"../test/data/InformResponse.xml"
+		      "../test/data/Inform.xml"
+		     %% "../test/data/Reboot.xml"
+		     %% "../test/data/SetParameterValues.xml"
+		     %% "../test/data/Simple.xml"
+		    ),
+						%    ?DBG(Doc),
+    ?DBG(Doc),
+    Rpc = parse(Doc, #parser{}),
     ?DBG(Rpc),
     ok.
 
 -endif.
+
+parse_root_test(File) ->
+    {Doc, _Rest} = xmerl_scan:file(File),
+    Rpc = parse(Doc, #parser{}),
+    io:format(">> ~p~n", [Rpc]),
+    ok.

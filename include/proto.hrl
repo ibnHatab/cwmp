@@ -5,13 +5,15 @@
 -define(CWMP_VERSION_1_URL,'urn:dslforum-org:cwmp-1-0').
 -define(CWMP_VERSION_2_URL,'urn:dslforum-org:cwmp-1-2').
 -define(SOAPENV_URL,'http://schemas.xmlsoap.org/soap/envelope/').
--define(XSD_URL,"http://www.w3.org/2001/XMLSchema-instance").
+-define(XSD_URL,'http://www.w3.org/2001/XMLSchema-instance').
 
 -type cwmp_version() :: 1 | 2.
 
 -type rpc_data_type() :: string | int | unsignedInt | boolean | dateTime | base64 | anySimpleType.
 
--type url() :: string().
+-type qName()     :: string().
+-type url()       :: string().
+-type anyURI()    :: string().
 -type date_time() :: string().
 
 -type cwmp_method() ::
@@ -204,12 +206,12 @@
 	  , {10, "AUTONOMOUS TRANSFER, COMPLETE"}
 	  , {11, "DU STATE CHANGE, COMPLETE"}
 	  , {12, "AUTONOMOUS DU STATE CHANGE, COMPLETE"}
-	  , {Reboot,		"M Reboot"}
-	  , {ScheduleInform,	"M ScheduleInform"}
-	  , {Download,		"M Download"}
-	  , {ScheduleDownload,	"M ScheduleDownload"}
-	  , {Upload,		"M Upload"}
-	  , {ChangeDUState,	"M ChangeDUState"}
+	  , {'Reboot',		 "M Reboot"}
+	  , {'ScheduleInform',	 "M ScheduleInform"}
+	  , {'Download',	 "M Download"}
+	  , {'ScheduleDownload', "M ScheduleDownload"}
+	  , {'Upload',		 "M Upload"}
+	  , {'ChangeDUState',	 "M ChangeDUState"}
 	]).
 -type event_code_type() :: 1-12 | atom().
 
@@ -256,24 +258,20 @@
 -type object_name_type() :: string().
 -type parameter_key_type() :: string().
 
--record(parameter_names, {
-	  string :: [string()]
-	 }).
-
 -record(parameter_value_struct,	{
 	  name  :: string(),
 	  value :: any()
 	 }).
 
--record(parameter_value_list,{
-	  parameter_value_struct :: [#parameter_value_struct{}]
-	 }).
+%% -record(parameter_value_list,{
+%% 	  parameter_value_struct :: [#parameter_value_struct{}]
+%% 	 }).
 
 %%    GetRPCMethods Type Definition
 
--record(method_list,{
-	 string :: [string()]
-	 }).
+%% -record(method_list,{
+%% 	 string :: [string()]
+%% 	 }).
 
 -record(device_id_struct,{
 	  manufacturer :: string(),
@@ -288,9 +286,9 @@
 	  command_key :: command_key_type()
 	 }).
 
--record(event_list,{
-	  event_struct :: [#event_struct{}]
-	 }).
+%% -record(event_list,{
+%% 	  event_struct :: [#event_struct{}]
+%% 	 }).
 
 %%    Get Parameter Names Type Definitions
 -record(parameter_info_struct, {
@@ -298,9 +296,9 @@
 	  writable :: boolean()
 	 }).
 
--record(parameter_info_list, {
-	 parameter_info_struct :: [#parameter_info_struct{}]
-	 }).
+%% -record(parameter_info_list, {
+%% 	 parameter_info_struct :: [#parameter_info_struct{}]
+%% 	 }).
 
 %%    Get/Set Parameter Attributes Type Definitions
 
@@ -404,7 +402,7 @@
 %%        An operation indicating a Deployment Unit should be installed
 %%
 -record(install_op_struct, {
-	  url :: string(),
+	  url :: anyURI(),
 	  uuid :: deployment_unit_uuid(),
 	  username :: string(),
 	  password :: string(),
@@ -417,7 +415,7 @@
 -record(update_op_struct, {
 	  uuid :: deployment_unit_uuid(),
 	  version :: string(),
-	  url :: string(),
+	  url :: anyURI(),
 	  username :: string(),
 	  password :: string()
 	 }).
@@ -500,14 +498,14 @@
 %%%-----------------------------------------------------------------------------
 
 %% @doc
--record (set_parameter_values_fault, {
+-record(set_parameter_values_fault, {
 	   parameter_name :: string(),
 	   fault_code :: cpe_fault_code_type()
 		       | cpe_vendor_fault_code_type (),
 	   fault_string :: string()
 	  }).
 
--record (fault, {
+-record(fault, {
 	   fault_code :: cpe_fault_code_type()
 		       | cpe_vendor_fault_code_type ()
 		       | acs_fault_code_type()
@@ -522,13 +520,13 @@
 %%%-----------------------------------------------------------------------------
 
 %% @doc GeRPCMethods message - Annex A.3.1.1
--record (get_rpc_methods, {
+-record(get_rpc_methods, {
 	   %% TODO: add ref
 	  }).
 
 %% @doc GeRPCMethodsResponse message - Annex A.3.1.1
--record (get_rpc_methods_response, {
-	   method_list :: #method_list{}
+-record(get_rpc_methods_response, {
+	   method_list :: [string()]
 	  }).
 
 
@@ -537,13 +535,13 @@
 %%%-----------------------------------------------------------------------------
 
 %% @doc SetParameterValues message - Annex A.3.2.1
--record (set_parameter_values, {
-	   parameter_list :: #parameter_value_list{},
+-record(set_parameter_values, {
+	   parameter_list :: [#parameter_value_struct{}], %#parameter_value_list{},
 	   parameter_key :: parameter_key_type()
 	  }).
 
 %% @doc SetParameterValuesResponse message - Annex A.3.2.1 
--record (set_parameter_values_response, {
+-record(set_parameter_values_response, {
 	   status :: 0 %% All Parameter changes have been validated and applied
 		   | 1
 		     %% All Parameter changes have been validated and committed,
@@ -552,54 +550,54 @@
 	  }).
 
 %% @doc GetParameterValues message - Annex A.3.2.2 
--record (get_parameter_values, {
-	   parameter_names :: #parameter_names{}
+-record(get_parameter_values, {
+	   parameter_names :: [string()]
 	  }).
 
 %% @doc GetParameterValuesResponse message - Annex A.3.2.2 
--record (get_parameter_values_response, {
-	   parameter_list :: #parameter_value_list{}
+-record(get_parameter_values_response, {
+	   parameter_list :: [#parameter_value_struct{}] %#parameter_value_list{}
 	  }).
 
 %% @doc GetParameterNames message - Annex A.3.2.3 
--record (get_parameter_names, {
+-record(get_parameter_names, {
 	   parameter_path :: string(),
 	   next_level :: boolean()
 	  }).
 
 %% @doc GetParameterNamesResponse message - Annex A.3.2.3 
--record (get_parameter_names_response, {
-	   parameter_list :: #parameter_info_list{}
+-record(get_parameter_names_response, {
+	   parameter_list :: [#parameter_info_struct{}]
 	  }).
 
 %% @doc SetParameterAttributes message - Annex A.3.2.4 
--record (set_parameter_attributes, {
+-record(set_parameter_attributes, {
 	   parameter_list :: #set_parameter_attributes_list{}
 	  }).
 
 %% @doc SetParameterAttributesResponse message - Annex A.3.2.4 
--record (set_parameter_attributes_response, {
+-record(set_parameter_attributes_response, {
 	   %% TODO: ref
 	  }).
 
 %% @doc GetParameterAttributes message - Annex A.3.2.5 
--record (get_parameter_attributes, {
-	   parameter_names :: #parameter_names{}
+-record(get_parameter_attributes, {
+	   parameter_names :: [string()]
 	  }).
 
 %% @doc GetParameterAttributesResponse message - Annex A.3.2.5 
--record (get_parameter_attributes_response, {
+-record(get_parameter_attributes_response, {
 	   parameter_list :: #parameter_attribute_list{}
 	  }).
 
 %% @doc AddObject message - Annex A.3.2.6 xmlText
--record (add_object, {
+-record(add_object, {
 	   object_name :: object_name_type(),
 	   parameter_key :: parameter_key_type()
 	  }).
 
 %% @doc AddObjectResponse message - Annex A.3.2.6 
--record (add_object_response, {
+-record(add_object_response, {
 	   instance_number :: non_neg_integer(),
 	   status :: 0 | 1
 		     %% 0 - The object has been created
@@ -607,20 +605,20 @@
 	  }).
 
 %% @doc DeleteObject message - Annex A.3.2.7 
--record (delete_object, {
+-record(delete_object, {
 	   object_name :: object_name_type(),
 	   parameter_key :: parameter_key_type()
 	  }).
 
 %% @doc DeleteObjectResponse message - Annex A.3.2.7 
--record (delete_object_response, {
+-record(delete_object_response, {
 	   status :: 0 | 1
 		     %% The object has been deleted
 		     %% The object deletion has been validated and committed, but not yet applied
 	  }).
 
 %% @doc Download message - Annex A.3.2.8 
--record (download, {
+-record(download, {
 	   command_key :: command_key_type(),
 	   file_type :: download_file_type(),
 	   url :: url(),
@@ -634,7 +632,7 @@
 	  }).
 
 %% @doc DownloadResponse message - Annex A.3.2.8 
--record (download_response, {
+-record(download_response, {
 	   status :: 0 | 1,
 	   %% 0 - Download has completed and been applied
 	   %% 1 - Download has not yet been completed and applied
@@ -643,12 +641,12 @@
 	  }).
 
 %% @doc Reboot message - Annex A.3.2.9 
--record (reboot, {
+-record(reboot, {
 	   command_key :: command_key_type()
 	  }).
 
 %% @doc RebootResponse message - Annex A.3.2.9 
--record (reboot_response, {
+-record(reboot_response, {
 	  }).
 
 %%%-----------------------------------------------------------------------------
@@ -656,45 +654,45 @@
 %%%-----------------------------------------------------------------------------
 
 %% @doc GetQueuedTransfers message - Annex A.4.1.1 
--record (get_queued_transfers, {
+-record(get_queued_transfers, {
 	  }).
 
 %% @doc GetQueuedTransfersResponse message - Annex A.4.1.1 
--record (get_queued_transfers_response, {
+-record(get_queued_transfers_response, {
 	   transfer_list :: #transfer_list{}
 	  }).
 
 %% @doc ScheduleInform message - Annex A.4.1.2 
--record (schedule_inform, {
+-record(schedule_inform, {
 	   delay_seconds :: non_neg_integer(),
 	   command_key :: command_key_type()
 	  }).
 
 %% @doc ScheduleInformResponse message - Annex A.4.1.2 
--record (schedule_inform_response, {
+-record(schedule_inform_response, {
 	  }).
 
 %% @doc SetVouchers message - Annex A.4.1.3 
--record (set_vouchers, {
+-record(set_vouchers, {
 	   voucher_list :: #voucher_list{}
 	  }).
 
 %% @doc SetVouchersResponse message - Annex A.4.1.3 
--record (set_vouchers_response, {
+-record(set_vouchers_response, {
 	  }).
 
 %% @doc GetOptions message - Annex A.4.1.4 
--record (get_options, {
+-record(get_options, {
 	   option_name :: string()
 	  }).
 
 %% @doc GetOptionsResponse message - Annex A.4.1.4 
--record (get_options_response, {
+-record(get_options_response, {
 	   option_list :: #option_list{}
 	  }).
 
 %% @doc Upload message - Annex A.4.1.5 
--record (upload, {
+-record(upload, {
 	   command_key :: command_key_type(),
 	   file_type :: upload_file_type(),
 	   url :: url(),
@@ -704,7 +702,7 @@
 	  }).
 
 %% @doc UploadResponse message - Annex A.4.1.5 
--record (upload_response, {
+-record(upload_response, {
 	   status :: 0 | 1,
 	   %% 0 - Upload has been completed
 	   %% 1 - Upload has not yet completed
@@ -713,24 +711,24 @@
 	  }).
 
 %% @doc FactoryReset message - Annex A.4.1.6 
--record (factory_reset, {
+-record(factory_reset, {
 	  }).
 
 %% @doc FactoryResetResponse message - Annex A.4.1.6 
--record (factory_reset_response, {	   
+-record(factory_reset_response, {	   
 	  }).
 
 %% @doc GetAllQueuedTransfers message - Annex A.4.1.7 
--record (get_all_queued_transfers, {
+-record(get_all_queued_transfers, {
 	  }).
 
 %% @doc GetAllQueuedTransfersResponse message - Annex A.4.1.7 
--record (get_all_queued_transfers_response, {
+-record(get_all_queued_transfers_response, {
 	   transfer_list :: #all_transfer_list{}
 	  }).
 
 %% @doc ScheduleDownload message - Annex A.4.1.8 
--record (schedule_download, {
+-record(schedule_download, {
 	   command_key :: command_key_type(),
 	   file_type :: download_file_type(),
 	   url :: url(),
@@ -742,50 +740,50 @@
 	  }).
 
 %% @doc ScheduleDownloadResponse message - Annex A.4.1.8 
--record (schedule_download_response, {
+-record(schedule_download_response, {
 
 	  }).
 
 %% @doc CancelTransfer message - Annex A.4.1.9 
--record (cancel_transfer, {
+-record(cancel_transfer, {
 	   command_key :: command_key_type()
 	  }).
 
 %% @doc CancelTransferResponse message - Annex A.4.1.9 
--record (cancel_transfer_response, {
+-record(cancel_transfer_response, {
 
 	  }).
 
 %% @doc
 %% A request to perform an action on a Deployment Unit on the device
--record (change_du_state, {
+-record(change_du_state, {
 	   operations :: #operation_struct{},
 	   command_key :: command_key_type()
 	  }).
 
 %% @doc
 %%        Response to a ChangeDUState message
--record (change_du_state_response, {
+-record(change_du_state_response, {
 
 	  }).
 
 %% @doc Inform message - Annex A.3.3.1 
--record (inform, {
+-record(inform, {
 	   device_id :: #device_id_struct{},
-	   event :: #event_list{},
+	   event :: [#event_struct{}],
 	   max_envelopes :: non_neg_integer(),
 	   current_time :: date_time(),
 	   retry_count :: non_neg_integer(),
-	   parameter_list :: #parameter_value_list{}
+	   parameter_list :: [#parameter_value_struct{}] %#parameter_value_list{}
 	  }).
 
 %% @doc InformResponse message - Annex A.3.3.1 
--record (inform_response, {
+-record(inform_response, {
 	   max_envelopes :: non_neg_integer()
 	  }).
 
 %% @doc TransferComplete message - Annex A.3.3.2 
--record (transfer_complete, {
+-record(transfer_complete, {
 	   command_key :: command_key_type(),
 	   fault_struct :: #transfer_complete_fault_struct{},
 	   start_time :: date_time(),
@@ -793,12 +791,12 @@
 	  }).
 
 %% @doc TransferCompleteResponse message - Annex A.3.3.2 
--record (transfer_complete_response, {
+-record(transfer_complete_response, {
 	   %% TODO: ref
 	  }).
 
 %% @doc AutonomousTransferComplete message - Annex A.3.3.3 
--record (autonomous_transfer_complete, {
+-record(autonomous_transfer_complete, {
 	   announce_url :: url(),
 	   transfer_url :: url(),
 	   is_download :: boolean(),
@@ -811,7 +809,7 @@
 	  }).
 
 %% @doc AutonomousTransferCompleteResponse message - Annex A.3.3.3 
--record (autonomous_transfer_complete_response, {
+-record(autonomous_transfer_complete_response, {
 
 	  }).
 
@@ -820,7 +818,7 @@
 %%%-----------------------------------------------------------------------------
 
 %% @doc Kicked message - Annex A.4.2.1 
--record (kicked, {
+-record(kicked, {
 	   command :: string(),
 	   referer :: string(),
 	   arg :: string(),
@@ -828,39 +826,39 @@
 	  }).
 
 %% @doc KickedResponse message - Annex A.4.2.1 
--record (kicked_response, {
+-record(kicked_response, {
 	   next_url :: url()
 	  }).
 
 %% @doc RequestDownload message - Annex A.4.2.2 
--record (request_download, {
+-record(request_download, {
 	   file_type :: download_file_type(),
 	   file_type_arg :: #file_type_arg{}
 	  }).
 
 %% @doc RequestDownloadResponse message - Annex A.4.2.2 
--record (request_download_response, {
+-record(request_download_response, {
 	  }).
 
 %% @doc A message indicating a prior ChangeDUState request to perform
 %% an action on a Deployment Unit on the device has completed
--record (du_state_change_complete, {
+-record(du_state_change_complete, {
 	   results :: #op_result_struct{},
 	   command_key :: command_key_type()
 	  }).
 
 %% @doc Response to a DUStateChangeComplete message
--record (du_state_change_complete_response, {
+-record(du_state_change_complete_response, {
 	  }).
 
 %% @doc A message indicating an autonomous action for a Deployment
 %%      Unit on the device has completed
--record (autonomous_du_state_change_complete, {
+-record(autonomous_du_state_change_complete, {
 	   results :: #auton_op_result_struct{}
 	  }).
 
 %% @doc Response to a AutonomousDUStateChangeComplete message
--record (autonomous_du_state_change_complete_response, {
+-record(autonomous_du_state_change_complete_response, {
 }).
 
 %%%-----------------------------------------------------------------------------
@@ -868,13 +866,13 @@
 %%%-----------------------------------------------------------------------------
 
 %% @doc  
--record (id, {
+-record(id, {
            mustUnderstand :: boolean(),
 	   value :: string()
 	  }).
 
 %% @doc  
--record (hold_requests, {
+-record(hold_requests, {
            mustUnderstand :: boolean(),
 	   value :: boolean()
 	  }).
@@ -887,6 +885,22 @@
           no_more_requests :: boolean()
          }).
 
+%% @Doc Fault reporting structure
+-record(soap_fault,{
+	  faultcode   :: qName(),
+	  faultstring :: string(),
+	  faultactor  :: anyURI(),
+	  detail      :: #fault{}
+         }).
+
+-record(envelope,{
+          header :: #header{},
+          body   :: [body_type()]
+         }).
+
+
+
+
 -type body_type() ::
         #add_object{}                          | #add_object_response{}
       | #autonomous_du_state_change_complete{} | #autonomous_du_state_change_complete_response{}
@@ -897,7 +911,6 @@
       | #download{}                            | #download_response{}
       | #du_state_change_complete{}            | #du_state_change_complete_response{}
       | #factory_reset{}                       | #factory_reset_response{}
-      | #fault{}                          
       | #get_all_queued_transfers{}            | #get_all_queued_transfers_response{}
       | #get_options{}                         | #get_options_response{}
       | #get_parameter_attributes{}            | #get_parameter_attributes_response{}
@@ -916,12 +929,8 @@
       | #set_vouchers{}                        | #set_vouchers_response{}
       | #transfer_complete{}                   | #transfer_complete_response{}
       | #upload{}                              | #upload_response{}
+      | #soap_fault{}                          
         .
-        
--record(envelope,{
-          header :: #header{},
-          body   :: body_type()
-         }).
 
 
 %%%-----------------------------------------------------------------------------
@@ -937,7 +946,7 @@
 %%%-----------------------------------------------------------------------------
 
 -type encoder_option() :: {version, cwmp_version()} | {handler, function()}.
--type decoder_option() :: {version, cwmp_version()} | {object_hook, function()}.
+-type parser_option() :: {version, cwmp_version()} | {object_hook, function()}.
 
 -record(encoder, {version = 1  :: cwmp_version(),
                   handler = null}).
@@ -946,7 +955,7 @@
                  ns_envelop = "",
                  ns_cwmp    = ""}).
 
--record(decoder, {version   = 1 :: cwmp_version(),
+-record(parser, {version   = 1 :: cwmp_version(),
                   object_hook = null,
                   state       = null,
                   ns :: #rpc_ns{}
