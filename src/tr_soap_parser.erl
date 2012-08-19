@@ -12,7 +12,8 @@
 -import(lists, [map/2, reverse/1, foldl/3]).
 
 -import(tr_soap_lib, [parse_error/2, return_error/2,
-		      get_local_name/2, local_name/1, get_QName/2]).
+		      get_local_name/2, get_local_name/1, get_QName/2,
+		      match_cwmp_ns_and_version/1, check_namespace/3]).
 
 -import(tr_soap_types, [ parse_AccessListChange/2,
 			 parse_AccessListValueType/2, parse_ACSFaultCodeType/2,
@@ -59,7 +60,7 @@
 			 parse_anySimpleType/2
 		       ]).
 
- 
+
 -export([parser/1, parse/1]).
 
 %%%-----------------------------------------------------------------------------
@@ -88,7 +89,7 @@ parser(Options) ->
 -spec parse(#xmlElement{}) -> #rpc_data{}.
 parse(S) ->
     parse(S, #parser{}).
- 
+
 -spec parse(#xmlElement{}, #parser{}) -> #rpc_data{}.
 parse(Doc, S) ->
     try
@@ -103,54 +104,25 @@ parse(Doc, S) ->
     end.
 
 -spec parse_Document(#xmlElement{}, #parser{}) -> #rpc_data{}.
-parse_Document(#xmlElement{namespace = Namespace} = Doc, State) when is_tuple(Doc) ->
-    {Nss, Version} = parse_Namespace(Namespace),
-    RefinedState = State#parser{version=Version, ns=Nss, state=soap},
-    Envelop = case get_local_name(Doc, Nss#rpc_ns.ns_envelop) of
-		  'Envelope' -> parse_Envelope(Doc, RefinedState);
+parse_Document(#xmlElement{name=QName, namespace = Namespace} = Doc, State) when is_tuple(Doc) ->
+    Nss = parse_Namespace(Namespace),
+    RefinedState = State#parser{ns=Nss, state=soap},
+    Envelop = case get_local_name(QName) of
+		  'Envelope' ->
+		      parse_Envelope(Doc, RefinedState);
 		  _ -> parse_error(Doc, RefinedState)
               end,
     #rpc_data{data = Envelop}.
 
 -spec parse_Namespace(#xmlNamespace{}) -> {#rpc_ns{}, cwmp_version()}.
-parse_Namespace(#xmlNamespace{nodes = Nss}) ->
-    {NsCwmp, CwmpVersion} = match_cwmp_ns_and_version(Nss),
-    {#rpc_ns{ns_xsd = find_ns_aux(Nss, ?XSD_URL),
-             ns_envelop = find_ns_aux(Nss, ?SOAPENV_URL),
-             ns_cwmp = NsCwmp},
-     CwmpVersion}.
-
--spec match_cwmp_ns_and_version([tuple()]) -> {string(), cwmp_version()}.
-match_cwmp_ns_and_version(Nss) ->
-    Mapped = lists:map(fun({Ns, Uri}) ->
-                               case re:split(atom_to_list(Uri), "-", [{return,list}]) of
-                                   ["urn:dslforum","org:cwmp", R, V] -> {Ns, R, V}; 
-                                   _ -> false
-                               end
-                       end, Nss),
-    Filtered = lists:filter(fun(X) when X == false -> false;
-                               (_) -> true end, Mapped),
-    {NsCwmp, CwmpVersion} =  case Filtered of
-                                 [{NsC,"1","0"}] -> {NsC, 1};
-                                 [{NsC,"1","2"}] -> {NsC, 2};
-                                 _ -> {"", 1}
-                             end,
-    {NsCwmp, CwmpVersion}.
-
--spec find_ns_aux([tuple()], term()) -> string().
-find_ns_aux(Nss, URL) when is_atom(URL)->
-    case lists:keyfind(URL, 2, Nss) of
-        {NsX, _} -> 
-            NsX;
-        false ->
-            ""
-    end.
+parse_Namespace(Nss) ->
+    match_cwmp_ns_and_version(Nss).
 
 -spec parse_Envelope(#xmlElement{}, #parser{}) -> #envelope{}.
-parse_Envelope(#xmlElement{content = Content} = _Doc,
-               #parser{ns=Nss} = State) ->
+parse_Envelope(#xmlElement{content = Content} = _Doc, #parser{ns=Nss} = S) ->
+    State = check_namespace('soap-env:Envelope', _Doc, S),
     lists:foldl(fun(Elem, Envelop) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_envelop) of
+                        case get_local_name(Elem#xmlElement.name) of
                             'Header' ->
                                 Envelop#envelope{header = parse_Header(Elem, State)};
                             'Body' ->
@@ -163,10 +135,10 @@ parse_Envelope(#xmlElement{content = Content} = _Doc,
                 lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 -spec parse_Header(#xmlElement{},#parser{}) -> #header{}.
-parse_Header(#xmlElement{content = Content} = _Elems,
-	     #parser{ns=Nss} = State) ->
+parse_Header(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('soap-env:Header', E, S),
     lists:foldl(fun(Elem, Header) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
                             'ID' ->
                                 Header#header{id = parse_ID(Elem, State)};
                             'HoldRequests' ->
@@ -184,26 +156,11 @@ parse_Header(#xmlElement{content = Content} = _Elems,
 %%%-----------------------------------------------------------------------------
 %%%        SOAP Body
 %%%-----------------------------------------------------------------------------
-get_ns_for_method('Fault', NSS) ->
-    NSS #rpc_ns.ns_envelop;
-get_ns_for_method(_, NSS) ->
-    NSS #rpc_ns.ns_cwmp.
-
-get_method_name(#xmlElement{name = Name} = Elem,
-		Nss) when is_atom(Name) ->
-    {NS1, LName} = local_name(Name),
-    NS2 = get_ns_for_method(LName, Nss),
-    if
-	NS1 == NS2 -> LName;
-	true ->
-	    parse_error(Elem, {NS2, "Namespace missmatch"})
-    end.
-
 -spec parse_Body(#xmlElement{}, #parser{}) -> [body_type()].
-parse_Body(#xmlElement{content = Content} = _Elems,
-	     #parser{ns=Nss} = State) ->
+parse_Body(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('soap-env:Body', E, S),
     lists:map(fun(Elem) ->
-		      case get_method_name(Elem, Nss) of
+		      case get_local_name(Elem#xmlElement.name) of
 			  'Fault' ->
 			      parse_SoapFault(Elem, State);
 			  Method ->			      
@@ -211,7 +168,7 @@ parse_Body(#xmlElement{content = Content} = _Elems,
 			      if is_function({?MODULE, F}, 2) ->
 				      apply(?MODULE, F, [Elem, State]);
 						%FIXME: deprecated tuple function 
-				  true -> 
+				 true -> 
 				      parse_error(Elem, State)
 			      end
 		      end
@@ -289,9 +246,10 @@ parse_HoldRequests(Elem, #parser{ns=Nss} = _State) ->
     #id{mustUnderstand = MustuNderstand, value = Value}.
 
 %% -spec parse_TransferCompleteFaultStruct(#xmlElement{},#parser{}) -> #transfer_complete_fault_struct{}.
-parse_TransferCompleteFaultStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_TransferCompleteFaultStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:TransferCompleteFaultStruct', E, S),
     lists:foldl(fun(Elem, _TransferCompleteFaultStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             %% 'FaultCode' ->
                             %%     TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_code = parse_FaultCode(Elem, State)};
@@ -306,9 +264,10 @@ parse_TransferCompleteFaultStruct(#xmlElement{content = Content} = _Elems, #pars
                 #transfer_complete_fault_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_DeploymentUnitFaultStruct(#xmlElement{},#parser{}) -> #deployment_unit_fault_struct{}.
-parse_DeploymentUnitFaultStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_DeploymentUnitFaultStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:DeploymentUnitFaultStruct', E, S),
     lists:foldl(fun(Elem, _DeploymentUnitFaultStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             %% 'FaultCode' ->
                             %%     DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_code = parse_FaultCode(Elem, State)};
@@ -324,8 +283,9 @@ parse_DeploymentUnitFaultStruct(#xmlElement{content = Content} = _Elems, #parser
                 #deployment_unit_fault_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 -spec parse_ParameterNames(#xmlElement{},#parser{}) -> [string()].
-parse_ParameterNames(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
-    [case get_local_name(Elem, Nss#rpc_ns.ns_xsd) of			  
+parse_ParameterNames(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:ParameterNames', E, S),
+    [case get_local_name(Elem#xmlElement.name) of			  
     	 'string' ->
     	     parse_string(Elem);
     	 _ ->
@@ -333,9 +293,10 @@ parse_ParameterNames(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = 
      end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
 %% -spec parse_ParameterValueStruct(#xmlElement{},#parser{}) -> #parameter_value_struct{}.
-parse_ParameterValueStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_ParameterValueStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:ParameterValueStruct', E, S),
     lists:foldl(fun(Elem, ParameterValueStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'Name' ->
                                 ParameterValueStruct#parameter_value_struct{name = parse_Name(Elem, State)};
@@ -350,8 +311,9 @@ parse_ParameterValueStruct(#xmlElement{content = Content} = _Elems, #parser{ns=N
                 #parameter_value_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 -spec parse_ParameterValueList(#xmlElement{},#parser{}) -> [#parameter_value_struct{}].
-parse_ParameterValueList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
-    [case get_local_name(Elem, Nss#rpc_ns.ns_xsd) of			  
+parse_ParameterValueList(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:ParameterValueList', E, S),
+    [case get_local_name(Elem#xmlElement.name) of			  
 	 'ParameterValueStruct' ->
 	     parse_ParameterValueStruct(Elem, State);
 	 _ ->
@@ -359,8 +321,9 @@ parse_ParameterValueList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss
      end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
 -spec parse_MethodList(#xmlElement{},#parser{}) -> [string()].
-parse_MethodList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
-    [case get_local_name(Elem, Nss#rpc_ns.ns_xsd) of			  
+parse_MethodList(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:MethodList', E, S),
+    [case get_local_name(Elem#xmlElement.name) of			  
     	 'string' ->
     	     parse_string(Elem);
     	 _ ->
@@ -368,9 +331,10 @@ parse_MethodList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = Stat
      end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
 %% -spec parse_DeviceIdStruct(#xmlElement{},#parser{}) -> #device_id_struct{}.
-parse_DeviceIdStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_DeviceIdStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:DeviceIdStruct', E, S),
     lists:foldl(fun(Elem, DeviceIdStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'Manufacturer' ->
                                 DeviceIdStruct#device_id_struct{manufacturer = parse_Manufacturer(Elem, State)};
@@ -391,9 +355,10 @@ parse_DeviceIdStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = 
                 #device_id_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_EventStruct(#xmlElement{},#parser{}) -> #event_struct{}.
-parse_EventStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_EventStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:EventStruct', E, S),
     lists:foldl(fun(Elem, EventStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
                             'EventCode' ->
                                 EventStruct#event_struct{event_code = parse_EventCode(Elem, State)};
                             'CommandKey' ->
@@ -405,8 +370,9 @@ parse_EventStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = Sta
                 #event_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_EventList(#xmlElement{},#parser{}) -> #event_list{}.
-parse_EventList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
-    [case get_local_name(Elem, Nss#rpc_ns.ns_xsd) of			  
+parse_EventList(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:EventList', E, S),
+    [case get_local_name(Elem#xmlElement.name) of			  
 	 'EventStruct' ->
 	     parse_EventStruct(Elem, State);
 	 _ ->
@@ -414,9 +380,10 @@ parse_EventList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State
      end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
 -spec parse_ParameterInfoStruct(#xmlElement{},#parser{}) -> #parameter_info_struct{}.
-parse_ParameterInfoStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_ParameterInfoStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:ParameterInfoStruct', E, S),
     lists:foldl(fun(Elem, ParameterInfoStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
                             'Name' ->
                                 ParameterInfoStruct#parameter_info_struct{name = parse_Name(Elem, State)};
 
@@ -430,8 +397,9 @@ parse_ParameterInfoStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Ns
                 #parameter_info_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 -spec parse_ParameterInfoList(#xmlElement{},#parser{}) -> [#parameter_info_struct{}].
-parse_ParameterInfoList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
-    [case get_local_name(Elem, Nss#rpc_ns.ns_xsd) of			  
+parse_ParameterInfoList(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:ParameterInfoList', E, S),
+    [case get_local_name(Elem#xmlElement.name) of			  
     	 'ParameterInfoStruct' ->
     	     parse_ParameterInfoStruct(Elem, State);
     	 _ ->
@@ -439,9 +407,10 @@ parse_ParameterInfoList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss}
      end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
 %% -spec parse_AccessList(#xmlElement{},#parser{}) -> #access_list{}.
-parse_AccessList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_AccessList(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:AccessList', E, S),
     lists:foldl(fun(Elem, AccessList) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'string' ->
                                 AccessList#access_list{string = parse_string(Elem, State)};
@@ -453,9 +422,10 @@ parse_AccessList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = Stat
                 #access_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_SetParameterAttributesStruct(#xmlElement{},#parser{}) -> #set_parameter_attributes_struct{}.
-parse_SetParameterAttributesStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_SetParameterAttributesStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:SetParameterAttributesStruct', E, S),
     lists:foldl(fun(Elem, SetParameterAttributesStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'Name' ->
                                 SetParameterAttributesStruct#set_parameter_attributes_struct{name = parse_Name(Elem, State)};
@@ -479,9 +449,10 @@ parse_SetParameterAttributesStruct(#xmlElement{content = Content} = _Elems, #par
                 #set_parameter_attributes_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_SetParameterAttributesList(#xmlElement{},#parser{}) -> #set_parameter_attributes_list{}.
-parse_SetParameterAttributesList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_SetParameterAttributesList(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:SetParameterAttributesList', E, S),
     lists:foldl(fun(Elem, SetParameterAttributesList) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'SetParameterAttributesStruct' ->
                                 SetParameterAttributesList#set_parameter_attributes_list{set_parameter_attributes_struct = parse_SetParameterAttributesStruct(Elem, State)};
@@ -493,9 +464,10 @@ parse_SetParameterAttributesList(#xmlElement{content = Content} = _Elems, #parse
                 #set_parameter_attributes_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_ParameterAttributeStruct(#xmlElement{},#parser{}) -> #parameter_attribute_struct{}.
-parse_ParameterAttributeStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_ParameterAttributeStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:ParameterAttributeStruct', E, S),
     lists:foldl(fun(Elem, ParameterAttributeStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'Name' ->
                                 ParameterAttributeStruct#parameter_attribute_struct{name = parse_Name(Elem, State)};
@@ -513,9 +485,10 @@ parse_ParameterAttributeStruct(#xmlElement{content = Content} = _Elems, #parser{
                 #parameter_attribute_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_ParameterAttributeList(#xmlElement{},#parser{}) -> #parameter_attribute_list{}.
-parse_ParameterAttributeList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_ParameterAttributeList(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:ParameterAttributeList', E, S),
     lists:foldl(fun(Elem, ParameterAttributeList) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'ParameterAttributeStruct' ->
                                 ParameterAttributeList#parameter_attribute_list{parameter_attribute_struct = parse_ParameterAttributeStruct(Elem, State)};
@@ -527,9 +500,10 @@ parse_ParameterAttributeList(#xmlElement{content = Content} = _Elems, #parser{ns
                 #parameter_attribute_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_TimeWindowStruct(#xmlElement{},#parser{}) -> #time_window_struct{}.
-parse_TimeWindowStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_TimeWindowStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:TimeWindowStruct', E, S),
     lists:foldl(fun(Elem, TimeWindowStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'WindowStart' ->
                                 TimeWindowStruct#time_window_struct{window_start = parse_WindowStart(Elem, State)};
@@ -553,9 +527,10 @@ parse_TimeWindowStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} 
                 #time_window_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_TimeWindowList(#xmlElement{},#parser{}) -> #time_window_list{}.
-parse_TimeWindowList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_TimeWindowList(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:TimeWindowList', E, S),
     lists:foldl(fun(Elem, TimeWindowList) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'TimeWindowStruct' ->
                                 TimeWindowList#time_window_list{time_window_struct = parse_TimeWindowStruct(Elem, State)};
@@ -567,9 +542,10 @@ parse_TimeWindowList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = 
                 #time_window_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_QueuedTransferStruct(#xmlElement{},#parser{}) -> #queued_transfer_struct{}.
-parse_QueuedTransferStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_QueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:QueuedTransferStruct', E, S),
     lists:foldl(fun(Elem, QueuedTransferStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
                                 QueuedTransferStruct#queued_transfer_struct{command_key = parse_CommandKey(Elem, State)};
@@ -584,9 +560,10 @@ parse_QueuedTransferStruct(#xmlElement{content = Content} = _Elems, #parser{ns=N
                 #queued_transfer_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_TransferList(#xmlElement{},#parser{}) -> #transfer_list{}.
-parse_TransferList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_TransferList(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:TransferList', E, S),
     lists:foldl(fun(Elem, TransferList) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'QueuedTransferStruct' ->
                                 TransferList#transfer_list{queued_transfer_struct = parse_QueuedTransferStruct(Elem, State)};
@@ -598,9 +575,10 @@ parse_TransferList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = St
                 #transfer_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_AllQueuedTransferStruct(#xmlElement{},#parser{}) -> #all_queued_transfer_struct{}.
-parse_AllQueuedTransferStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_AllQueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:AllQueuedTransferStruct', E, S),
     lists:foldl(fun(Elem, AllQueuedTransferStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
                                 AllQueuedTransferStruct#all_queued_transfer_struct{command_key = parse_CommandKey(Elem, State)};
@@ -627,9 +605,10 @@ parse_AllQueuedTransferStruct(#xmlElement{content = Content} = _Elems, #parser{n
                 #all_queued_transfer_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_AllTransferList(#xmlElement{},#parser{}) -> #all_transfer_list{}.
-parse_AllTransferList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_AllTransferList(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:AllTransferList', E, S),
     lists:foldl(fun(Elem, AllTransferList) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'AllQueuedTransferStruct' ->
                                 AllTransferList#all_transfer_list{all_queued_transfer_struct = parse_AllQueuedTransferStruct(Elem, State)};
@@ -641,9 +620,10 @@ parse_AllTransferList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} =
                 #all_transfer_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_OperationStruct(#xmlElement{},#parser{}) -> #operation_struct{}.
-parse_OperationStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_OperationStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:OperationStruct', E, S),
     lists:foldl(fun(Elem, _OperationStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             _ ->
                                 parse_error(Elem, State)
@@ -652,9 +632,10 @@ parse_OperationStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} =
                 #operation_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_InstallOpStruct(#xmlElement{},#parser{}) -> #install_op_struct{}.
-parse_InstallOpStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_InstallOpStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:InstallOpStruct', E, S),
     lists:foldl(fun(Elem, InstallOpStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'URL' ->
                                 InstallOpStruct#install_op_struct{url = parse_URL(Elem, State)};
@@ -678,9 +659,10 @@ parse_InstallOpStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} =
                 #install_op_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_UpdateOpStruct(#xmlElement{},#parser{}) -> #update_op_struct{}.
-parse_UpdateOpStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_UpdateOpStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:UpdateOpStruct', E, S),
     lists:foldl(fun(Elem, UpdateOpStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'UUID' ->
                                 UpdateOpStruct#update_op_struct{uuid = parse_UUID(Elem, State)};
@@ -704,9 +686,10 @@ parse_UpdateOpStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = 
                 #update_op_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_UninstallOpStruct(#xmlElement{},#parser{}) -> #uninstall_op_struct{}.
-parse_UninstallOpStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_UninstallOpStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:UninstallOpStruct', E, S),
     lists:foldl(fun(Elem, UninstallOpStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'UUID' ->
                                 UninstallOpStruct#uninstall_op_struct{uuid = parse_UUID(Elem, State)};
@@ -724,9 +707,10 @@ parse_UninstallOpStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss}
                 #uninstall_op_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_OpResultStruct(#xmlElement{},#parser{}) -> #op_result_struct{}.
-parse_OpResultStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_OpResultStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:OpResultStruct', E, S),
     lists:foldl(fun(Elem, OpResultStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'UUID' ->
                                 OpResultStruct#op_result_struct{uuid = parse_UUID(Elem, State)};
@@ -762,9 +746,10 @@ parse_OpResultStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = 
                 #op_result_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_AutonOpResultStruct(#xmlElement{},#parser{}) -> #auton_op_result_struct{}.
-parse_AutonOpResultStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_AutonOpResultStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:AutonOpResultStruct', E, S),
     lists:foldl(fun(Elem, AutonOpResultStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'OperationPerformed' ->
                                 AutonOpResultStruct#auton_op_result_struct{operation_performed = parse_OperationPerformed(Elem, State)};
@@ -776,9 +761,10 @@ parse_AutonOpResultStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Ns
                 #auton_op_result_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_VoucherList(#xmlElement{},#parser{}) -> #voucher_list{}.
-parse_VoucherList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_VoucherList(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:VoucherList', E, S),
     lists:foldl(fun(Elem, VoucherList) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'base64' ->
                                 VoucherList#voucher_list{base64 = parse_base64(Elem, State)};
@@ -790,9 +776,10 @@ parse_VoucherList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = Sta
                 #voucher_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_OptionStruct(#xmlElement{},#parser{}) -> #option_struct{}.
-parse_OptionStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_OptionStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:OptionStruct', E, S),
     lists:foldl(fun(Elem, OptionStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'OptionName' ->
                                 OptionStruct#option_struct{option_name = parse_OptionName(Elem, State)};
@@ -822,9 +809,10 @@ parse_OptionStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = St
                 #option_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_OptionList(#xmlElement{},#parser{}) -> #option_list{}.
-parse_OptionList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_OptionList(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:OptionList', E, S),
     lists:foldl(fun(Elem, OptionList) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'OptionStruct' ->
                                 OptionList#option_list{option_struct = parse_OptionStruct(Elem, State)};
@@ -836,9 +824,10 @@ parse_OptionList(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = Stat
                 #option_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_ArgStruct(#xmlElement{},#parser{}) -> #arg_struct{}.
-parse_ArgStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_ArgStruct(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:ArgStruct', E, S),
     lists:foldl(fun(Elem, ArgStruct) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'Name' ->
                                 ArgStruct#arg_struct{name = parse_Name(Elem, State)};
@@ -853,9 +842,10 @@ parse_ArgStruct(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State
                 #arg_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_FileTypeArg(#xmlElement{},#parser{}) -> #file_type_arg{}.
-parse_FileTypeArg(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_FileTypeArg(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:FileTypeArg', E, S),
     lists:foldl(fun(Elem, FileTypeArg) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'ArgStruct' ->
                                 FileTypeArg#file_type_arg{arg_struct = parse_ArgStruct(Elem, State)};
@@ -868,25 +858,26 @@ parse_FileTypeArg(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = Sta
 
 
 -spec parse_SoapFaultDetail(#xmlElement{},#parser{}) -> #fault{}.
-parse_SoapFaultDetail(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_SoapFaultDetail(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('soap-env:detail', E, S),
     case lists:filter(fun tr_soap_lib:xmlElement/1, Content) of
 	[] ->
 	    undefined;
 	[#xmlElement{name=Name} = Elem | _Rest] ->
-	    QName = get_QName('Fault', Nss#rpc_ns.ns_cwmp),
-	    if
-		Name == QName ->
+	    case get_local_name(Name) of
+		'Fault' ->
 		    parse_Fault(Elem, State);
-		true ->
+		_ ->
 		    parse_error(Elem, State)
 	    end
 
-	end.
+    end.
 
 -spec parse_SoapFault(#xmlElement{},#parser{}) -> #soap_fault{}.
-parse_SoapFault(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_SoapFault(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('soap-env:Fault', E, S),
     lists:foldl(fun(Elem, Fault) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_envelop) of
+                        case get_local_name(Elem#xmlElement.name) of
                             'faultcode' ->
                                 Fault#soap_fault{faultcode = parse_string(Elem)};
                             'faultstring' ->
@@ -902,9 +893,10 @@ parse_SoapFault(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State
                 #soap_fault{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 -spec parse_SetParameterValuesFault(#xmlElement{},#parser{}) -> #set_parameter_values_fault{}.
-parse_SetParameterValuesFault(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_SetParameterValuesFault(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:SetParameterValuesFault', E, S),
     lists:foldl(fun(Elem, Fault) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
                             'ParameterName' ->
                                 Fault#set_parameter_values_fault{parameter_name = parse_string(Elem)};
                             'FaultCode' ->
@@ -920,9 +912,10 @@ parse_SetParameterValuesFault(#xmlElement{content = Content} = _Elems, #parser{n
 
 
 -spec parse_Fault(#xmlElement{},#parser{}) -> #fault{}.
-parse_Fault(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_Fault(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:Fault', E, S),
     lists:foldl(fun(Elem, Fault) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
                             'FaultCode' ->
                                 Fault#fault{fault_code = parse_FaultCode(Elem)};
 			    'FaultString' ->
@@ -939,9 +932,10 @@ parse_Fault(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
 parse_GetRPCMethods(_, _) -> #get_rpc_methods{}.
 
 %% -spec parse_GetRPCMethodsResponse(#xmlElement{},#parser{}) -> #get_rpc_methods_response{}.
-parse_GetRPCMethodsResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_GetRPCMethodsResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:GetRPCMethodsResponse', E, S),
     lists:foldl(fun(Elem, GetRPCMethodsResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
                             'MethodList' ->
                                 GetRPCMethodsResponse#get_rpc_methods_response{method_list = parse_MethodList(Elem, State)};
 
@@ -952,9 +946,10 @@ parse_GetRPCMethodsResponse(#xmlElement{content = Content} = _Elems, #parser{ns=
                 #get_rpc_methods_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_SetParameterValues(#xmlElement{},#parser{}) -> #set_parameter_values{}.
-parse_SetParameterValues(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_SetParameterValues(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:SetParameterValues', E, S),
     lists:foldl(fun(Elem, SetParameterValues) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'ParameterList' ->
                                 SetParameterValues#set_parameter_values{parameter_list = parse_ParameterValueList(Elem, State)};
@@ -969,9 +964,10 @@ parse_SetParameterValues(#xmlElement{content = Content} = _Elems, #parser{ns=Nss
                 #set_parameter_values{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_SetParameterValuesResponse(#xmlElement{},#parser{}) -> #set_parameter_values_response{}.
-parse_SetParameterValuesResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_SetParameterValuesResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:SetParameterValuesResponse', E, S),
     lists:foldl(fun(Elem, SetParameterValuesResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'Status' ->
                                 SetParameterValuesResponse#set_parameter_values_response{status = parse_Status(Elem, State)};
@@ -983,9 +979,10 @@ parse_SetParameterValuesResponse(#xmlElement{content = Content} = _Elems, #parse
                 #set_parameter_values_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_GetParameterValues(#xmlElement{},#parser{}) -> #get_parameter_values{}.
-parse_GetParameterValues(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_GetParameterValues(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:GetParameterValues', E, S),
     lists:foldl(fun(Elem, GetParameterValues) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'ParameterNames' ->
                                 GetParameterValues#get_parameter_values{parameter_names = parse_ParameterNames(Elem, State)};
@@ -997,9 +994,10 @@ parse_GetParameterValues(#xmlElement{content = Content} = _Elems, #parser{ns=Nss
                 #get_parameter_values{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_GetParameterValuesResponse(#xmlElement{},#parser{}) -> #get_parameter_values_response{}.
-parse_GetParameterValuesResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_GetParameterValuesResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:GetParameterValuesResponse', E, S),
     lists:foldl(fun(Elem, GetParameterValuesResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'ParameterList' ->
                                 GetParameterValuesResponse#get_parameter_values_response{parameter_list = parse_ParameterValueList(Elem, State)};
@@ -1011,9 +1009,10 @@ parse_GetParameterValuesResponse(#xmlElement{content = Content} = _Elems, #parse
                 #get_parameter_values_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_GetParameterNames(#xmlElement{},#parser{}) -> #get_parameter_names{}.
-parse_GetParameterNames(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_GetParameterNames(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:GetParameterNames', E, S),
     lists:foldl(fun(Elem, GetParameterNames) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'ParameterPath' ->
                                 GetParameterNames#get_parameter_names{parameter_path = parse_ParameterPath(Elem, State)};
@@ -1028,9 +1027,10 @@ parse_GetParameterNames(#xmlElement{content = Content} = _Elems, #parser{ns=Nss}
                 #get_parameter_names{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_GetParameterNamesResponse(#xmlElement{},#parser{}) -> #get_parameter_names_response{}.
-parse_GetParameterNamesResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_GetParameterNamesResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:GetParameterNamesResponse', E, S),
     lists:foldl(fun(Elem, GetParameterNamesResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
                             'ParameterList' ->
                                 GetParameterNamesResponse#get_parameter_names_response{parameter_list = parse_ParameterInfoList(Elem, State)};
                             _ ->
@@ -1040,9 +1040,10 @@ parse_GetParameterNamesResponse(#xmlElement{content = Content} = _Elems, #parser
                 #get_parameter_names_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_SetParameterAttributes(#xmlElement{},#parser{}) -> #set_parameter_attributes{}.
-parse_SetParameterAttributes(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_SetParameterAttributes(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:SetParameterAttributes', E, S),
     lists:foldl(fun(Elem, SetParameterAttributes) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'ParameterList' ->
                                 SetParameterAttributes#set_parameter_attributes{parameter_list = parse_ParameterList(Elem, State)};
@@ -1057,9 +1058,10 @@ parse_SetParameterAttributes(#xmlElement{content = Content} = _Elems, #parser{ns
 parse_SetParameterAttributesResponse(_, _) -> #set_parameter_attributes_response{}.
 
 %% -spec parse_GetParameterAttributes(#xmlElement{},#parser{}) -> #get_parameter_attributes{}.
-parse_GetParameterAttributes(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_GetParameterAttributes(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:GetParameterAttributes', E, S),
     lists:foldl(fun(Elem, GetParameterAttributes) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'ParameterNames' ->
                                 GetParameterAttributes#get_parameter_attributes{parameter_names = parse_ParameterNames(Elem, State)};
@@ -1071,9 +1073,10 @@ parse_GetParameterAttributes(#xmlElement{content = Content} = _Elems, #parser{ns
                 #get_parameter_attributes{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_GetParameterAttributesResponse(#xmlElement{},#parser{}) -> #get_parameter_attributes_response{}.
-parse_GetParameterAttributesResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_GetParameterAttributesResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:GetParameterAttributesResponse', E, S),
     lists:foldl(fun(Elem, GetParameterAttributesResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'ParameterList' ->
                                 GetParameterAttributesResponse#get_parameter_attributes_response{parameter_list = parse_ParameterList(Elem, State)};
@@ -1085,9 +1088,10 @@ parse_GetParameterAttributesResponse(#xmlElement{content = Content} = _Elems, #p
                 #get_parameter_attributes_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_AddObject(#xmlElement{},#parser{}) -> #add_object{}.
-parse_AddObject(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_AddObject(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:AddObject', E, S),
     lists:foldl(fun(Elem, AddObject) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'ObjectName' ->
                                 AddObject#add_object{object_name = parse_ObjectName(Elem, State)};
@@ -1102,9 +1106,10 @@ parse_AddObject(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State
                 #add_object{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_AddObjectResponse(#xmlElement{},#parser{}) -> #add_object_response{}.
-parse_AddObjectResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_AddObjectResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:AddObjectResponse', E, S),
     lists:foldl(fun(Elem, AddObjectResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'InstanceNumber' ->
                                 AddObjectResponse#add_object_response{instance_number = parse_InstanceNumber(Elem, State)};
@@ -1119,9 +1124,10 @@ parse_AddObjectResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss}
                 #add_object_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_DeleteObject(#xmlElement{},#parser{}) -> #delete_object{}.
-parse_DeleteObject(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_DeleteObject(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:DeleteObject', E, S),
     lists:foldl(fun(Elem, DeleteObject) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'ObjectName' ->
                                 DeleteObject#delete_object{object_name = parse_ObjectName(Elem, State)};
@@ -1136,9 +1142,10 @@ parse_DeleteObject(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = St
                 #delete_object{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_DeleteObjectResponse(#xmlElement{},#parser{}) -> #delete_object_response{}.
-parse_DeleteObjectResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_DeleteObjectResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:DeleteObjectResponse', E, S),
     lists:foldl(fun(Elem, DeleteObjectResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'Status' ->
                                 DeleteObjectResponse#delete_object_response{status = parse_Status(Elem, State)};
@@ -1150,9 +1157,10 @@ parse_DeleteObjectResponse(#xmlElement{content = Content} = _Elems, #parser{ns=N
                 #delete_object_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_Download(#xmlElement{},#parser{}) -> #download{}.
-parse_Download(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_Download(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:Download', E, S),
     lists:foldl(fun(Elem, Download) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
                                 Download#download{command_key = parse_CommandKey(Elem, State)};
@@ -1191,9 +1199,10 @@ parse_Download(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State)
                 #download{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_DownloadResponse(#xmlElement{},#parser{}) -> #download_response{}.
-parse_DownloadResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_DownloadResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:DownloadResponse', E, S),
     lists:foldl(fun(Elem, DownloadResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'Status' ->
                                 DownloadResponse#download_response{status = parse_Status(Elem, State)};
@@ -1211,9 +1220,10 @@ parse_DownloadResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} 
                 #download_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_Reboot(#xmlElement{},#parser{}) -> #reboot{}.
-parse_Reboot(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_Reboot(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:Reboot', E, S),
     lists:foldl(fun(Elem, Reboot) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
                                 Reboot#reboot{command_key = parse_CommandKey(Elem, State)};
@@ -1231,9 +1241,10 @@ parse_RebootResponse(_, _) -> #reboot_response{}.
 parse_GetQueuedTransfers(_, _) -> #get_queued_transfers{}.
 
 %% -spec parse_GetQueuedTransfersResponse(#xmlElement{},#parser{}) -> #get_queued_transfers_response{}.
-parse_GetQueuedTransfersResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_GetQueuedTransfersResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:GetQueuedTransfersResponse', E, S),
     lists:foldl(fun(Elem, GetQueuedTransfersResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'TransferList' ->
                                 GetQueuedTransfersResponse#get_queued_transfers_response{transfer_list = parse_TransferList(Elem, State)};
@@ -1245,9 +1256,10 @@ parse_GetQueuedTransfersResponse(#xmlElement{content = Content} = _Elems, #parse
                 #get_queued_transfers_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_ScheduleInform(#xmlElement{},#parser{}) -> #schedule_inform{}.
-parse_ScheduleInform(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_ScheduleInform(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:ScheduleInform', E, S),
     lists:foldl(fun(Elem, ScheduleInform) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'DelaySeconds' ->
                                 ScheduleInform#schedule_inform{delay_seconds = parse_DelaySeconds(Elem, State)};
@@ -1265,9 +1277,10 @@ parse_ScheduleInform(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = 
 parse_ScheduleInformResponse(_, _) -> #schedule_inform_response{}.
 
 %% -spec parse_SetVouchers(#xmlElement{},#parser{}) -> #set_vouchers{}.
-parse_SetVouchers(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_SetVouchers(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:SetVouchers', E, S),
     lists:foldl(fun(Elem, SetVouchers) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'VoucherList' ->
                                 SetVouchers#set_vouchers{voucher_list = parse_VoucherList(Elem, State)};
@@ -1282,9 +1295,10 @@ parse_SetVouchers(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = Sta
 parse_SetVouchersResponse(_, _) -> #set_vouchers_response{}.
 
 %% -spec parse_GetOptions(#xmlElement{},#parser{}) -> #get_options{}.
-parse_GetOptions(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_GetOptions(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:GetOptions', E, S),
     lists:foldl(fun(Elem, GetOptions) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'OptionName' ->
                                 GetOptions#get_options{option_name = parse_OptionName(Elem, State)};
@@ -1296,9 +1310,10 @@ parse_GetOptions(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = Stat
                 #get_options{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_GetOptionsResponse(#xmlElement{},#parser{}) -> #get_options_response{}.
-parse_GetOptionsResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_GetOptionsResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:GetOptionsResponse', E, S),
     lists:foldl(fun(Elem, GetOptionsResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'OptionList' ->
                                 GetOptionsResponse#get_options_response{option_list = parse_OptionList(Elem, State)};
@@ -1310,9 +1325,10 @@ parse_GetOptionsResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss
                 #get_options_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_Upload(#xmlElement{},#parser{}) -> #upload{}.
-parse_Upload(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_Upload(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:Upload', E, S),
     lists:foldl(fun(Elem, Upload) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
                                 Upload#upload{command_key = parse_CommandKey(Elem, State)};
@@ -1339,9 +1355,10 @@ parse_Upload(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) -
                 #upload{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_UploadResponse(#xmlElement{},#parser{}) -> #upload_response{}.
-parse_UploadResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_UploadResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:UploadResponse', E, S),
     lists:foldl(fun(Elem, UploadResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'Status' ->
                                 UploadResponse#upload_response{status = parse_Status(Elem, State)};
@@ -1368,9 +1385,10 @@ parse_FactoryResetResponse(_, _) -> #factory_reset_response{}.
 parse_GetAllQueuedTransfers(_, _) -> #get_all_queued_transfers{}.
 
 %% -spec parse_GetAllQueuedTransfersResponse(#xmlElement{},#parser{}) -> #get_all_queued_transfers_response{}.
-parse_GetAllQueuedTransfersResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_GetAllQueuedTransfersResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:GetAllQueuedTransfersResponse', E, S),
     lists:foldl(fun(Elem, GetAllQueuedTransfersResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'TransferList' ->
                                 GetAllQueuedTransfersResponse#get_all_queued_transfers_response{transfer_list = parse_TransferList(Elem, State)};
@@ -1382,9 +1400,10 @@ parse_GetAllQueuedTransfersResponse(#xmlElement{content = Content} = _Elems, #pa
                 #get_all_queued_transfers_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_ScheduleDownload(#xmlElement{},#parser{}) -> #schedule_download{}.
-parse_ScheduleDownload(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_ScheduleDownload(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:ScheduleDownload', E, S),
     lists:foldl(fun(Elem, ScheduleDownload) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
                                 ScheduleDownload#schedule_download{command_key = parse_CommandKey(Elem, State)};
@@ -1420,9 +1439,10 @@ parse_ScheduleDownload(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} 
 parse_ScheduleDownloadResponse(_, _) -> #schedule_download_response{}.
 
 %% -spec parse_CancelTransfer(#xmlElement{},#parser{}) -> #cancel_transfer{}.
-parse_CancelTransfer(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_CancelTransfer(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:CancelTransfer', E, S),
     lists:foldl(fun(Elem, CancelTransfer) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
                                 CancelTransfer#cancel_transfer{command_key = parse_CommandKey(Elem, State)};
@@ -1437,9 +1457,10 @@ parse_CancelTransfer(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = 
 parse_CancelTransferResponse(_, _) -> #cancel_transfer_response{}.
 
 %% -spec parse_ChangeDUState(#xmlElement{},#parser{}) -> #change_d_u_state{}.
-parse_ChangeDUState(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_ChangeDUState(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:ChangeDUState', E, S),
     lists:foldl(fun(Elem, ChangeDUState) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'Operations' ->
                                 ChangeDUState#change_du_state{operations = parse_Operations(Elem, State)};
@@ -1457,9 +1478,10 @@ parse_ChangeDUState(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = S
 parse_ChangeDUStateResponse(_, _) -> #change_du_state_response{}.
 
 %% -spec parse_Inform(#xmlElement{},#parser{}) -> #inform{}.
-parse_Inform(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_Inform(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:Inform', E, S),
     lists:foldl(fun(Elem, Inform) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
                             'DeviceId' ->
                                 Inform#inform{device_id = parse_DeviceId(Elem, State)};
                             'Event' ->
@@ -1479,9 +1501,10 @@ parse_Inform(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) -
                 #inform{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 -spec parse_InformResponse(#xmlElement{},#parser{}) -> #inform_response{}.
-parse_InformResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_InformResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:InformResponse', E, S),
     lists:foldl(fun(Elem, InformResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
                             'MaxEnvelopes' ->
                                 InformResponse#inform_response{max_envelopes = parse_MaxEnvelopes(Elem, State)};
                             _ ->
@@ -1491,9 +1514,10 @@ parse_InformResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = 
                 #inform_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_TransferComplete(#xmlElement{},#parser{}) -> #transfer_complete{}.
-parse_TransferComplete(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_TransferComplete(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:TransferComplete', E, S),
     lists:foldl(fun(Elem, TransferComplete) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
                                 TransferComplete#transfer_complete{command_key = parse_CommandKey(Elem, State)};
@@ -1517,9 +1541,10 @@ parse_TransferComplete(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} 
 parse_TransferCompleteResponse(_, _) -> #transfer_complete_response{}.
 
 %% -spec parse_AutonomousTransferComplete(#xmlElement{},#parser{}) -> #autonomous_transfer_complete{}.
-parse_AutonomousTransferComplete(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_AutonomousTransferComplete(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:AutonomousTransferComplete', E, S),
     lists:foldl(fun(Elem, AutonomousTransferComplete) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'AnnounceURL' ->
                                 AutonomousTransferComplete#autonomous_transfer_complete{announce_url = parse_AnnounceURL(Elem, State)};
@@ -1558,9 +1583,10 @@ parse_AutonomousTransferComplete(#xmlElement{content = Content} = _Elems, #parse
 parse_AutonomousTransferCompleteResponse(_, _) -> #autonomous_transfer_complete_response{}.
 
 %% -spec parse_Kicked(#xmlElement{},#parser{}) -> #kicked{}.
-parse_Kicked(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_Kicked(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:Kicked', E, S),
     lists:foldl(fun(Elem, Kicked) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'Command' ->
                                 Kicked#kicked{command = parse_Command(Elem, State)};
@@ -1581,9 +1607,10 @@ parse_Kicked(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) -
                 #kicked{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_KickedResponse(#xmlElement{},#parser{}) -> #kicked_response{}.
-parse_KickedResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_KickedResponse(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:KickedResponse', E, S),
     lists:foldl(fun(Elem, KickedResponse) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'NextURL' ->
                                 KickedResponse#kicked_response{next_url = parse_NextURL(Elem, State)};
@@ -1595,9 +1622,10 @@ parse_KickedResponse(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = 
                 #kicked_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_RequestDownload(#xmlElement{},#parser{}) -> #request_download{}.
-parse_RequestDownload(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_RequestDownload(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:RequestDownload', E, S),
     lists:foldl(fun(Elem, RequestDownload) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'FileType' ->
                                 RequestDownload#request_download{file_type = parse_FileType(Elem, State)};
@@ -1615,9 +1643,10 @@ parse_RequestDownload(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} =
 parse_RequestDownloadResponse(_, _) -> #request_download_response{}.
 
 %% -spec parse_DUStateChangeComplete(#xmlElement{},#parser{}) -> #du_state_change_complete{}.
-parse_DUStateChangeComplete(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_DUStateChangeComplete(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:DUStateChangeComplete', E, S),
     lists:foldl(fun(Elem, DUStateChangeComplete) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of			    
+                        case get_local_name(Elem#xmlElement.name) of			    
                             'Results' ->
                                 DUStateChangeComplete#du_state_change_complete{results = parse_Results(Elem, State)};
 
@@ -1632,11 +1661,11 @@ parse_DUStateChangeComplete(#xmlElement{content = Content} = _Elems, #parser{ns=
 
 %% -spec parse_DUStateChangeCompleteResponse(#xmlElement{},#parser{}) -> #du_state_change_complete_response{}.
 parse_DUStateChangeCompleteResponse(_, _) -> #du_state_change_complete_response{}.
-
 %% -spec parse_AutonomousDUStateChangeComplete(#xmlElement{},#parser{}) -> #autonomous_du_state_change_complete{}.
-parse_AutonomousDUStateChangeComplete(#xmlElement{content = Content} = _Elems, #parser{ns=Nss} = State) ->
+parse_AutonomousDUStateChangeComplete(#xmlElement{content = Content} = E, S) ->
+    State = check_namespace('cwmp:AutonomousDUStateChangeComplete', E, S),
     lists:foldl(fun(Elem, AutonomousDUStateChangeComplete) ->
-                        case get_local_name(Elem, Nss#rpc_ns.ns_cwmp) of
+                        case get_local_name(Elem#xmlElement.name) of
 
                             'Results' ->
                                 AutonomousDUStateChangeComplete#autonomous_du_state_change_complete{results = parse_Results(Elem, State)};
@@ -1660,28 +1689,19 @@ parse_AutonomousDUStateChangeCompleteResponse(_, _) -> #autonomous_du_state_chan
 
 -include_lib("eunit/include/eunit.hrl").
 
-get_ns_orts_test() ->
-    {#xmlElement{namespace = Namespace}, _} = xmerl_scan:file("../test/data/Fault.xml"),
-    {Nss, CwmpVersion} = parse_Namespace(Namespace),
-    ?assertEqual("", Nss#rpc_ns.ns_xsd),
-    ?assertEqual("soap-env", Nss#rpc_ns.ns_envelop),
-    ?assertEqual("cwmp", Nss#rpc_ns.ns_cwmp),
-    ?assertEqual(CwmpVersion, 1),
-    ok.
-
 parse_root_test() ->
     {Doc, _Rest} = xmerl_scan:file(
-		     %"../test/data/GetParameterValues.xml"
-		     %"../test/data/FaultResponse.xml"
-		     % "../test/data/Fault.xml"
-		     %"../test/data/GetParameterAttributes.xml"
-		     % "../test/data/GetParameterNamesResponse.xml"
-		     % "../test/data/GetParameterNames.xml"
-		     % "../test/data/GetParameterValues.xml"
-		     %"../test/data/GetRPCMethodsResponse.xml"
-		     %"../test/data/GetRPCMethods.xml"
-		     %"../test/data/InformResponse.xml"
-		      "../test/data/Inform.xml"
+						%"../test/data/GetParameterValues.xml"
+						%"../test/data/FaultResponse.xml"
+		     "../test/data/Fault.xml"
+						%"../test/data/GetParameterAttributes.xml"
+						% "../test/data/GetParameterNamesResponse.xml"
+						% "../test/data/GetParameterNames.xml"
+						% "../test/data/GetParameterValues.xml"
+						%"../test/data/GetRPCMethodsResponse.xml"
+						%"../test/data/GetRPCMethods.xml"
+						%"../test/data/InformResponse.xml"
+		     %% "../test/data/Inform.xml"
 		     %% "../test/data/Reboot.xml"
 		     %% "../test/data/SetParameterValues.xml"
 		     %% "../test/data/Simple.xml"

@@ -951,11 +951,16 @@
 -record(encoder, {version = 1  :: cwmp_version(),
                   handler = null}).
 
--record(rpc_ns, {ns_xsd     = "",
-                 ns_envelop = "",
-                 ns_cwmp    = ""}).
+-record(rpc_ns, {
+	  ns_xsd     :: atom(),
+	  ns_envelop :: atom(),
+	  ns_encoding:: atom(),
+	  ns_cwmp    :: atom(),
+	  cwmp_version = 0 :: cwmp_version(),
+	  inherited  :: atom()
+		}).
 
--record(parser, {version   = 1 :: cwmp_version(),
+-record(parser, { version = 1  :: cwmp_version(),
                   object_hook = null,
                   state       = null,
                   ns :: #rpc_ns{}
