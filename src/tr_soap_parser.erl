@@ -9,10 +9,12 @@
 -include("tr69.hrl").
 -include("proto.hrl").
 
--export([parse_root_test/1]).
+-export([parser/1, parse/1]).
 
+-export([main/1]).
 
--import(tr_soap_lib, [parse_error/2, get_local_name/1, get_QName/2,
+-import(tr_soap_lib, [parse_error/2, parse_error/3,
+		      get_local_name/1, get_QName/2, local_ns/2,
 		      match_cwmp_ns_and_version/1, check_namespace/3]).
 
 -import(tr_soap_types, [
@@ -88,9 +90,6 @@
 			parse_attribete/3,
 			parse_anySimpleType/2
 		       ]).
-
-
--export([parser/1, parse/1]).
 
 
 %%%-----------------------------------------------------------------------------
@@ -254,22 +253,6 @@ parse_Body(#xmlElement{content = Content} = E, S) ->
 	      lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 
-%% Method ->			      
-%%     F = list_to_atom("parse_" ++ atom_to_list(Method)),
-%%     ?DBG(F),
-%%     try
-%% 	  erlang:apply(?MODULE, F, [Elem, State])
-%%     catch
-%% 	  error: undef ->
-%% 	      parse_error(Elem, State);
-
-%% 	  Error : Reason ->
-%% 	      ?DBG({Error, Reason, erlang:get_stacktrace()}),
-%% 	      {Error, Reason, erlang:get_stacktrace()}
-
-%%     end
-
-
 %%%-----------------------------------------------------------------------------
 %%   Complex Data
 %%%-----------------------------------------------------------------------------
@@ -334,7 +317,7 @@ parse_ParameterNames(#xmlElement{content = Content} = E, S) ->
     	     parse_error(Elem, State)
      end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
-%% -spec parse_ParameterValueStruct(#xmlElement{},#parser{}) -> #parameter_value_struct{}.
+-spec parse_ParameterValueStruct(#xmlElement{},#parser{}) -> #parameter_value_struct{}.
 parse_ParameterValueStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:ParameterValueStruct', E, S),
     lists:foldl(fun(Elem, ParameterValueStruct) ->
@@ -372,7 +355,7 @@ parse_MethodList(#xmlElement{content = Content} = E, S) ->
     	     parse_error(Elem, State)
      end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
-%% -spec parse_DeviceIdStruct(#xmlElement{},#parser{}) -> #device_id_struct{}.
+-spec parse_DeviceIdStruct(#xmlElement{},#parser{}) -> #device_id_struct{}.
 parse_DeviceIdStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:DeviceIdStruct', E, S),
     lists:foldl(fun(Elem, DeviceIdStruct) ->
@@ -396,7 +379,7 @@ parse_DeviceIdStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #device_id_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_EventStruct(#xmlElement{},#parser{}) -> #event_struct{}.
+-spec parse_EventStruct(#xmlElement{},#parser{}) -> #event_struct{}.
 parse_EventStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:EventStruct', E, S),
     lists:foldl(fun(Elem, EventStruct) ->
@@ -411,7 +394,7 @@ parse_EventStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #event_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_EventList(#xmlElement{},#parser{}) -> #event_list{}.
+-spec parse_EventList(#xmlElement{},#parser{}) -> [#event_struct{}].
 parse_EventList(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:EventList', E, S),
     [case get_local_name(Elem#xmlElement.name) of			  
@@ -439,31 +422,46 @@ parse_ParameterInfoStruct(#xmlElement{content = Content} = E, S) ->
                 #parameter_info_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 -spec parse_ParameterInfoList(#xmlElement{},#parser{}) -> [#parameter_info_struct{}].
-parse_ParameterInfoList(#xmlElement{content = Content} = E, S) ->
+parse_ParameterInfoList(#xmlElement{content = Content} = E,
+			#parser{ns = Nss} = S) ->
     State = check_namespace('cwmp:ParameterInfoList', E, S),
-    [case get_local_name(Elem#xmlElement.name) of			  
-    	 'ParameterInfoStruct' ->
-    	     parse_ParameterInfoStruct(Elem, State);
-    	 _ ->
-    	     parse_error(Elem, State)
-     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
+    AttrName = get_QName(local_ns('soap-enc', Nss), 'arrayType'),
+    Value = parse_attribete(E, AttrName, int),
+    List = [case get_local_name(Elem#xmlElement.name) of			   
+		'ParameterInfoStruct' ->
+		    parse_ParameterInfoStruct(Elem, State);
+		_ ->
+		    parse_error(Elem, State)
+	    end || Elem <- Content, tr_soap_lib:xmlElement(Elem)],
+    if
+	length(List) == Value ->
+	    List;
+	true ->
+	    parse_error(E, State, "Array size")
+    end.
 
-%% -spec parse_AccessList(#xmlElement{},#parser{}) -> #access_list{}.
-parse_AccessList(#xmlElement{content = Content} = E, S) ->
+-spec parse_AccessList(#xmlElement{},#parser{}) -> [access_list_value_type()].
+parse_AccessList(#xmlElement{content = Content} = E, #parser{ns = Nss} = S) ->
     State = check_namespace('cwmp:AccessList', E, S),
-    lists:foldl(fun(Elem, AccessList) ->
-                        case get_local_name(Elem#xmlElement.name) of
+    AttrName = get_QName(local_ns('soap-enc', Nss), 'arrayType'),
+    Value = parse_attribete(E, AttrName, int),
+    List = [case get_local_name(Elem#xmlElement.name) of			   
+		'string' ->
+		    check_namespace('cwmp:string', Elem, State),
+		    parse_string(Elem);
+		_ ->
+		    parse_error(Elem, State)
+	    end || Elem <- Content, tr_soap_lib:xmlElement(Elem)],
+    if
+	length(List) == Value ->
+	    List;
+	true ->
+	    parse_error(E, State, "Array size")
+    end.
 
-                            'string' ->
-                                AccessList#access_list{string = parse_string(Elem)};
 
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #access_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetParameterAttributesStruct(#xmlElement{},#parser{}) -> #set_parameter_attributes_struct{}.
+-spec parse_SetParameterAttributesStruct(#xmlElement{},#parser{}) -> #set_parameter_attributes_struct{}.
 parse_SetParameterAttributesStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:SetParameterAttributesStruct', E, S),
     lists:foldl(fun(Elem, SetParameterAttributesStruct) ->
@@ -490,20 +488,25 @@ parse_SetParameterAttributesStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #set_parameter_attributes_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetParameterAttributesList(#xmlElement{},#parser{}) -> #set_parameter_attributes_list{}.
-parse_SetParameterAttributesList(#xmlElement{content = Content} = E, S) ->
+-spec parse_SetParameterAttributesList(#xmlElement{},#parser{}) -> #set_parameter_attributes_list{}.
+parse_SetParameterAttributesList(#xmlElement{content = Content} = E,
+				 #parser{ns = Nss} = S) ->
     State = check_namespace('cwmp:SetParameterAttributesList', E, S),
-    lists:foldl(fun(Elem, SetParameterAttributesList) ->
-                        case get_local_name(Elem#xmlElement.name) of
+    AttrName = get_QName(local_ns('soap-enc', Nss), 'arrayType'),
+    Value = parse_attribete(E, AttrName, int),
+    List = [case get_local_name(Elem#xmlElement.name) of			   
+		'SetParameterAttributesStruct' ->
+		    parse_SetParameterAttributesStruct(Elem, State);
+		_ ->
+		    parse_error(Elem, State)
+	    end || Elem <- Content, tr_soap_lib:xmlElement(Elem)],
+    if
+	length(List) == Value ->
+	    List;
+	true ->
+	    parse_error(E, State, "Array size")
+    end.
 
-                            'SetParameterAttributesStruct' ->
-                                SetParameterAttributesList#set_parameter_attributes_list{set_parameter_attributes_struct = parse_SetParameterAttributesStruct(Elem, State)};
-
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #set_parameter_attributes_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_ParameterAttributeStruct(#xmlElement{},#parser{}) -> #parameter_attribute_struct{}.
 parse_ParameterAttributeStruct(#xmlElement{content = Content} = E, S) ->
@@ -1718,11 +1721,18 @@ parse_AutonomousDUStateChangeCompleteResponse(_, _) -> #autonomous_du_state_chan
 %%% Unitary tetsts
 %%%-----------------------------------------------------------------------------
 
+main(File) ->
+    {Doc, _Rest} = xmerl_scan:file(File),
+    Rpc = parse(Doc, #parser{}),
+    io:format(">> ~p~n", [Rpc]),
+    ok.
+
+
 -ifdef(TEST).
 
 -include_lib("eunit/include/eunit.hrl").
 
-parse_root_test() ->
+parse_root_test() ->   
     T = ["../test/data/GetParameterValues.xml",
 	 "../test/data/FaultResponse.xml",
 	 "../test/data/Fault.xml",
@@ -1739,17 +1749,11 @@ parse_root_test() ->
 	 "../test/data/Simple.xml"
 	],
     A = array:from_list(T),
-    F = array:get(12, A),
-    ?DBG(F),
+    F = array:get(0,  A),
+    ?DBG(T),
     {Doc, _Rest} = xmerl_scan:file(F),
     Rpc = parse(Doc, #parser{}),
     ?DBG(Rpc),
     ok.
 
 -endif.
-
-parse_root_test(File) ->
-    {Doc, _Rest} = xmerl_scan:file(File),
-    Rpc = parse(Doc, #parser{}),
-    io:format(">> ~p~n", [Rpc]),
-    ok.

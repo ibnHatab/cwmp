@@ -284,8 +284,8 @@ parse_ExecutionEnvRef(E)      -> parse_string(E).
 parse_ExecutionUnitRefList(E) -> parse_string(E).
 parse_ExpirationDate(E)       -> parse_dateTime(E).
 parse_FailureURL(E)           -> parse_string(E).
-parse_FaultCode(E)               -> parse_unsignedInt(E).
-parse_FaultString(E)             -> parse_string(E).
+parse_FaultCode(E)            -> parse_unsignedInt(E).
+parse_FaultString(E)          -> parse_string(E).
 parse_FileSize(E)             -> parse_unsignedInt(E).
 parse_FileType(E)             -> parse_string(E).
 parse_InstanceNumber(E)       -> parse_unsignedInt(E).

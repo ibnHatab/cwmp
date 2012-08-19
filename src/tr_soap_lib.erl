@@ -9,15 +9,12 @@
 -include("tr69.hrl").
 -include("proto.hrl").
 
--import(lists, [map/2, reverse/1]).
--import(string, [join/2]).
-
 -export([read_xml/1, write_xml/1]).
 
 -export([return_error/2, parse_error/2, parse_error/3,
 	 parse_warning/2, parse_warning/3,
 	 get_QName/2, get_local_name/1,
-	 local_name/1, %FIXME: internal
+	 local_name/1, local_ns/2,
 	 xmlText/1,
 	 xmlElement/1
 	]).
@@ -26,6 +23,8 @@
 
 -export([match_cwmp_ns_and_version/1, check_namespace/3]).
 
+-import(lists, [map/2, reverse/1]).
+-import(string, [join/2]).
 
 %% @doc parse XML document from string
 -spec read_xml(string()) -> Result when

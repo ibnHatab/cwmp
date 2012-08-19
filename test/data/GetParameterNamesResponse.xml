@@ -10,7 +10,7 @@
  </soap-env:Header>
  <soap-env:Body>
    <cwmp:GetParameterNamesResponse>
-     <ParameterList soap:arrayType="cwmp:ParameterInfoStruct[3343]">
+     <ParameterList soap:arrayType="cwmp:ParameterInfoStruct[3]">
        <ParameterInfoStruct>
 	 <Name>InternetGatewayDevice.DeviceSummary</Name>
 	 <Writable>0</Writable>

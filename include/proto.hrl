@@ -286,19 +286,11 @@
 	  command_key :: command_key_type()
 	 }).
 
-%% -record(event_list,{
-%% 	  event_struct :: [#event_struct{}]
-%% 	 }).
-
 %%    Get Parameter Names Type Definitions
 -record(parameter_info_struct, {
 	  name :: string(),
 	  writable :: boolean()
 	 }).
-
-%% -record(parameter_info_list, {
-%% 	 parameter_info_struct :: [#parameter_info_struct{}]
-%% 	 }).
 
 %%    Get/Set Parameter Attributes Type Definitions
 
