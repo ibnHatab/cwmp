@@ -239,7 +239,7 @@ match_event_code(Code, Description) ->
 -spec parse_EventCodeType(#xmlElement{},#parser{}) -> event_code_type().
 parse_EventCodeType(Elem, State) ->
     String = parse_string(Elem),
-    case string:chr(String) of
+    case string:chr(String, $\s) of
 	0 ->
 	    parse_error(Elem, State);
 	Space ->

@@ -9,6 +9,10 @@
 -include("tr69.hrl").
 -include("proto.hrl").
 
+-export([parse_root_test/1]).
+
+
+
 -import(lists, [map/2, reverse/1, foldl/3]).
 
 -import(tr_soap_lib, [parse_error/2, return_error/2,
@@ -119,8 +123,8 @@ parse_Namespace(Nss) ->
     match_cwmp_ns_and_version(Nss).
 
 -spec parse_Envelope(#xmlElement{}, #parser{}) -> #envelope{}.
-parse_Envelope(#xmlElement{content = Content} = _Doc, #parser{ns=Nss} = S) ->
-    State = check_namespace('soap-env:Envelope', _Doc, S),
+parse_Envelope(#xmlElement{content = Content} = Doc, S) ->
+    State = check_namespace('soap-env:Envelope', Doc, S),
     lists:foldl(fun(Elem, Envelop) ->
                         case get_local_name(Elem#xmlElement.name) of
                             'Header' ->
@@ -165,11 +169,17 @@ parse_Body(#xmlElement{content = Content} = E, S) ->
 			      parse_SoapFault(Elem, State);
 			  Method ->			      
 			      F = list_to_atom("parse_" ++ atom_to_list(Method)),
-			      if is_function({?MODULE, F}, 2) ->
-				      apply(?MODULE, F, [Elem, State]);
-						%FIXME: deprecated tuple function 
-				 true -> 
-				      parse_error(Elem, State)
+			      ?DBG(F),
+			      try
+				  erlang:apply(?MODULE, F, [Elem, State])
+			      catch
+				  error: undef ->
+				      parse_error(Elem, State);
+				      
+				  Error : Reason ->
+				      ?DBG({Error, Reason, erlang:get_stacktrace()}),
+				      {Error, Reason, erlang:get_stacktrace()}
+					  
 			      end
 		      end
 	      end,
@@ -1668,7 +1678,7 @@ parse_AutonomousDUStateChangeComplete(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Results' ->
-                                AutonomousDUStateChangeComplete#autonomous_du_state_change_complete{results = parse_Results(Elem, State)};
+				AutonomousDUStateChangeComplete#autonomous_du_state_change_complete{results = parse_Results(Elem, State)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1690,24 +1700,25 @@ parse_AutonomousDUStateChangeCompleteResponse(_, _) -> #autonomous_du_state_chan
 -include_lib("eunit/include/eunit.hrl").
 
 parse_root_test() ->
-    {Doc, _Rest} = xmerl_scan:file(
-						%"../test/data/GetParameterValues.xml"
-						%"../test/data/FaultResponse.xml"
-		     "../test/data/Fault.xml"
-						%"../test/data/GetParameterAttributes.xml"
-						% "../test/data/GetParameterNamesResponse.xml"
-						% "../test/data/GetParameterNames.xml"
-						% "../test/data/GetParameterValues.xml"
-						%"../test/data/GetRPCMethodsResponse.xml"
-						%"../test/data/GetRPCMethods.xml"
-						%"../test/data/InformResponse.xml"
-		     %% "../test/data/Inform.xml"
-		     %% "../test/data/Reboot.xml"
-		     %% "../test/data/SetParameterValues.xml"
-		     %% "../test/data/Simple.xml"
-		    ),
-						%    ?DBG(Doc),
-    ?DBG(Doc),
+    T = ["../test/data/GetParameterValues.xml",
+	 "../test/data/FaultResponse.xml",
+	 "../test/data/Fault.xml",
+	 "../test/data/GetParameterAttributes.xml",
+	 "../test/data/GetParameterNamesResponse.xml",
+	 "../test/data/GetParameterNames.xml",
+	 "../test/data/GetParameterValues.xml",
+	 "../test/data/GetRPCMethodsResponse.xml",
+	 "../test/data/GetRPCMethods.xml",
+	 "../test/data/InformResponse.xml",
+	 "../test/data/Inform.xml",
+	 "../test/data/Reboot.xml",
+	 "../test/data/SetParameterValues.xml",
+	 "../test/data/Simple.xml"
+	],
+    A = array:from_list(T),
+    F = array:get(12, A),
+    ?DBG(F),
+    {Doc, _Rest} = xmerl_scan:file(F),
     Rpc = parse(Doc, #parser{}),
     ?DBG(Rpc),
     ok.
