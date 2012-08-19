@@ -1,8 +1,8 @@
+%%% File    : tr_soap_parser.erl
+%%% Description : SOAP Structure Parser for TR-069 RPC
 
 
 -module(tr_soap_parser).
-
--compile(export_all).
 
 -include_lib("xmerl/include/xmerl.hrl").
 
@@ -12,60 +12,86 @@
 -export([parse_root_test/1]).
 
 
-
--import(lists, [map/2, reverse/1, foldl/3]).
-
--import(tr_soap_lib, [parse_error/2, return_error/2,
-		      get_local_name/2, get_local_name/1, get_QName/2,
+-import(tr_soap_lib, [parse_error/2, get_local_name/1, get_QName/2,
 		      match_cwmp_ns_and_version/1, check_namespace/3]).
 
--import(tr_soap_types, [ parse_AccessListChange/2,
-			 parse_AccessListValueType/2, parse_ACSFaultCodeType/2,
-			 parse_ACSVendorFaultCodeType/2, parse_AnnounceURL/2, parse_Arg/2,
-			 parse_Command/2, parse_CommandKeyType/2, parse_CompleteTime/2,
-			 parse_CPEExtensionFaultCodeType/2, parse_CPEFaultCodeType/2,
-			 parse_CPEVendorFaultCodeType/2, parse_CurrentTime/2,
-			 parse_DeploymentUnitOperationType/2, %FIEME
-			 parse_DefaultDeploymentUnitOperationType/2, parse_DelaySeconds/2,
-			 parse_DeploymentUnitCPEFaultCodeType/2, parse_DeploymentUnitRef/2,
-			 parse_DeploymentUnitState/2, parse_DeploymentUnitUUID/2,
-			 parse_DownloadFileType/2, parse_EventCodeType/2,
-			 parse_ExecutionEnvRef/2, parse_ExecutionUnitRefList/2,
-			 parse_ExpirationDate/2, parse_FailureURL/2, parse_FaultCode/1,
-			 parse_FaultString/1, parse_FileSize/2, parse_InstanceNumber/2,
-			 parse_IsDownload/2, parse_IsTransferable/2, parse_Manufacturer/2,
-			 parse_MaxEnvelopes/2, parse_MaxRetries/2, parse_Mode/2, parse_Name/2,
-			 parse_Next/2, parse_NextLevel/2, parse_NextURL/2,
-			 parse_NotificationChange/2, parse_ObjectNameType/2,
-			 parse_OptionName/2, parse_OUI/2,
-			 parse_ParameterAttributeNotificationValueType/2,
-			 parse_ParameterKeyType/2, parse_ParameterName/2,
-			 parse_ParameterPath/2, parse_Password/2, parse_ProductClass/2,
-			 parse_Referer/2, parse_Resolved/2, parse_RetryCount/2,
-			 parse_SerialNumber/2, parse_StartDate/2, parse_StartTime/2,
-			 parse_State/2, parse_Status/2, parse_SuccessURL/2,
-			 parse_TargetFileName/2, parse_TimeWindowModeValueType/2,
-			 parse_TransferCompleteCPEFaultCodeType/2, parse_TransferFileType/2,
-			 parse_TransferStateType/2, parse_TransferURL/2,
-			 parse_UploadFileType/2, parse_URL/2, parse_UserMessage/2,
-			 parse_Username/2, parse_Value/2, parse_Version/2, parse_VoucherSN/2,
-			 parse_WindowEnd/2, parse_WindowStart/2, parse_Writable/2,
+-import(tr_soap_types, [
+			parse_AccessListChange/1,
+			parse_AnnounceURL/1,
+			parse_Arg/1,
+			parse_Command/1,
+			parse_CommandKeyType/1,
+			parse_CompleteTime/1,
+			parse_CurrentTime/1,
+			parse_DelaySeconds/1,
+			parse_DeploymentUnitOperationType/1,
+			parse_DeploymentUnitRef/1,
+			parse_DeploymentUnitState/1,
+			parse_EventCodeType/2,
+			parse_ExecutionEnvRef/1,
+			parse_ExecutionUnitRefList/1,
+			parse_ExpirationDate/1,
+			parse_FailureURL/1,
+			parse_FaultCode/1,
+			parse_FaultString/1,
+			parse_FileSize/1,
+			parse_FileType/1,
+			parse_InstanceNumber/1,
+			parse_IsDownload/1,
+			parse_IsTransferable/1,
+			parse_Manufacturer/1,
+			parse_MaxEnvelopes/1,
+			parse_MaxRetries/1,
+			parse_Mode/1,
+			parse_Name/1,
+			parse_Next/1,
+			parse_NextLevel/1,
+			parse_NextURL/1,
+			parse_Notification/1,
+			parse_NotificationChange/1,
+			parse_ObjectNameType/1,
+			parse_OptionName/1,
+			parse_OUI/1,
+			parse_ParameterKeyType/1,
+			parse_ParameterPath/1,
+			parse_Password/1,
+			parse_ProductClass/1,
+			parse_Referer/1,
+			parse_Resolved/1,
+			parse_RetryCount/1,
+			parse_SerialNumber/1,
+			parse_StartDate/1,
+			parse_StartTime/1,
+			parse_State/1,
+			parse_Status/1,
+			parse_SuccessURL/1,
+			parse_TargetFileName/1,
+			parse_TransferURL/1,
+			parse_URL/1,
+			parse_UserMessage/1,
+			parse_Username/1,
+			parse_UUID/1,
+			parse_Value/1,
+			parse_Version/1,
+			parse_VoucherSN/1,
+			parse_WindowEnd/1,
+			parse_WindowMode/1,
+			parse_WindowStart/1,
+			parse_Writable/1,
 
-			 parse_unsignedInt/1,
-			 parse_string/1,
-			 parse_string/2,
-			 parse_boolean/1,
-			 parse_int/1,
-			 parse_dateTime/1,
-			 parse_base64/1,
-			 parse_anyURI/1,
-						%			parse_anySimpleType/1
-			 parse_attribete/3,
-			 parse_anySimpleType/2
+			parse_string/1,
+			parse_boolean/1,
+						%			 parse_int/1,
+						%			 parse_dateTime/1,
+			parse_base64/1,
+			parse_anyURI/1,
+			parse_attribete/3,
+			parse_anySimpleType/2
 		       ]).
 
 
 -export([parser/1, parse/1]).
+
 
 %%%-----------------------------------------------------------------------------
 %%%        Local API
@@ -165,77 +191,84 @@ parse_Body(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('soap-env:Body', E, S),
     lists:map(fun(Elem) ->
 		      case get_local_name(Elem#xmlElement.name) of
-			  'Fault' ->
-			      parse_SoapFault(Elem, State);
-			  Method ->			      
-			      F = list_to_atom("parse_" ++ atom_to_list(Method)),
-			      ?DBG(F),
-			      try
-				  erlang:apply(?MODULE, F, [Elem, State])
-			      catch
-				  error: undef ->
-				      parse_error(Elem, State);
-				      
-				  Error : Reason ->
-				      ?DBG({Error, Reason, erlang:get_stacktrace()}),
-				      {Error, Reason, erlang:get_stacktrace()}
-					  
-			      end
+			  'Fault'                                       -> parse_SoapFault(Elem, State);
+			  'GetRPCMethods'				-> parse_GetRPCMethods(Elem, State);
+			  'GetRPCMethodsResponse'			-> parse_GetRPCMethodsResponse(Elem, State);
+			  'SetParameterValues'				-> parse_SetParameterValues(Elem, State);
+			  'SetParameterValuesResponse'			-> parse_SetParameterValuesResponse(Elem, State);
+			  'GetParameterValues'				-> parse_GetParameterValues(Elem, State);
+			  'GetParameterValuesResponse'			-> parse_GetParameterValuesResponse(Elem, State);
+			  'GetParameterNames'				-> parse_GetParameterNames(Elem, State);
+			  'GetParameterNamesResponse'			-> parse_GetParameterNamesResponse(Elem, State);
+			  'SetParameterAttributes'			-> parse_SetParameterAttributes(Elem, State);
+			  'SetParameterAttributesResponse'		-> parse_SetParameterAttributesResponse(Elem, State);
+			  'GetParameterAttributes'			-> parse_GetParameterAttributes(Elem, State);
+			  'GetParameterAttributesResponse'		-> parse_GetParameterAttributesResponse(Elem, State);
+			  'AddObject'					-> parse_AddObject(Elem, State);
+			  'AddObjectResponse'				-> parse_AddObjectResponse(Elem, State);
+			  'DeleteObject'				-> parse_DeleteObject(Elem, State);
+			  'DeleteObjectResponse'			-> parse_DeleteObjectResponse(Elem, State);
+			  'Download'					-> parse_Download(Elem, State);
+			  'DownloadResponse'				-> parse_DownloadResponse(Elem, State);
+			  'Reboot'					-> parse_Reboot(Elem, State);
+			  'RebootResponse'				-> parse_RebootResponse(Elem, State);
+			  'GetQueuedTransfers'				-> parse_GetQueuedTransfers(Elem, State);
+			  'GetQueuedTransfersResponse'			-> parse_GetQueuedTransfersResponse(Elem, State);
+			  'ScheduleInform'				-> parse_ScheduleInform(Elem, State);
+			  'ScheduleInformResponse'			-> parse_ScheduleInformResponse(Elem, State);
+			  'SetVouchers'					-> parse_SetVouchers(Elem, State);
+			  'SetVouchersResponse'				-> parse_SetVouchersResponse(Elem, State);
+			  'GetOptions'					-> parse_GetOptions(Elem, State);
+			  'GetOptionsResponse'				-> parse_GetOptionsResponse(Elem, State);
+			  'Upload'					-> parse_Upload(Elem, State);
+			  'UploadResponse'				-> parse_UploadResponse(Elem, State);
+			  'FactoryReset'				-> parse_FactoryReset(Elem, State);
+			  'FactoryResetResponse'			-> parse_FactoryResetResponse(Elem, State);
+			  'GetAllQueuedTransfers'			-> parse_GetAllQueuedTransfers(Elem, State);
+			  'GetAllQueuedTransfersResponse'		-> parse_GetAllQueuedTransfersResponse(Elem, State);
+			  'ScheduleDownload'				-> parse_ScheduleDownload(Elem, State);
+			  'ScheduleDownloadResponse'			-> parse_ScheduleDownloadResponse(Elem, State);
+			  'CancelTransfer'				-> parse_CancelTransfer(Elem, State);
+			  'CancelTransferResponse'			-> parse_CancelTransferResponse(Elem, State);
+			  'ChangeDUState'				-> parse_ChangeDUState(Elem, State);
+			  'ChangeDUStateResponse'			-> parse_ChangeDUStateResponse(Elem, State);
+			  'Inform'					-> parse_Inform(Elem, State);
+			  'InformResponse'				-> parse_InformResponse(Elem, State);
+			  'TransferComplete'				-> parse_TransferComplete(Elem, State);
+			  'TransferCompleteResponse'			-> parse_TransferCompleteResponse(Elem, State);
+			  'AutonomousTransferComplete'			-> parse_AutonomousTransferComplete(Elem, State);
+			  'AutonomousTransferCompleteResponse'		-> parse_AutonomousTransferCompleteResponse(Elem, State);
+			  'Kicked'					-> parse_Kicked(Elem, State);
+			  'KickedResponse'				-> parse_KickedResponse(Elem, State);
+			  'RequestDownload'				-> parse_RequestDownload(Elem, State);
+			  'RequestDownloadResponse'			-> parse_RequestDownloadResponse(Elem, State);
+			  'DUStateChangeComplete'			-> parse_DUStateChangeComplete(Elem, State);
+			  'DUStateChangeCompleteResponse'		-> parse_DUStateChangeCompleteResponse(Elem, State);
+			  'AutonomousDUStateChangeComplete'		-> parse_AutonomousDUStateChangeComplete(Elem, State);
+			  'AutonomousDUStateChangeCompleteResponse'	-> parse_AutonomousDUStateChangeCompleteResponse(Elem, State);
+			  _ ->
+			      parse_error(Elem, State)
+
 		      end
 	      end,
 	      lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 
-%%%-----------------------------------------------------------------------------
-%% Complex Type Mapping
-%%%-----------------------------------------------------------------------------
+%% Method ->			      
+%%     F = list_to_atom("parse_" ++ atom_to_list(Method)),
+%%     ?DBG(F),
+%%     try
+%% 	  erlang:apply(?MODULE, F, [Elem, State])
+%%     catch
+%% 	  error: undef ->
+%% 	      parse_error(Elem, State);
 
-%%%parse_AccessList(E,_S) -> parse_AccessList(E,_S).
-%%%parse_AllQueuedTransferStruct(E,_S) -> parse_AllQueuedTransferStruct(E,_S).
-						%parse_ArgStruct(E,_S) -> parse_ArgStruct(E,_S).
-parse_base64(E,_S) -> parse_base64(E).
-parse_CommandKey(E,_S) -> parse_CommandKeyType(E,_S). %%FIXME: inline
-parse_CurrentState(E,_S) -> parse_DeploymentUnitState(E,_S).
-parse_DeviceId(E,_S) -> parse_DeviceIdStruct(E,_S).
-parse_EventCode(E,_S) -> parse_EventCodeType(E,_S).
-parse_Event(E,_S) -> parse_EventList(E,_S).
-%%%parse_EventStruct(E,_S) -> parse_EventStruct(E,_S).
-%%parse_Fault(E,_S) -> parse_DeploymentUnitFaultStruct(E,_S).
-parse_FaultStruct(E,_S) -> parse_TransferCompleteFaultStruct(E,_S).
-%% parse_FileTypeArg(E,_S) -> parse_FileTypeArg(E,_S).
-parse_FileType(E,_S) -> parse_DownloadFileType(E,_S).
-%% parse_FileType(E,_S) -> parse_TransferFileType(E,_S).
-%% parse_FileType(E,_S) -> parse_UploadFileType(E,_S).
-%%%parse_MethodList(E,_S) -> parse_MethodList(E,_S).
-parse_Notification(E,_S) -> parse_ParameterAttributeNotificationValueType(E,_S).
-parse_ObjectName(E,_S) -> parse_ObjectNameType(E,_S).
-parse_OperationPerformed(E,_S) -> parse_DeploymentUnitOperationType(E,_S).
-parse_Operations(E,_S) -> parse_OperationStruct(E,_S).
-%% parse_OptionList(E,_S) -> parse_OptionList(E,_S).
-						%parse_OptionStruct(E,_S) -> parse_OptionStruct(E,_S).
-%%parse_ParameterAttributeStruct(E,_S) -> parse_ParameterAttributeStruct(E,_S).
-%%%parse_ParameterInfoStruct(E,_S) -> parse_ParameterInfoStruct(E,_S).
-parse_ParameterKey(E,_S) -> parse_ParameterKeyType(E,_S).
-parse_ParameterList(E,_S) -> parse_ParameterAttributeList(E,_S).
-%% parse_ParameterList(E,_S) -> parse_ParameterInfoList(E,_S).
-%% parse_ParameterList(E,_S) -> parse_ParameterValueList(E,_S).
-%% parse_ParameterList(E,_S) -> parse_SetParameterAttributesList(E,_S).
-%%%parse_ParameterNames(E,_S) -> parse_ParameterNames(E,_S).
-%%%parse_ParameterValueStruct(E,_S) -> parse_ParameterValueStruct(E,_S).
-%%%parse_QueuedTransferStruct(E,_S) -> parse_QueuedTransferStruct(E,_S).
-parse_Results(E,_S) -> parse_AutonOpResultStruct(E,_S).
-%% parse_Results(E,_S) -> parse_OpResultStruct(E,_S).
-%%parse_SetParameterAttributesStruct(E,_S) -> parse_SetParameterAttributesStruct(E,_S).
-						%parse_State(E,_S) -> parse_TransferStateType(E,_S).
-%%parse_string(E,_S) -> parse_AccessListValueType(E,_S).
-%%parse_TimeWindowList(E,_S) -> parse_TimeWindowList(E,_S).
-%%parse_TimeWindowStruct(E,_S) -> parse_TimeWindowStruct(E,_S).
-%%parse_TransferList(E,_S) -> parse_AllTransferList(E,_S).
-						%parse_TransferList(E,_S) -> parse_TransferList(E,_S).
-parse_UUID(E,_S) -> parse_DeploymentUnitUUID(E,_S).
-						%parse_Value(E,_S) -> parse_anySimpleType(E,_S).
-%%%parse_VoucherList(E,_S) -> parse_VoucherList(E,_S).
-parse_WindowMode(E,_S) -> parse_TimeWindowModeValueType(E,_S).
+%% 	  Error : Reason ->
+%% 	      ?DBG({Error, Reason, erlang:get_stacktrace()}),
+%% 	      {Error, Reason, erlang:get_stacktrace()}
+
+%%     end
+
 
 %%%-----------------------------------------------------------------------------
 %%   Complex Data
@@ -255,37 +288,36 @@ parse_HoldRequests(Elem, #parser{ns=Nss} = _State) ->
     MustuNderstand = parse_attribete(Elem, QName, boolean),
     #id{mustUnderstand = MustuNderstand, value = Value}.
 
-%% -spec parse_TransferCompleteFaultStruct(#xmlElement{},#parser{}) -> #transfer_complete_fault_struct{}.
+-spec parse_TransferCompleteFaultStruct(#xmlElement{},#parser{}) -> #transfer_complete_fault_struct{}.
 parse_TransferCompleteFaultStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:TransferCompleteFaultStruct', E, S),
-    lists:foldl(fun(Elem, _TransferCompleteFaultStruct) ->
+    lists:foldl(fun(Elem, TransferCompleteFaultStruct) ->
                         case get_local_name(Elem#xmlElement.name) of
 
-                            %% 'FaultCode' ->
-                            %%     TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_code = parse_FaultCode(Elem, State)};
+			    'FaultCode' ->
+				TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_code = parse_FaultCode(Elem)};
 
-                            %% 'FaultString' ->
-                            %%     TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_string = parse_FaultString(Elem, State)};
-			    ok -> ok; %typer fix
+			    'FaultString' ->
+				TransferCompleteFaultStruct#transfer_complete_fault_struct{fault_string = parse_FaultString(Elem)};
+
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #transfer_complete_fault_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_DeploymentUnitFaultStruct(#xmlElement{},#parser{}) -> #deployment_unit_fault_struct{}.
+-spec parse_DeploymentUnitFaultStruct(#xmlElement{},#parser{}) -> #deployment_unit_fault_struct{}.
 parse_DeploymentUnitFaultStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:DeploymentUnitFaultStruct', E, S),
-    lists:foldl(fun(Elem, _DeploymentUnitFaultStruct) ->
+    lists:foldl(fun(Elem, DeploymentUnitFaultStruct) ->
                         case get_local_name(Elem#xmlElement.name) of
 
-                            %% 'FaultCode' ->
-                            %%     DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_code = parse_FaultCode(Elem, State)};
+			    'FaultCode' ->
+				DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_code = parse_FaultCode(Elem)};
 
-                            %% 'FaultString' ->
-                            %%     DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_string = parse_FaultString(Elem, State)};
+			    'FaultString' ->
+				DeploymentUnitFaultStruct#deployment_unit_fault_struct{fault_string = parse_FaultString(Elem)};
 
-			    ok -> ok; %typer fix
                             _ ->
                                 parse_error(Elem, State)
                         end
@@ -309,7 +341,7 @@ parse_ParameterValueStruct(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Name' ->
-                                ParameterValueStruct#parameter_value_struct{name = parse_Name(Elem, State)};
+                                ParameterValueStruct#parameter_value_struct{name = parse_Name(Elem)};
 
                             'Value' ->
                                 ParameterValueStruct#parameter_value_struct{value = parse_anySimpleType(Elem, State)};
@@ -347,16 +379,16 @@ parse_DeviceIdStruct(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Manufacturer' ->
-                                DeviceIdStruct#device_id_struct{manufacturer = parse_Manufacturer(Elem, State)};
+                                DeviceIdStruct#device_id_struct{manufacturer = parse_Manufacturer(Elem)};
 
                             'OUI' ->
-                                DeviceIdStruct#device_id_struct{oui = parse_OUI(Elem, State)};
+                                DeviceIdStruct#device_id_struct{oui = parse_OUI(Elem)};
 
                             'ProductClass' ->
-                                DeviceIdStruct#device_id_struct{product_class = parse_ProductClass(Elem, State)};
+                                DeviceIdStruct#device_id_struct{product_class = parse_ProductClass(Elem)};
 
                             'SerialNumber' ->
-                                DeviceIdStruct#device_id_struct{serial_number = parse_SerialNumber(Elem, State)};
+                                DeviceIdStruct#device_id_struct{serial_number = parse_SerialNumber(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -370,9 +402,9 @@ parse_EventStruct(#xmlElement{content = Content} = E, S) ->
     lists:foldl(fun(Elem, EventStruct) ->
                         case get_local_name(Elem#xmlElement.name) of
                             'EventCode' ->
-                                EventStruct#event_struct{event_code = parse_EventCode(Elem, State)};
+                                EventStruct#event_struct{event_code = parse_EventCodeType(Elem, State)};
                             'CommandKey' ->
-                                EventStruct#event_struct{command_key = parse_CommandKey(Elem, State)};
+                                EventStruct#event_struct{command_key = parse_CommandKeyType(Elem)};
                             _ ->
                                 parse_error(Elem, State)
                         end
@@ -395,10 +427,10 @@ parse_ParameterInfoStruct(#xmlElement{content = Content} = E, S) ->
     lists:foldl(fun(Elem, ParameterInfoStruct) ->
                         case get_local_name(Elem#xmlElement.name) of
                             'Name' ->
-                                ParameterInfoStruct#parameter_info_struct{name = parse_Name(Elem, State)};
+                                ParameterInfoStruct#parameter_info_struct{name = parse_Name(Elem)};
 
                             'Writable' ->
-                                ParameterInfoStruct#parameter_info_struct{writable = parse_Writable(Elem, State)};
+                                ParameterInfoStruct#parameter_info_struct{writable = parse_Writable(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -423,7 +455,7 @@ parse_AccessList(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'string' ->
-                                AccessList#access_list{string = parse_string(Elem, State)};
+                                AccessList#access_list{string = parse_string(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -438,16 +470,16 @@ parse_SetParameterAttributesStruct(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Name' ->
-                                SetParameterAttributesStruct#set_parameter_attributes_struct{name = parse_Name(Elem, State)};
+                                SetParameterAttributesStruct#set_parameter_attributes_struct{name = parse_Name(Elem)};
 
                             'NotificationChange' ->
-                                SetParameterAttributesStruct#set_parameter_attributes_struct{notification_change = parse_NotificationChange(Elem, State)};
+                                SetParameterAttributesStruct#set_parameter_attributes_struct{notification_change = parse_NotificationChange(Elem)};
 
                             'Notification' ->
-                                SetParameterAttributesStruct#set_parameter_attributes_struct{notification = parse_Notification(Elem, State)};
+                                SetParameterAttributesStruct#set_parameter_attributes_struct{notification = parse_Notification(Elem)};
 
                             'AccessListChange' ->
-                                SetParameterAttributesStruct#set_parameter_attributes_struct{access_list_change = parse_AccessListChange(Elem, State)};
+                                SetParameterAttributesStruct#set_parameter_attributes_struct{access_list_change = parse_AccessListChange(Elem)};
 
                             'AccessList' ->
                                 SetParameterAttributesStruct#set_parameter_attributes_struct{access_list = parse_AccessList(Elem, State)};
@@ -480,10 +512,10 @@ parse_ParameterAttributeStruct(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Name' ->
-                                ParameterAttributeStruct#parameter_attribute_struct{name = parse_Name(Elem, State)};
+                                ParameterAttributeStruct#parameter_attribute_struct{name = parse_Name(Elem)};
 
                             'Notification' ->
-                                ParameterAttributeStruct#parameter_attribute_struct{notification = parse_Notification(Elem, State)};
+                                ParameterAttributeStruct#parameter_attribute_struct{notification = parse_Notification(Elem)};
 
                             'AccessList' ->
                                 ParameterAttributeStruct#parameter_attribute_struct{access_list = parse_AccessList(Elem, State)};
@@ -516,19 +548,19 @@ parse_TimeWindowStruct(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'WindowStart' ->
-                                TimeWindowStruct#time_window_struct{window_start = parse_WindowStart(Elem, State)};
+                                TimeWindowStruct#time_window_struct{window_start = parse_WindowStart(Elem)};
 
                             'WindowEnd' ->
-                                TimeWindowStruct#time_window_struct{window_end = parse_WindowEnd(Elem, State)};
+                                TimeWindowStruct#time_window_struct{window_end = parse_WindowEnd(Elem)};
 
                             'WindowMode' ->
-                                TimeWindowStruct#time_window_struct{window_mode = parse_WindowMode(Elem, State)};
+                                TimeWindowStruct#time_window_struct{window_mode = parse_WindowMode(Elem)};
 
                             'UserMessage' ->
-                                TimeWindowStruct#time_window_struct{user_message = parse_UserMessage(Elem, State)};
+                                TimeWindowStruct#time_window_struct{user_message = parse_UserMessage(Elem)};
 
                             'MaxRetries' ->
-                                TimeWindowStruct#time_window_struct{max_retries = parse_MaxRetries(Elem, State)};
+                                TimeWindowStruct#time_window_struct{max_retries = parse_MaxRetries(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -558,10 +590,10 @@ parse_QueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
-                                QueuedTransferStruct#queued_transfer_struct{command_key = parse_CommandKey(Elem, State)};
+                                QueuedTransferStruct#queued_transfer_struct{command_key = parse_CommandKeyType(Elem)};
 
                             'State' ->
-                                QueuedTransferStruct#queued_transfer_struct{state = parse_State(Elem, State)};
+                                QueuedTransferStruct#queued_transfer_struct{state = parse_State(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -569,7 +601,7 @@ parse_QueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #queued_transfer_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_TransferList(#xmlElement{},#parser{}) -> #transfer_list{}.
+-spec parse_TransferList(#xmlElement{},#parser{}) -> #transfer_list{}.
 parse_TransferList(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:TransferList', E, S),
     lists:foldl(fun(Elem, TransferList) ->
@@ -591,22 +623,22 @@ parse_AllQueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{command_key = parse_CommandKey(Elem, State)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{command_key = parse_CommandKeyType(Elem)};
 
                             'State' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{state = parse_State(Elem, State)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{state = parse_State(Elem)};
 
                             'IsDownload' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{is_download = parse_IsDownload(Elem, State)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{is_download = parse_IsDownload(Elem)};
 
                             'FileType' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{file_type = parse_FileType(Elem, State)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{file_type = parse_FileType(Elem)};
 
                             'FileSize' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{file_size = parse_FileSize(Elem, State)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{file_size = parse_FileSize(Elem)};
 
                             'TargetFileName' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{target_file_name = parse_TargetFileName(Elem, State)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{target_file_name = parse_TargetFileName(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -614,53 +646,50 @@ parse_AllQueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #all_queued_transfer_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AllTransferList(#xmlElement{},#parser{}) -> #all_transfer_list{}.
+-spec parse_AllTransferList(#xmlElement{},#parser{}) -> [#all_queued_transfer_struct{}].
 parse_AllTransferList(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:AllTransferList', E, S),
-    lists:foldl(fun(Elem, AllTransferList) ->
-                        case get_local_name(Elem#xmlElement.name) of
+    [case get_local_name(Elem#xmlElement.name) of			  
+	 'AllQueuedTransferStruct' ->
+	     parse_AllQueuedTransferStruct(Elem, State);
+	 _ ->
+	     parse_error(Elem, State)
+     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
 
-                            'AllQueuedTransferStruct' ->
-                                AllTransferList#all_transfer_list{all_queued_transfer_struct = parse_AllQueuedTransferStruct(Elem, State)};
-
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #all_transfer_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% -spec parse_OperationStruct(#xmlElement{},#parser{}) -> #operation_struct{}.
+-spec parse_OperationStruct(#xmlElement{},#parser{}) -> operation_struct().
 parse_OperationStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:OperationStruct', E, S),
-    lists:foldl(fun(Elem, _OperationStruct) ->
-                        case get_local_name(Elem#xmlElement.name) of
+    [case get_local_name(Elem#xmlElement.name) of 
+	 'InstallOpStruct' ->
+	     parse_InstallOpStruct(Elem, State);
+	 'UpdateOpStruct' ->
+	     parse_UpdateOpStruct(Elem, State);
+	 'UninstallOpStruct' ->
+	     parse_UninstallOpStruct(Elem, State);
+	 _ ->
+	     parse_error(Elem, State)
+     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].   
 
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #operation_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
-%% -spec parse_InstallOpStruct(#xmlElement{},#parser{}) -> #install_op_struct{}.
+-spec parse_InstallOpStruct(#xmlElement{},#parser{}) -> #install_op_struct{}.
 parse_InstallOpStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:InstallOpStruct', E, S),
     lists:foldl(fun(Elem, InstallOpStruct) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'URL' ->
-                                InstallOpStruct#install_op_struct{url = parse_URL(Elem, State)};
+                                InstallOpStruct#install_op_struct{url = parse_URL(Elem)};
 
                             'UUID' ->
-                                InstallOpStruct#install_op_struct{uuid = parse_UUID(Elem, State)};
+                                InstallOpStruct#install_op_struct{uuid = parse_UUID(Elem)};
 
                             'Username' ->
-                                InstallOpStruct#install_op_struct{username = parse_Username(Elem, State)};
+                                InstallOpStruct#install_op_struct{username = parse_Username(Elem)};
 
                             'Password' ->
-                                InstallOpStruct#install_op_struct{password = parse_Password(Elem, State)};
+                                InstallOpStruct#install_op_struct{password = parse_Password(Elem)};
 
                             'ExecutionEnvRef' ->
-                                InstallOpStruct#install_op_struct{execution_env_ref = parse_ExecutionEnvRef(Elem, State)};
+                                InstallOpStruct#install_op_struct{execution_env_ref = parse_ExecutionEnvRef(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -668,86 +697,80 @@ parse_InstallOpStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #install_op_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_UpdateOpStruct(#xmlElement{},#parser{}) -> #update_op_struct{}.
+-spec parse_UpdateOpStruct(#xmlElement{},#parser{}) -> #update_op_struct{}.
 parse_UpdateOpStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:UpdateOpStruct', E, S),
     lists:foldl(fun(Elem, UpdateOpStruct) ->
                         case get_local_name(Elem#xmlElement.name) of
-
                             'UUID' ->
-                                UpdateOpStruct#update_op_struct{uuid = parse_UUID(Elem, State)};
+                                UpdateOpStruct#update_op_struct{uuid = parse_UUID(Elem)};
 
                             'Version' ->
-                                UpdateOpStruct#update_op_struct{version = parse_Version(Elem, State)};
+                                UpdateOpStruct#update_op_struct{version = parse_Version(Elem)};
 
                             'URL' ->
-                                UpdateOpStruct#update_op_struct{url = parse_URL(Elem, State)};
+                                UpdateOpStruct#update_op_struct{url = parse_URL(Elem)};
 
                             'Username' ->
-                                UpdateOpStruct#update_op_struct{username = parse_Username(Elem, State)};
+                                UpdateOpStruct#update_op_struct{username = parse_Username(Elem)};
 
                             'Password' ->
-                                UpdateOpStruct#update_op_struct{password = parse_Password(Elem, State)};
-
+                                UpdateOpStruct#update_op_struct{password = parse_Password(Elem)};
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #update_op_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_UninstallOpStruct(#xmlElement{},#parser{}) -> #uninstall_op_struct{}.
+-spec parse_UninstallOpStruct(#xmlElement{},#parser{}) -> #uninstall_op_struct{}.
 parse_UninstallOpStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:UninstallOpStruct', E, S),
     lists:foldl(fun(Elem, UninstallOpStruct) ->
                         case get_local_name(Elem#xmlElement.name) of
-
                             'UUID' ->
-                                UninstallOpStruct#uninstall_op_struct{uuid = parse_UUID(Elem, State)};
-
+				UninstallOpStruct#uninstall_op_struct{uuid = parse_UUID(Elem)};
                             'Version' ->
-                                UninstallOpStruct#uninstall_op_struct{version = parse_Version(Elem, State)};
-
+                                UninstallOpStruct#uninstall_op_struct{version = parse_Version(Elem)};
                             'ExecutionEnvRef' ->
-                                UninstallOpStruct#uninstall_op_struct{execution_env_ref = parse_ExecutionEnvRef(Elem, State)};
-
+                                UninstallOpStruct#uninstall_op_struct{execution_env_ref = parse_ExecutionEnvRef(Elem)};
                             _ ->
                                 parse_error(Elem, State)
                         end
                 end,
                 #uninstall_op_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_OpResultStruct(#xmlElement{},#parser{}) -> #op_result_struct{}.
+-spec parse_OpResultStruct(#xmlElement{},#parser{}) -> #op_result_struct{}.
 parse_OpResultStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:OpResultStruct', E, S),
     lists:foldl(fun(Elem, OpResultStruct) ->
-                        case get_local_name(Elem#xmlElement.name) of
+			case get_local_name(Elem#xmlElement.name) of
 
                             'UUID' ->
-                                OpResultStruct#op_result_struct{uuid = parse_UUID(Elem, State)};
+                                OpResultStruct#op_result_struct{uuid = parse_UUID(Elem)};
 
                             'DeploymentUnitRef' ->
-                                OpResultStruct#op_result_struct{deployment_unit_ref = parse_DeploymentUnitRef(Elem, State)};
+                                OpResultStruct#op_result_struct{deployment_unit_ref = parse_DeploymentUnitRef(Elem)};
 
                             'Version' ->
-                                OpResultStruct#op_result_struct{version = parse_Version(Elem, State)};
+                                OpResultStruct#op_result_struct{version = parse_Version(Elem)};
 
                             'CurrentState' ->
-                                OpResultStruct#op_result_struct{current_state = parse_CurrentState(Elem, State)};
+                                OpResultStruct#op_result_struct{current_state = parse_DeploymentUnitState(Elem)};
 
                             'Resolved' ->
-                                OpResultStruct#op_result_struct{resolved = parse_Resolved(Elem, State)};
+                                OpResultStruct#op_result_struct{resolved = parse_Resolved(Elem)};
 
                             'ExecutionUnitRefList' ->
-                                OpResultStruct#op_result_struct{execution_unit_ref_list = parse_ExecutionUnitRefList(Elem, State)};
+                                OpResultStruct#op_result_struct{execution_unit_ref_list = parse_ExecutionUnitRefList(Elem)};
 
                             'StartTime' ->
-                                OpResultStruct#op_result_struct{start_time = parse_StartTime(Elem, State)};
+                                OpResultStruct#op_result_struct{start_time = parse_StartTime(Elem)};
 
                             'CompleteTime' ->
-                                OpResultStruct#op_result_struct{complete_time = parse_CompleteTime(Elem, State)};
+                                OpResultStruct#op_result_struct{complete_time = parse_CompleteTime(Elem)};
 
                             'Fault' ->
-                                OpResultStruct#op_result_struct{fault = parse_Fault(Elem, State)};
+                                OpResultStruct#op_result_struct{fault = parse_DeploymentUnitFaultStruct(Elem, State)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -755,14 +778,14 @@ parse_OpResultStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #op_result_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AutonOpResultStruct(#xmlElement{},#parser{}) -> #auton_op_result_struct{}.
+-spec parse_AutonOpResultStruct(#xmlElement{},#parser{}) -> #auton_op_result_struct{}.
 parse_AutonOpResultStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:AutonOpResultStruct', E, S),
     lists:foldl(fun(Elem, AutonOpResultStruct) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'OperationPerformed' ->
-                                AutonOpResultStruct#auton_op_result_struct{operation_performed = parse_OperationPerformed(Elem, State)};
+                                AutonOpResultStruct#auton_op_result_struct{operation_performed = parse_DeploymentUnitOperationType(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -777,7 +800,7 @@ parse_VoucherList(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'base64' ->
-                                VoucherList#voucher_list{base64 = parse_base64(Elem, State)};
+                                VoucherList#voucher_list{base64 = parse_base64(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -792,25 +815,25 @@ parse_OptionStruct(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'OptionName' ->
-                                OptionStruct#option_struct{option_name = parse_OptionName(Elem, State)};
+                                OptionStruct#option_struct{option_name = parse_OptionName(Elem)};
 
                             'VoucherSN' ->
-                                OptionStruct#option_struct{voucher_sn = parse_VoucherSN(Elem, State)};
+                                OptionStruct#option_struct{voucher_sn = parse_VoucherSN(Elem)};
 
                             'State' ->
-                                OptionStruct#option_struct{state = parse_State(Elem, State)};
+                                OptionStruct#option_struct{state = parse_State(Elem)};
 
                             'Mode' ->
-                                OptionStruct#option_struct{mode = parse_Mode(Elem, State)};
+                                OptionStruct#option_struct{mode = parse_Mode(Elem)};
 
                             'StartDate' ->
-                                OptionStruct#option_struct{start_date = parse_StartDate(Elem, State)};
+                                OptionStruct#option_struct{start_date = parse_StartDate(Elem)};
 
                             'ExpirationDate' ->
-                                OptionStruct#option_struct{expiration_date = parse_ExpirationDate(Elem, State)};
+                                OptionStruct#option_struct{expiration_date = parse_ExpirationDate(Elem)};
 
                             'IsTransferable' ->
-                                OptionStruct#option_struct{is_transferable = parse_IsTransferable(Elem, State)};
+                                OptionStruct#option_struct{is_transferable = parse_IsTransferable(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -840,10 +863,10 @@ parse_ArgStruct(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Name' ->
-                                ArgStruct#arg_struct{name = parse_Name(Elem, State)};
+                                ArgStruct#arg_struct{name = parse_Name(Elem)};
 
                             'Value' ->
-                                ArgStruct#arg_struct{value = parse_Value(Elem, State)};
+                                ArgStruct#arg_struct{value = parse_Value(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -965,7 +988,7 @@ parse_SetParameterValues(#xmlElement{content = Content} = E, S) ->
                                 SetParameterValues#set_parameter_values{parameter_list = parse_ParameterValueList(Elem, State)};
 
                             'ParameterKey' ->
-                                SetParameterValues#set_parameter_values{parameter_key = parse_ParameterKey(Elem, State)};
+                                SetParameterValues#set_parameter_values{parameter_key = parse_ParameterKeyType(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -980,7 +1003,7 @@ parse_SetParameterValuesResponse(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Status' ->
-                                SetParameterValuesResponse#set_parameter_values_response{status = parse_Status(Elem, State)};
+                                SetParameterValuesResponse#set_parameter_values_response{status = parse_Status(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1025,10 +1048,10 @@ parse_GetParameterNames(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'ParameterPath' ->
-                                GetParameterNames#get_parameter_names{parameter_path = parse_ParameterPath(Elem, State)};
+                                GetParameterNames#get_parameter_names{parameter_path = parse_ParameterPath(Elem)};
 
                             'NextLevel' ->
-                                GetParameterNames#get_parameter_names{next_level = parse_NextLevel(Elem, State)};
+                                GetParameterNames#get_parameter_names{next_level = parse_NextLevel(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1049,14 +1072,14 @@ parse_GetParameterNamesResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #get_parameter_names_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetParameterAttributes(#xmlElement{},#parser{}) -> #set_parameter_attributes{}.
+-spec parse_SetParameterAttributes(#xmlElement{},#parser{}) -> #set_parameter_attributes{}.
 parse_SetParameterAttributes(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:SetParameterAttributes', E, S),
     lists:foldl(fun(Elem, SetParameterAttributes) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'ParameterList' ->
-                                SetParameterAttributes#set_parameter_attributes{parameter_list = parse_ParameterList(Elem, State)};
+                                SetParameterAttributes#set_parameter_attributes{parameter_list = parse_SetParameterAttributesList(Elem, State)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1082,14 +1105,14 @@ parse_GetParameterAttributes(#xmlElement{content = Content} = E, S) ->
                 end,
                 #get_parameter_attributes{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetParameterAttributesResponse(#xmlElement{},#parser{}) -> #get_parameter_attributes_response{}.
+-spec parse_GetParameterAttributesResponse(#xmlElement{},#parser{}) -> #get_parameter_attributes_response{}.
 parse_GetParameterAttributesResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:GetParameterAttributesResponse', E, S),
     lists:foldl(fun(Elem, GetParameterAttributesResponse) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'ParameterList' ->
-                                GetParameterAttributesResponse#get_parameter_attributes_response{parameter_list = parse_ParameterList(Elem, State)};
+                                GetParameterAttributesResponse#get_parameter_attributes_response{parameter_list = parse_ParameterAttributeList(Elem, State)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1104,10 +1127,10 @@ parse_AddObject(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'ObjectName' ->
-                                AddObject#add_object{object_name = parse_ObjectName(Elem, State)};
+                                AddObject#add_object{object_name = parse_ObjectNameType(Elem)};
 
                             'ParameterKey' ->
-                                AddObject#add_object{parameter_key = parse_ParameterKey(Elem, State)};
+                                AddObject#add_object{parameter_key = parse_ParameterKeyType(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1122,10 +1145,10 @@ parse_AddObjectResponse(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'InstanceNumber' ->
-                                AddObjectResponse#add_object_response{instance_number = parse_InstanceNumber(Elem, State)};
+                                AddObjectResponse#add_object_response{instance_number = parse_InstanceNumber(Elem)};
 
                             'Status' ->
-                                AddObjectResponse#add_object_response{status = parse_Status(Elem, State)};
+                                AddObjectResponse#add_object_response{status = parse_Status(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1140,10 +1163,10 @@ parse_DeleteObject(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'ObjectName' ->
-                                DeleteObject#delete_object{object_name = parse_ObjectName(Elem, State)};
+                                DeleteObject#delete_object{object_name = parse_ObjectNameType(Elem)};
 
                             'ParameterKey' ->
-                                DeleteObject#delete_object{parameter_key = parse_ParameterKey(Elem, State)};
+                                DeleteObject#delete_object{parameter_key = parse_ParameterKeyType(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1158,7 +1181,7 @@ parse_DeleteObjectResponse(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Status' ->
-                                DeleteObjectResponse#delete_object_response{status = parse_Status(Elem, State)};
+                                DeleteObjectResponse#delete_object_response{status = parse_Status(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1166,41 +1189,41 @@ parse_DeleteObjectResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #delete_object_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_Download(#xmlElement{},#parser{}) -> #download{}.
+-spec parse_Download(#xmlElement{},#parser{}) -> #download{}.
 parse_Download(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:Download', E, S),
     lists:foldl(fun(Elem, Download) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
-                                Download#download{command_key = parse_CommandKey(Elem, State)};
+                                Download#download{command_key = parse_CommandKeyType(Elem)};
 
                             'FileType' ->
-                                Download#download{file_type = parse_FileType(Elem, State)};
+                                Download#download{file_type = parse_FileType(Elem)};
 
                             'URL' ->
-                                Download#download{url = parse_URL(Elem, State)};
+                                Download#download{url = parse_URL(Elem)};
 
                             'Username' ->
-                                Download#download{username = parse_Username(Elem, State)};
+                                Download#download{username = parse_Username(Elem)};
 
                             'Password' ->
-                                Download#download{password = parse_Password(Elem, State)};
+                                Download#download{password = parse_Password(Elem)};
 
                             'FileSize' ->
-                                Download#download{file_size = parse_FileSize(Elem, State)};
+                                Download#download{file_size = parse_FileSize(Elem)};
 
                             'TargetFileName' ->
-                                Download#download{target_file_name = parse_TargetFileName(Elem, State)};
+                                Download#download{target_file_name = parse_TargetFileName(Elem)};
 
                             'DelaySeconds' ->
-                                Download#download{delay_seconds = parse_DelaySeconds(Elem, State)};
+                                Download#download{delay_seconds = parse_DelaySeconds(Elem)};
 
                             'SuccessURL' ->
-                                Download#download{success_url = parse_SuccessURL(Elem, State)};
+                                Download#download{success_url = parse_SuccessURL(Elem)};
 
                             'FailureURL' ->
-                                Download#download{failure_url = parse_FailureURL(Elem, State)};
+                                Download#download{failure_url = parse_FailureURL(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1215,13 +1238,13 @@ parse_DownloadResponse(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Status' ->
-                                DownloadResponse#download_response{status = parse_Status(Elem, State)};
+                                DownloadResponse#download_response{status = parse_Status(Elem)};
 
                             'StartTime' ->
-                                DownloadResponse#download_response{start_time = parse_StartTime(Elem, State)};
+                                DownloadResponse#download_response{start_time = parse_StartTime(Elem)};
 
                             'CompleteTime' ->
-                                DownloadResponse#download_response{complete_time = parse_CompleteTime(Elem, State)};
+                                DownloadResponse#download_response{complete_time = parse_CompleteTime(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1236,7 +1259,7 @@ parse_Reboot(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
-                                Reboot#reboot{command_key = parse_CommandKey(Elem, State)};
+                                Reboot#reboot{command_key = parse_CommandKeyType(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1250,7 +1273,7 @@ parse_RebootResponse(_, _) -> #reboot_response{}.
 %% -spec parse_GetQueuedTransfers(#xmlElement{},#parser{}) -> #get_queued_transfers{}.
 parse_GetQueuedTransfers(_, _) -> #get_queued_transfers{}.
 
-%% -spec parse_GetQueuedTransfersResponse(#xmlElement{},#parser{}) -> #get_queued_transfers_response{}.
+-spec parse_GetQueuedTransfersResponse(#xmlElement{},#parser{}) -> #get_queued_transfers_response{}.
 parse_GetQueuedTransfersResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:GetQueuedTransfersResponse', E, S),
     lists:foldl(fun(Elem, GetQueuedTransfersResponse) ->
@@ -1272,10 +1295,10 @@ parse_ScheduleInform(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'DelaySeconds' ->
-                                ScheduleInform#schedule_inform{delay_seconds = parse_DelaySeconds(Elem, State)};
+                                ScheduleInform#schedule_inform{delay_seconds = parse_DelaySeconds(Elem)};
 
                             'CommandKey' ->
-                                ScheduleInform#schedule_inform{command_key = parse_CommandKey(Elem, State)};
+                                ScheduleInform#schedule_inform{command_key = parse_CommandKeyType(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1311,7 +1334,7 @@ parse_GetOptions(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'OptionName' ->
-                                GetOptions#get_options{option_name = parse_OptionName(Elem, State)};
+                                GetOptions#get_options{option_name = parse_OptionName(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1341,22 +1364,22 @@ parse_Upload(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
-                                Upload#upload{command_key = parse_CommandKey(Elem, State)};
+                                Upload#upload{command_key = parse_CommandKeyType(Elem)};
 
                             'FileType' ->
-                                Upload#upload{file_type = parse_FileType(Elem, State)};
+                                Upload#upload{file_type = parse_FileType(Elem)};
 
                             'URL' ->
-                                Upload#upload{url = parse_URL(Elem, State)};
+                                Upload#upload{url = parse_URL(Elem)};
 
                             'Username' ->
-                                Upload#upload{username = parse_Username(Elem, State)};
+                                Upload#upload{username = parse_Username(Elem)};
 
                             'Password' ->
-                                Upload#upload{password = parse_Password(Elem, State)};
+                                Upload#upload{password = parse_Password(Elem)};
 
                             'DelaySeconds' ->
-                                Upload#upload{delay_seconds = parse_DelaySeconds(Elem, State)};
+                                Upload#upload{delay_seconds = parse_DelaySeconds(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1371,13 +1394,13 @@ parse_UploadResponse(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Status' ->
-                                UploadResponse#upload_response{status = parse_Status(Elem, State)};
+                                UploadResponse#upload_response{status = parse_Status(Elem)};
 
                             'StartTime' ->
-                                UploadResponse#upload_response{start_time = parse_StartTime(Elem, State)};
+                                UploadResponse#upload_response{start_time = parse_StartTime(Elem)};
 
                             'CompleteTime' ->
-                                UploadResponse#upload_response{complete_time = parse_CompleteTime(Elem, State)};
+                                UploadResponse#upload_response{complete_time = parse_CompleteTime(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1394,14 +1417,14 @@ parse_FactoryResetResponse(_, _) -> #factory_reset_response{}.
 %% -spec parse_GetAllQueuedTransfers(#xmlElement{},#parser{}) -> #get_all_queued_transfers{}.
 parse_GetAllQueuedTransfers(_, _) -> #get_all_queued_transfers{}.
 
-%% -spec parse_GetAllQueuedTransfersResponse(#xmlElement{},#parser{}) -> #get_all_queued_transfers_response{}.
+-spec parse_GetAllQueuedTransfersResponse(#xmlElement{},#parser{}) -> #get_all_queued_transfers_response{}.
 parse_GetAllQueuedTransfersResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:GetAllQueuedTransfersResponse', E, S),
     lists:foldl(fun(Elem, GetAllQueuedTransfersResponse) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'TransferList' ->
-                                GetAllQueuedTransfersResponse#get_all_queued_transfers_response{transfer_list = parse_TransferList(Elem, State)};
+                                GetAllQueuedTransfersResponse#get_all_queued_transfers_response{transfer_list = parse_AllTransferList(Elem, State)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1416,25 +1439,25 @@ parse_ScheduleDownload(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
-                                ScheduleDownload#schedule_download{command_key = parse_CommandKey(Elem, State)};
+                                ScheduleDownload#schedule_download{command_key = parse_CommandKeyType(Elem)};
 
                             'FileType' ->
-                                ScheduleDownload#schedule_download{file_type = parse_FileType(Elem, State)};
+                                ScheduleDownload#schedule_download{file_type = parse_FileType(Elem)};
 
                             'URL' ->
-                                ScheduleDownload#schedule_download{url = parse_URL(Elem, State)};
+                                ScheduleDownload#schedule_download{url = parse_URL(Elem)};
 
                             'Username' ->
-                                ScheduleDownload#schedule_download{username = parse_Username(Elem, State)};
+                                ScheduleDownload#schedule_download{username = parse_Username(Elem)};
 
                             'Password' ->
-                                ScheduleDownload#schedule_download{password = parse_Password(Elem, State)};
+                                ScheduleDownload#schedule_download{password = parse_Password(Elem)};
 
                             'FileSize' ->
-                                ScheduleDownload#schedule_download{file_size = parse_FileSize(Elem, State)};
+                                ScheduleDownload#schedule_download{file_size = parse_FileSize(Elem)};
 
                             'TargetFileName' ->
-                                ScheduleDownload#schedule_download{target_file_name = parse_TargetFileName(Elem, State)};
+                                ScheduleDownload#schedule_download{target_file_name = parse_TargetFileName(Elem)};
 
                             'TimeWindowList' ->
                                 ScheduleDownload#schedule_download{time_window_list = parse_TimeWindowList(Elem, State)};
@@ -1455,7 +1478,7 @@ parse_CancelTransfer(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
-                                CancelTransfer#cancel_transfer{command_key = parse_CommandKey(Elem, State)};
+                                CancelTransfer#cancel_transfer{command_key = parse_CommandKeyType(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1473,10 +1496,10 @@ parse_ChangeDUState(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Operations' ->
-                                ChangeDUState#change_du_state{operations = parse_Operations(Elem, State)};
+                                ChangeDUState#change_du_state{operations = parse_OperationStruct(Elem, State)};
 
                             'CommandKey' ->
-                                ChangeDUState#change_du_state{command_key = parse_CommandKey(Elem, State)};
+                                ChangeDUState#change_du_state{command_key = parse_CommandKeyType(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1493,15 +1516,15 @@ parse_Inform(#xmlElement{content = Content} = E, S) ->
     lists:foldl(fun(Elem, Inform) ->
                         case get_local_name(Elem#xmlElement.name) of
                             'DeviceId' ->
-                                Inform#inform{device_id = parse_DeviceId(Elem, State)};
+                                Inform#inform{device_id = parse_DeviceIdStruct(Elem, State)};
                             'Event' ->
-                                Inform#inform{event = parse_Event(Elem, State)};
+                                Inform#inform{event = parse_EventList(Elem, State)};
                             'MaxEnvelopes' ->
-                                Inform#inform{max_envelopes = parse_MaxEnvelopes(Elem, State)};
+                                Inform#inform{max_envelopes = parse_MaxEnvelopes(Elem)};
                             'CurrentTime' ->
-                                Inform#inform{current_time = parse_CurrentTime(Elem, State)};
+                                Inform#inform{current_time = parse_CurrentTime(Elem)};
                             'RetryCount' ->
-                                Inform#inform{retry_count = parse_RetryCount(Elem, State)};
+                                Inform#inform{retry_count = parse_RetryCount(Elem)};
                             'ParameterList' ->
                                 Inform#inform{parameter_list = parse_ParameterValueList(Elem, State)};
                             _ ->
@@ -1516,7 +1539,7 @@ parse_InformResponse(#xmlElement{content = Content} = E, S) ->
     lists:foldl(fun(Elem, InformResponse) ->
                         case get_local_name(Elem#xmlElement.name) of
                             'MaxEnvelopes' ->
-                                InformResponse#inform_response{max_envelopes = parse_MaxEnvelopes(Elem, State)};
+                                InformResponse#inform_response{max_envelopes = parse_MaxEnvelopes(Elem)};
                             _ ->
                                 parse_error(Elem, State)
                         end
@@ -1530,16 +1553,16 @@ parse_TransferComplete(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'CommandKey' ->
-                                TransferComplete#transfer_complete{command_key = parse_CommandKey(Elem, State)};
+                                TransferComplete#transfer_complete{command_key = parse_CommandKeyType(Elem)};
 
                             'FaultStruct' ->
-                                TransferComplete#transfer_complete{fault_struct = parse_FaultStruct(Elem, State)};
+                                TransferComplete#transfer_complete{fault_struct = parse_TransferCompleteFaultStruct(Elem, State)};
 
                             'StartTime' ->
-                                TransferComplete#transfer_complete{start_time = parse_StartTime(Elem, State)};
+                                TransferComplete#transfer_complete{start_time = parse_StartTime(Elem)};
 
                             'CompleteTime' ->
-                                TransferComplete#transfer_complete{complete_time = parse_CompleteTime(Elem, State)};
+                                TransferComplete#transfer_complete{complete_time = parse_CompleteTime(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1557,31 +1580,31 @@ parse_AutonomousTransferComplete(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'AnnounceURL' ->
-                                AutonomousTransferComplete#autonomous_transfer_complete{announce_url = parse_AnnounceURL(Elem, State)};
+                                AutonomousTransferComplete#autonomous_transfer_complete{announce_url = parse_AnnounceURL(Elem)};
 
                             'TransferURL' ->
-                                AutonomousTransferComplete#autonomous_transfer_complete{transfer_url = parse_TransferURL(Elem, State)};
+                                AutonomousTransferComplete#autonomous_transfer_complete{transfer_url = parse_TransferURL(Elem)};
 
                             'IsDownload' ->
-                                AutonomousTransferComplete#autonomous_transfer_complete{is_download = parse_IsDownload(Elem, State)};
+                                AutonomousTransferComplete#autonomous_transfer_complete{is_download = parse_IsDownload(Elem)};
 
                             'FileType' ->
-                                AutonomousTransferComplete#autonomous_transfer_complete{file_type = parse_FileType(Elem, State)};
+                                AutonomousTransferComplete#autonomous_transfer_complete{file_type = parse_FileType(Elem)};
 
                             'FileSize' ->
-                                AutonomousTransferComplete#autonomous_transfer_complete{file_size = parse_FileSize(Elem, State)};
+                                AutonomousTransferComplete#autonomous_transfer_complete{file_size = parse_FileSize(Elem)};
 
                             'TargetFileName' ->
-                                AutonomousTransferComplete#autonomous_transfer_complete{target_file_name = parse_TargetFileName(Elem, State)};
+                                AutonomousTransferComplete#autonomous_transfer_complete{target_file_name = parse_TargetFileName(Elem)};
 
                             'FaultStruct' ->
-                                AutonomousTransferComplete#autonomous_transfer_complete{fault_struct = parse_FaultStruct(Elem, State)};
+                                AutonomousTransferComplete#autonomous_transfer_complete{fault_struct = parse_TransferCompleteFaultStruct(Elem, State)};
 
                             'StartTime' ->
-                                AutonomousTransferComplete#autonomous_transfer_complete{start_time = parse_StartTime(Elem, State)};
+                                AutonomousTransferComplete#autonomous_transfer_complete{start_time = parse_StartTime(Elem)};
 
                             'CompleteTime' ->
-                                AutonomousTransferComplete#autonomous_transfer_complete{complete_time = parse_CompleteTime(Elem, State)};
+                                AutonomousTransferComplete#autonomous_transfer_complete{complete_time = parse_CompleteTime(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1599,16 +1622,16 @@ parse_Kicked(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Command' ->
-                                Kicked#kicked{command = parse_Command(Elem, State)};
+                                Kicked#kicked{command = parse_Command(Elem)};
 
                             'Referer' ->
-                                Kicked#kicked{referer = parse_Referer(Elem, State)};
+                                Kicked#kicked{referer = parse_Referer(Elem)};
 
                             'Arg' ->
-                                Kicked#kicked{arg = parse_Arg(Elem, State)};
+                                Kicked#kicked{arg = parse_Arg(Elem)};
 
                             'Next' ->
-                                Kicked#kicked{next = parse_Next(Elem, State)};
+                                Kicked#kicked{next = parse_Next(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1623,7 +1646,7 @@ parse_KickedResponse(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'NextURL' ->
-                                KickedResponse#kicked_response{next_url = parse_NextURL(Elem, State)};
+                                KickedResponse#kicked_response{next_url = parse_NextURL(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1638,7 +1661,7 @@ parse_RequestDownload(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'FileType' ->
-                                RequestDownload#request_download{file_type = parse_FileType(Elem, State)};
+                                RequestDownload#request_download{file_type = parse_FileType(Elem)};
 
                             'FileTypeArg' ->
                                 RequestDownload#request_download{file_type_arg = parse_FileTypeArg(Elem, State)};
@@ -1658,10 +1681,10 @@ parse_DUStateChangeComplete(#xmlElement{content = Content} = E, S) ->
     lists:foldl(fun(Elem, DUStateChangeComplete) ->
                         case get_local_name(Elem#xmlElement.name) of			    
                             'Results' ->
-                                DUStateChangeComplete#du_state_change_complete{results = parse_Results(Elem, State)};
+                                DUStateChangeComplete#du_state_change_complete{results = parse_OpResultStruct(Elem, State)};
 
                             'CommandKey' ->
-                                DUStateChangeComplete#du_state_change_complete{command_key = parse_CommandKey(Elem, State)};
+                                DUStateChangeComplete#du_state_change_complete{command_key = parse_CommandKeyType(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -1678,7 +1701,7 @@ parse_AutonomousDUStateChangeComplete(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'Results' ->
-				AutonomousDUStateChangeComplete#autonomous_du_state_change_complete{results = parse_Results(Elem, State)};
+				AutonomousDUStateChangeComplete#autonomous_du_state_change_complete{results = parse_AutonOpResultStruct(Elem, State)};
 
                             _ ->
                                 parse_error(Elem, State)

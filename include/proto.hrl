@@ -12,8 +12,8 @@
 -type rpc_data_type() :: string | int | unsignedInt | boolean | dateTime | base64 | anySimpleType.
 
 -type qName()     :: string().
--type url()       :: string().
--type anyURI()    :: string().
+-type url()       :: tuple().
+-type anyURI()    :: tuple().
 -type date_time() :: string().
 
 -type cwmp_method() ::
@@ -391,12 +391,6 @@
 -type deployment_unit_operation_type() :: default_deployment_unit_operation_type()
 					  | string().
 
-%% @doc
-%%        A base type for Deployment Unit operations that can be performed on a device
-%%
--record(operation_struct, {
-	  %% FIXME: enumeration
-	 }).
 
 %% @doc
 %%        An operation indicating a Deployment Unit should be installed
@@ -428,6 +422,12 @@
 	  version :: string(),
 	  execution_env_ref :: string()
 	 }).
+
+%% @doc
+%%        A base type for Deployment Unit operations that can be performed on a device
+%%
+-type operation_struct() :: #install_op_struct{} | #update_op_struct{} | #uninstall_op_struct{}.
+
 
 %% @doc
 %%        The result of a Deployment Unit operation performed on the device
@@ -757,7 +757,7 @@
 %% @doc
 %% A request to perform an action on a Deployment Unit on the device
 -record(change_du_state, {
-	   operations :: #operation_struct{},
+	   operations :: [operation_struct()],
 	   command_key :: command_key_type()
 	  }).
 

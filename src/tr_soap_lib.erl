@@ -141,39 +141,23 @@ check_namespace(RefQName, #xmlElement{name = QName} = Elem, #parser{ns=Nss} = St
     
     RefNs = local_ns(RefNsC, Nss),
     {Ns, Name} = local_name(QName),
-	
-    %% ?DBG({Name, Ns, Nss#rpc_ns.inherited}),
-    %% ?DBG({RefName, RefNs}),
-    
+
     case {Name, Ns, Nss#rpc_ns.inherited}  of
 	{RefName, RefNs, Ns} ->
-%	    ?DBG("--- same namespace"),
 	    State;
 	{RefName, '', RefNs}->
-%	    ?DBG("--- inherited namespace"),
 	    State;
 	{RefName, RefNs, _InhNs} -> 
-%	    ?DBG({"--- change namespace", Ns}),
 	    State#parser{ ns = Nss#rpc_ns{ inherited = Ns }};
 	_ ->
 	    parse_warning(Elem, RefNs, "Namespace missmatch"),
 	    State
     end.
 
-
-set_enherited(Ns, Nss) ->    
-    Nss#rpc_ns{inherited = canonical_ns(Ns, Nss)}.
-
-canonical_ns(Ns, Nss) when Ns == Nss#rpc_ns.ns_envelop  -> 'soap-env';
-canonical_ns(Ns, Nss) when Ns == Nss#rpc_ns.ns_encoding -> 'soap-enc';
-canonical_ns(Ns, Nss) when Ns == Nss#rpc_ns.ns_cwmp     -> 'cwmp';
-canonical_ns(Ns, Nss) when Ns == Nss#rpc_ns.ns_xsd      -> 'xsd'.
-
 local_ns('soap-env', Nss) ->  Nss#rpc_ns.ns_envelop;
 local_ns('soap-enc', Nss) ->  Nss#rpc_ns.ns_encoding;
 local_ns('cwmp', Nss)     ->  Nss#rpc_ns.ns_cwmp;
 local_ns('xsd', Nss)      ->  Nss#rpc_ns.ns_xsd.
-
 
 set_local_ns('soap-env', Nss, LocalNs) -> Nss#rpc_ns{ns_envelop = LocalNs};
 set_local_ns('soap-enc', Nss, LocalNs) -> Nss#rpc_ns{ns_encoding = LocalNs};
@@ -182,7 +166,6 @@ set_local_ns('cwmp_v2', Nss, LocalNs)  -> Nss#rpc_ns{ns_cwmp = LocalNs, cwmp_ver
 set_local_ns('xsd',  Nss, LocalNs)     -> Nss#rpc_ns{ns_xsd = LocalNs}.
 
 -spec match_cwmp_ns_and_version(#xmlNamespace{}) -> {#rpc_ns{}, cwmp_version()}.
-
 match_cwmp_ns_and_version(#xmlNamespace{default = _Default, nodes = Nodes}) ->
     NsMap = [{'soap-enc', 'http://schemas.xmlsoap.org/soap/encoding/'},
 	     {'soap-env', 'http://schemas.xmlsoap.org/soap/envelope/'},

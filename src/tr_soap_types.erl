@@ -1,3 +1,5 @@
+%%% File    : tr_soap_types.erl
+%%% Description : SOAP Type Parser for TR-069 RPC Methods
 
 -module(tr_soap_types).
 
@@ -8,7 +10,82 @@
 -include("tr69.hrl").
 -include("proto.hrl").
 
--import(tr_soap_lib, [return_error/2, parse_error/2, get_local_name/2]).
+-export([ parse_AccessListChange/1,
+	  parse_AnnounceURL/1,
+	  parse_Arg/1,
+	  parse_Command/1,
+	  parse_CommandKeyType/1,
+	  parse_CompleteTime/1,
+	  parse_CurrentTime/1,
+	  parse_DelaySeconds/1,
+	  parse_DeploymentUnitOperationType/1,
+	  parse_DeploymentUnitRef/1,
+	  parse_DeploymentUnitState/1,
+	  parse_EventCodeType/2,
+	  parse_ExecutionEnvRef/1,
+	  parse_ExecutionUnitRefList/1,
+	  parse_ExpirationDate/1,
+	  parse_FailureURL/1,
+	  parse_FaultCode/1,
+	  parse_FaultString/1,
+	  parse_FileSize/1,
+	  parse_FileType/1,
+	  parse_InstanceNumber/1,
+	  parse_IsDownload/1,
+	  parse_IsTransferable/1,
+	  parse_Manufacturer/1,
+	  parse_MaxEnvelopes/1,
+	  parse_MaxRetries/1,
+	  parse_Mode/1,
+	  parse_Name/1,
+	  parse_Next/1,
+	  parse_NextLevel/1,
+	  parse_NextURL/1,
+	  parse_Notification/1,
+	  parse_NotificationChange/1,
+	  parse_ObjectNameType/1,
+	  parse_OptionName/1,
+	  parse_OUI/1,
+	  parse_ParameterKeyType/1,
+	  parse_ParameterPath/1,
+	  parse_Password/1,
+	  parse_ProductClass/1,
+	  parse_Referer/1,
+	  parse_Resolved/1,
+	  parse_RetryCount/1,
+	  parse_SerialNumber/1,
+	  parse_StartDate/1,
+	  parse_StartTime/1,
+	  parse_State/1,
+	  parse_Status/1,
+	  parse_SuccessURL/1,
+	  parse_TargetFileName/1,
+	  parse_TransferURL/1,
+	  parse_URL/1,
+	  parse_UserMessage/1,
+	  parse_Username/1,
+	  parse_UUID/1,
+	  parse_Value/1,
+	  parse_Version/1,
+	  parse_VoucherSN/1,
+	  parse_WindowEnd/1,
+	  parse_WindowMode/1,
+	  parse_WindowStart/1,
+	  parse_Writable/1
+	]).
+
+-export([ parse_string/1,
+	  parse_boolean/1,
+	  parse_int/1,
+	  parse_dateTime/1,
+	  parse_base64/1,
+	  parse_anyURI/1,
+	  parse_attribete/3,
+	  parse_anySimpleType/1
+	]).
+
+-import(tr_soap_lib, [return_error/2, parse_error/2]).
+
 
 -ifdef(TEST).
 -import(tr_soap_lib, [get_QName/2]).
@@ -182,39 +259,77 @@ get_AttributeByName(Elem, AttrName) ->
 	Attr ->
 	    Attr#xmlAttribute.value
     end.
-%parse_attribete(Elem, AttrName, string) ->
-    
 
-%FIXME: booom !!!
-parse_(_E) ->  ok.
 
-parse_DeploymentUnitOperationType(E,_S) -> parse_string(E).
-parse_anySimpleType(E,_S) -> parse_string(E).
+parse_DeploymentUnitOperationType(E) ->
+    case parse_string(E) of
+	V when V == "Install"; V == "Update"; V == "Uninstall"
+	       -> V;
+	V ->
+	    parse_error(E, {V, "Enumeration"})
+    end.
 
-%FIXME: add context knowledge here
-parse_URL(E,_S) when is_list(E) -> parse_string(E);
-parse_URL(E,_S) -> parse_anyURI(E).
-
-parse_AccessListChange(E,_S) -> parse_boolean(E).
-parse_AccessListValueType(E,_S) -> parse_string(E).
-parse_ACSFaultCodeType(E,_S) -> parse_unsignedInt(E).
-parse_ACSVendorFaultCodeType(E,_S) -> parse_unsignedInt(E).
-parse_AnnounceURL(E,_S) -> parse_string(E).
-parse_Arg(E,_S) -> parse_string(E).
-parse_Command(E,_S) -> parse_string(E).
-parse_CommandKeyType(E,_S) -> parse_string(E).
-parse_CompleteTime(E,_S) -> parse_dateTime(E).
-parse_CPEExtensionFaultCodeType(E,_S) -> parse_unsignedInt(E).
-parse_CPEFaultCodeType(E,_S) -> parse_unsignedInt(E).
-parse_CPEVendorFaultCodeType(E,_S) -> parse_unsignedInt(E).
-parse_CurrentTime(E,_S) -> parse_dateTime(E).
-parse_DefaultDeploymentUnitOperationType(E,_S) -> parse_string(E).
-parse_DelaySeconds(E,_S) -> parse_unsignedInt(E).
-parse_DeploymentUnitCPEFaultCodeType(E,_S) -> parse_string(E). %parse_CPEFaultCodeType(E).
-parse_DeploymentUnitRef(E,_S) -> parse_string(E).
-parse_DeploymentUnitState(E,_S) -> parse_string(E).
-parse_DeploymentUnitUUID(E,_S) -> parse_string(E).
-parse_DownloadFileType(E,_S) -> parse_string(E).
+parse_AccessListChange(E)     -> parse_boolean(E).
+parse_AnnounceURL(E)          -> parse_string(E).
+parse_anySimpleType(E)        -> parse_string(E).
+parse_Arg(E)                  -> parse_string(E).
+parse_Command(E)              -> parse_string(E).
+parse_CommandKeyType(E)       -> parse_string(E).
+parse_CompleteTime(E)         -> parse_dateTime(E).
+parse_CurrentTime(E)          -> parse_dateTime(E).
+parse_DelaySeconds(E)         -> parse_unsignedInt(E).
+parse_DeploymentUnitRef(E)    -> parse_string(E).
+parse_DeploymentUnitState(E)  -> parse_string(E).
+parse_ExecutionEnvRef(E)      -> parse_string(E).
+parse_ExecutionUnitRefList(E) -> parse_string(E).
+parse_ExpirationDate(E)       -> parse_dateTime(E).
+parse_FailureURL(E)           -> parse_string(E).
+parse_FaultCode(E)               -> parse_unsignedInt(E).
+parse_FaultString(E)             -> parse_string(E).
+parse_FileSize(E)             -> parse_unsignedInt(E).
+parse_FileType(E)             -> parse_string(E).
+parse_InstanceNumber(E)       -> parse_unsignedInt(E).
+parse_IsDownload(E)           -> parse_boolean(E).
+parse_IsTransferable(E)       -> parse_int(E).
+parse_Manufacturer(E)         -> parse_string(E).
+parse_MaxEnvelopes(E)         -> parse_unsignedInt(E). %FIXME: inline
+parse_MaxRetries(E)           -> parse_int(E).
+parse_Mode(E)                 -> parse_int(E).
+parse_Name(E)                 -> parse_string(E).
+parse_Next(E)                 -> parse_string(E).
+parse_NextLevel(E)            -> parse_boolean(E).
+parse_NextURL(E)              -> parse_string(E).
+parse_NotificationChange(E)   -> parse_boolean(E).
+parse_Notification(E)         -> parse_int(E).
+parse_ObjectNameType(E)       -> parse_string(E).
+parse_OptionName(E)           -> parse_string(E).
+parse_OUI(E)                  -> parse_string(E).
+parse_ParameterKeyType(E)     -> parse_string(E).
+parse_ParameterPath(E)        -> parse_string(E).
+parse_Password(E)             -> parse_string(E).
+parse_ProductClass(E)         -> parse_string(E).
+parse_Referer(E)              -> parse_string(E).
+parse_Resolved(E)             -> parse_boolean(E).
+parse_RetryCount(E)           -> parse_unsignedInt(E).
+parse_SerialNumber(E)         -> parse_string(E).
+parse_StartDate(E)            -> parse_dateTime(E).
+parse_StartTime(E)            -> parse_dateTime(E).
+parse_State(E)                -> parse_unsignedInt(E).
+parse_Status(E)               -> parse_int(E).
+parse_SuccessURL(E)           -> parse_string(E).
+parse_TargetFileName(E)       -> parse_string(E).
+parse_TransferURL(E)          -> parse_string(E).
+parse_URL(E)                  -> parse_anyURI(E).
+parse_UserMessage(E)          -> parse_string(E).
+parse_Username(E)             -> parse_string(E).
+parse_UUID(E)                 -> parse_string(E).
+parse_Value(E)                -> parse_string(E).
+parse_Version(E)              -> parse_string(E).
+parse_VoucherSN(E)            -> parse_unsignedInt(E).
+parse_WindowEnd(E)            -> parse_unsignedInt(E).
+parse_WindowMode(E)           -> parse_string(E).
+parse_WindowStart(E)          -> parse_unsignedInt(E).
+parse_Writable(E)             -> parse_boolean(E).
 
 
 match_event_code(Code, Description) ->
@@ -253,61 +368,6 @@ parse_EventCodeType(Elem, State) ->
 	    end
     end.
     
-parse_ExecutionEnvRef(E,_S) -> parse_string(E).
-parse_ExecutionUnitRefList(E,_S) -> parse_string(E).
-parse_ExpirationDate(E,_S) -> parse_dateTime(E).
-parse_FailureURL(E,_S) -> parse_string(E).
-
-parse_FaultCode(E) -> parse_unsignedInt(E).
-parse_FaultString(E) -> parse_string(E).
-
-parse_FileSize(E,_S) -> parse_unsignedInt(E).
-parse_InstanceNumber(E,_S) -> parse_unsignedInt(E).
-parse_IsDownload(E,_S) -> parse_boolean(E).
-parse_IsTransferable(E,_S) -> parse_int(E).
-parse_Manufacturer(E,_S) -> parse_string(E).
-parse_MaxEnvelopes(E,_S) -> parse_unsignedInt(E). %FIXME: inline
-parse_MaxRetries(E,_S) -> parse_int(E).
-parse_Mode(E,_S) -> parse_int(E).
-parse_Name(E,_S) -> parse_string(E).
-parse_Next(E,_S) -> parse_string(E).
-parse_NextLevel(E,_S) -> parse_boolean(E).
-parse_NextURL(E,_S) -> parse_string(E).
-parse_NotificationChange(E,_S) -> parse_boolean(E).
-parse_ObjectNameType(E,_S) -> parse_string(E).
-parse_OptionName(E,_S) -> parse_string(E).
-parse_OUI(E,_S) -> parse_string(E).
-parse_ParameterAttributeNotificationValueType(E,_S) -> parse_int(E).
-parse_ParameterKeyType(E,_S) -> parse_string(E).
-parse_ParameterName(E,_S) -> parse_string(E).
-parse_ParameterPath(E,_S) -> parse_string(E).
-parse_Password(E,_S) -> parse_string(E).
-parse_ProductClass(E,_S) -> parse_string(E).
-parse_Referer(E,_S) -> parse_string(E).
-parse_Resolved(E,_S) -> parse_boolean(E).
-parse_RetryCount(E,_S) -> parse_unsignedInt(E).
-parse_SerialNumber(E,_S) -> parse_string(E).
-parse_StartDate(E,_S) -> parse_dateTime(E).
-parse_StartTime(E,_S) -> parse_dateTime(E).
-parse_State(E,_S) -> parse_unsignedInt(E).
-parse_Status(E,_S) -> parse_int(E).
-parse_string(E,_S) -> parse_string(E).
-parse_SuccessURL(E,_S) -> parse_string(E).
-parse_TargetFileName(E,_S) -> parse_string(E).
-parse_TimeWindowModeValueType(E,_S) -> parse_string(E).
-parse_TransferCompleteCPEFaultCodeType(E,_S) -> parse_string(E). %parse_CPEFaultCodeType(E).
-parse_TransferFileType(E,_S) -> parse_string(E).
-parse_TransferStateType(E,_S) -> parse_int(E).
-parse_TransferURL(E,_S) -> parse_string(E).
-parse_UploadFileType(E,_S) -> parse_string(E).
-parse_UserMessage(E,_S) -> parse_string(E).
-parse_Username(E,_S) -> parse_string(E).
-parse_Value(E) -> parse_string(E).
-parse_Version(E,_S) -> parse_string(E).
-parse_VoucherSN(E,_S) -> parse_unsignedInt(E).
-parse_WindowEnd(E,_S) -> parse_unsignedInt(E).
-parse_WindowStart(E,_S) -> parse_unsignedInt(E).
-parse_Writable(E,_S) -> parse_boolean(E).
 
 %% end
 
