@@ -13,7 +13,7 @@
 -include_lib("common_test/include/ct.hrl").
 
 -import(tr_soap_lib, [get_QName/2]).
--import(tr_soap_types, [convert_iso8601_date/1]).
+-import(tr_soap_types, [convert_iso8601_date/1,parse_string/1,parse_int/1]).
 
 
 
@@ -111,7 +111,9 @@ end_per_testcase(_TestCase, _Config) ->
 %%--------------------------------------------------------------------
 groups() ->
     [{soap_parse_types, [sequence], [parse_boolean_tc,
-				     parse_iso8601_tc
+				     parse_iso8601_tc,
+				     parse_string_tc,
+				     parse_int_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -126,7 +128,11 @@ groups() ->
 %% @end
 %%--------------------------------------------------------------------
 all() ->    
-    [parse_boolean_tc, parse_iso8601_tc].
+    [parse_boolean_tc,
+     parse_iso8601_tc,
+     parse_string_tc,
+     parse_int_tc
+    ].
      %% 	,
     %% [{group, soap_parse_types},
     %%  {group, soap_parse_doc}].
@@ -140,8 +146,13 @@ all() ->
 parse_boolean_tc() -> 
     [].
 
-
 parse_iso8601_tc() ->
+    [].
+
+parse_string_tc() ->
+    [].
+
+parse_int_tc() ->
     [].
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
@@ -196,8 +207,54 @@ parse_iso8601_check(Expect, String) ->
     Res = convert_iso8601_date(String),
     %assert
     Expect = Res.
-    
 
+parse_string_tc(_Config) ->
+    [
+     begin
+	 parse_string_check(Expect, String),
+	 ct:print("--> ~p ~p ~n",[Expect, parse_string_check(Expect, String)])
+     end
+      ||
+	{Expect, String} <- [
+			     {"This is a sentence", "This is a sentence"}
+			     , {"false", "false"}
+			     , {"1", "1"}
+			     , {"true", "true"}
+			    ]],
+    ok.
+			   
+parse_string_check(Expect, String) ->
+    %setup
+    E = make_Element("ParseString",String),
+    %execute
+    Res = parse_string(E),
+    %assert
+    Expect = Res.
+
+parse_int_tc(_Config) ->
+    [
+     begin
+	 parse_int_check(Expect, String),
+	 ct:print("--> ~p ~p ~n",[Expect, parse_int_check(Expect, String)])
+     end
+      ||
+	{Expect, String} <- [
+			     {123,  "123"}
+			     , {12, "   12"}
+			     , { 0, "0  "}
+			     , { 1, " 1   "}
+			     , {11, "  11  "}
+			    ]],
+    ok.
+    
+parse_int_check(Expect, String) ->
+    %setup
+    E = make_Element("ParseInt", String),
+    %execute
+    Res = parse_int(E),
+    %assert
+    Expect = Res.
+    
 %%--------------------------------------------------------------------
 %%% Local API
 %%--------------------------------------------------------------------
