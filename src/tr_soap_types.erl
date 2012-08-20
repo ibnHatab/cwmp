@@ -80,7 +80,7 @@
 	  parse_dateTime/1,
 	  parse_base64/1,
 	  parse_anyURI/1,
-	  parse_attribete/3,
+	  parse_attribute/3,
 	  parse_anySimpleType/1
 	]).
 
@@ -218,22 +218,22 @@ parse_dateTime(String) when is_list(String) ->
 parse_base64(_E) ->
     <<"aa">>.
 
--spec parse_attribete(#xmlElement{}, atom(), atom()) -> any() | undefined.
-parse_attribete(Elem, AttrName, boolean) ->
+-spec parse_attribute(#xmlElement{}, atom(), atom()) -> any() | undefined.
+parse_attribute(Elem, AttrName, boolean) ->
     case  get_AttributeByName(Elem, AttrName) of
 	undefined ->
 	    undefined;
 	Value ->
 	    list_to_boolean(check_Value(AttrName, Value, boolean))
     end;
-parse_attribete(Elem, AttrName, string) ->
+parse_attribute(Elem, AttrName, string) ->
     case  get_AttributeByName(Elem, AttrName) of
 	undefined ->
 	    undefined;
 	Value ->
 	    check_Value(AttrName, Value, string)
     end;
-parse_attribete(Elem, AttrName, int) ->
+parse_attribute(Elem, AttrName, int) ->
     case  get_AttributeByName(Elem, AttrName) of
 	undefined ->
 	    undefined;
@@ -241,7 +241,7 @@ parse_attribete(Elem, AttrName, int) ->
 	    IntS = check_Value(AttrName, Value, int),
 	    string:to_integer(IntS)
     end;
-parse_attribete(Elem, AttrName, Type) ->
+parse_attribute(Elem, AttrName, Type) ->
     case  get_AttributeByName(Elem, AttrName) of
 	undefined ->
 	    undefined;

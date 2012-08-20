@@ -13,7 +13,7 @@
 -include_lib("common_test/include/ct.hrl").
 
 -import(tr_soap_lib, [get_QName/2]).
--import(tr_soap_types, [convert_iso8601_date/1]).
+-import(tr_soap_types, [convert_iso8601_date/1,parse_string/1,parse_int/1,parse_unsignedInt/1]).
 
 
 
@@ -111,7 +111,10 @@ end_per_testcase(_TestCase, _Config) ->
 %%--------------------------------------------------------------------
 groups() ->
     [{soap_parse_types, [sequence], [parse_boolean_tc,
-				     parse_iso8601_tc
+				     parse_iso8601_tc,
+				     parse_string_tc,
+				     parse_int_tc,
+				     parse_unsignedInt_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -126,7 +129,12 @@ groups() ->
 %% @end
 %%--------------------------------------------------------------------
 all() ->    
-    [parse_boolean_tc, parse_iso8601_tc].
+    [parse_boolean_tc,
+     parse_iso8601_tc,
+     parse_string_tc,
+     parse_int_tc,
+     parse_unsignedInt_tc
+    ].
      %% 	,
     %% [{group, soap_parse_types},
     %%  {group, soap_parse_doc}].
@@ -140,8 +148,16 @@ all() ->
 parse_boolean_tc() -> 
     [].
 
-
 parse_iso8601_tc() ->
+    [].
+
+parse_string_tc() ->
+    [].
+
+parse_int_tc() ->
+    [].
+
+parse_unsignedInt_tc() ->
     [].
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
@@ -172,29 +188,108 @@ parse_boolean_check(Expect, String) ->
     Expect = Res.
 
 
+
 parse_iso8601_tc(_Config) ->
      [
+      parse_iso8601_check(Expect, String)
+      ||
+	 {Expect, String} <- lists:zip([{{2004, 11, 01},    {04, 40, 35}}
+					,{ {2004, 11, 01},  {04, 40, 35}}
+					,{{-2000, 01, 12},  {12, 13, 14}}
+					,{ {2000, 01, 12},  {0,   0,  0}}
+					,{ {2009, 06, 25},  {04, 32, 31}}
+				       ],
+				       [ "2004-10-31T21:40:35.5-07:00",
+					 "2004-11-01T04:40:35.5Z",
+					 "-2000-01-12T12:13:14Z",
+					 "2000-01-12T00:00:00Z",
+					 "2009-06-25T05:32:31+01:00"
+				       ])],
+    ok.
+
+parse_iso8601_check(Expect, String) ->
+    %execute
+    Res = convert_iso8601_date(String),
+    %assert
+    Expect = Res.
+
+parse_string_tc(_Config) ->
+    [
      begin
-	%% ?DBG({DT, Str, convert_iso8601_date(Str)}),
-	 ct:print(">> ~p : ~p~n",[DT,  convert_iso8601_date(Str)]),
-	 DT = convert_iso8601_date(Str)
+	 parse_string_check(Expect, String),
+	 ct:print("--> ~p ~p ~n",[Expect, parse_string_check(Expect, String)])
      end
       ||
-	{DT, Str} <- lists:zip([{{2004, 11, 01}, {04, 40, 35}},
-				{{2004, 11, 01}, {04, 40, 35}},
-				{{-2000, 01, 12}, {12, 13, 14}},
-				{{2000, 01, 12}, {0,   0,  0}},
-				{{2009, 06, 25}, {04, 32, 31}}
-			       ],
+	{Expect, String} <- [
+			     {"This is a sentence", "This is a sentence"}
+			     , {"false", "false"}
+			     , {"1", "1"}
+			     , {"true", "true"}
+			    ]],
+    ok.
+			   
+parse_string_check(Expect, String) ->
+    %setup
+    E = make_Element("ParseString",String),
+    %execute
+    Res = parse_string(E),
+    %assert
+    Expect = Res.
 
-			       [ "2004-10-31T21:40:35.5-07:00",
-				 "2004-11-01T04:40:35.5Z",
-				 "-2000-01-12T12:13:14Z",
-				 "2000-01-12T00:00:00Z",
-				 "2009-06-25T05:32:31+01:00"
-			       ])
-    ].
+parse_int_tc(_Config) ->
+    [
+     begin
+	 parse_int_check(Expect, String),
+	 ct:print("--> ~p ~p ~n",[Expect, parse_int_check(Expect, String)])
+     end
+      ||
+	{Expect, String} <- [
+			     { -123, "-123"}
+			     , { 12, "   12"}
+			     , {  0, "+0  "}
+			     , {-21, " -21 "}
+			     , {  1, " +1   "}
+			     , { 11, "  11  "}
+			     , {  0, "   -0  "}
+			    ]],
+    ok.
+    
+parse_int_check(Expect, String) ->
+    %setup
+    E = make_Element("ParseInt", String),
+    %execute
+    Res = parse_int(E),
+    %assert
+    Expect = Res.
 
+
+parse_unsignedInt_tc(_Config) ->
+    [
+     begin
+	 parse_unsignedInt_check(Expect, String),
+	 ct:print("--> ~p ~p ~n",[Expect, parse_unsignedInt_check(Expect, String)])
+     end
+      ||
+	{Expect, String} <- [
+			     {123,  "123"}
+			     , {12, "   12"}
+			     , { 0, "-0  "}
+			     , { 1, " 1   "}
+			     , {11, "  11  "}
+			     , { 0, " +0 "}
+			    ]],
+    ok.
+
+
+parse_unsignedInt_check(Expect, String) ->
+    %setup
+    E = make_Element("ParseUnsignedInt", String),
+    %execute
+    Res = parse_unsignedInt(E),
+    %assert
+    Expect = Res.
+
+    
 %%--------------------------------------------------------------------
 %%% Local API
 %%--------------------------------------------------------------------
