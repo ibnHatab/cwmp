@@ -84,12 +84,10 @@
 	  parse_anySimpleType/1
 	]).
 
--import(tr_soap_lib, [return_error/2, parse_error/2]).
-
-
--ifdef(TEST).
--import(tr_soap_lib, [get_QName/2]).
--endif.
+-import(tr_soap_lib, [return_error/2, parse_error/2, parse_error/3,
+		      get_local_name/1, get_QName/2,
+		      local_ns/2, local_name/1
+		     ]).
 
 %%%-----------------------------------------------------------------------------
 %% Internal API
@@ -380,29 +378,29 @@ parse_ArraySize(Value, ContentTag, Nss) ->
 		    DigitStr = string:substr(Value, DigitStart+1, DigitLength),
 		    case string:to_integer(DigitStr) of
 			{error, Reason} ->
-			    tr_soap_lib:parse_error(Value, DigitStr, Reason);
+			    parse_error(Value, DigitStr, Reason);
 			{Int, _Rest} ->
 			    Int
 		    end;    
 	       true ->
-		    tr_soap_lib:parse_error(Value, ContentTag, "Bad Tag")
+		    parse_error(Value, ContentTag, "Bad Tag")
 	    end;
 	_ ->								
-	    tr_soap_lib:parse_error(Value, ContentTag, "Parse array size")
+	    parse_error(Value, ContentTag, "Parse array size")
     end.
 
 parse_XS_Array(Mapper, #xmlElement{content = Content} = E,
 	       ContentTag, #parser{ns = Nss} = State) ->
-    AttrName = tr_soap_lib:get_QName('arrayType', tr_soap_lib:local_ns('soap-enc', Nss)),
+    NsSoapEnc = local_ns('soap-enc', Nss),
+    AttrName = get_QName('arrayType', NsSoapEnc),
     Value = parse_attribete(E, AttrName, string),
     Size = parse_ArraySize(Value, ContentTag, Nss),
-    List = [Mapper(Elem, State)
-	    || Elem <- Content, tr_soap_lib:xmlElement(Elem)],
+    List = [Mapper(Elem, State) || Elem <- Content, tr_soap_lib:xmlElement(Elem)],
     if
 	length(List) == Size ->
 	    List;
 	true ->
-	    tr_soap_lib:parse_error(E, State, "Array size")
+	    parse_error(E, State, "Array size")
     end.
 
 %% end

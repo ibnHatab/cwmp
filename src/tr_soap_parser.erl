@@ -14,7 +14,7 @@
 -export([main/1]).
 
 -import(tr_soap_lib, [parse_error/2, parse_error/3,
-		      get_local_name/1, get_QName/2, local_ns/2, local_name/1,
+		      get_local_name/1, get_QName/2, local_ns/2, 
 		      match_cwmp_ns_and_version/1, check_namespace/3]).
 
 -import(tr_soap_types, [
