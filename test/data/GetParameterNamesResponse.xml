@@ -1,7 +1,6 @@
 <soap-env:Envelope 
     xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/" 
     xmlns:soap-env="http://schemas.xmlsoap.org/soap/envelope/" 
-    xmlns:soap="http://schemas.xmlsoap.org/soap/encoding/" 
     xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xmlns:cwmp="urn:dslforum-org:cwmp-1-0">
@@ -10,7 +9,7 @@
  </soap-env:Header>
  <soap-env:Body>
    <cwmp:GetParameterNamesResponse>
-     <ParameterList soap:arrayType="cwmp:ParameterInfoStruct[3]">
+     <ParameterList soap-enc:arrayType="cwmp:ParameterInfoStruct[2]">
        <ParameterInfoStruct>
 	 <Name>InternetGatewayDevice.DeviceSummary</Name>
 	 <Writable>0</Writable>

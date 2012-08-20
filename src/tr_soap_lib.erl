@@ -85,11 +85,14 @@ return_error(Tag, Message) ->
     throw({error, {Tag, Message}}).
 
 -spec parse_error(#xmlElement{}, #parser{}) -> no_return().
-parse_error(Elem, State, Msg) ->
+parse_error(Elem, State, Msg) when is_record(Elem, xmlElement)->
 %    ?DBG(erlang:get_stacktrace()),
     Path = [Elem#xmlElement.name | [N || {N, _Id} <- Elem#xmlElement.parents]],
     XPath = "/" ++ join(map(fun atom_to_list/1, reverse(Path)), "/"),
-    return_error(XPath, {State, Msg}).
+    return_error(XPath, {State, Msg});
+parse_error(Tag, State, Msg) ->
+    return_error(Tag, {State, Msg}).
+
 
 parse_error(Elem, State) ->
     parse_error(Elem, State, "Unknown element").

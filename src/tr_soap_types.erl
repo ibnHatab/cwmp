@@ -369,6 +369,42 @@ parse_EventCodeType(Elem, State) ->
     end.
     
 
+parse_ArraySize(Value, ContentTag, Nss) ->
+    {NsL, Name} = tr_soap_lib:local_name (ContentTag),
+    Ns = tr_soap_lib:local_ns(NsL, Nss),
+    ContentName = atom_to_list(tr_soap_lib:get_QName(Name, Ns)),
+    case re:run(Value, "\(.*\)\\[\(.*\)\\]") of
+	{match,[_All, {TagStart,TagLength},{DigitStart,DigitLength}]} ->
+	    TagStr = string:substr(Value, TagStart+1, TagLength),
+	    if ContentName == TagStr ->
+		    DigitStr = string:substr(Value, DigitStart+1, DigitLength),
+		    case string:to_integer(DigitStr) of
+			{error, Reason} ->
+			    tr_soap_lib:parse_error(Value, DigitStr, Reason);
+			{Int, _Rest} ->
+			    Int
+		    end;    
+	       true ->
+		    tr_soap_lib:parse_error(Value, ContentTag, "Bad Tag")
+	    end;
+	_ ->								
+	    tr_soap_lib:parse_error(Value, ContentTag, "Parse array size")
+    end.
+
+parse_XS_Array(Mapper, #xmlElement{content = Content} = E,
+	       ContentTag, #parser{ns = Nss} = State) ->
+    AttrName = tr_soap_lib:get_QName('arrayType', tr_soap_lib:local_ns('soap-enc', Nss)),
+    Value = parse_attribete(E, AttrName, string),
+    Size = parse_ArraySize(Value, ContentTag, Nss),
+    List = [Mapper(Elem, State)
+	    || Elem <- Content, tr_soap_lib:xmlElement(Elem)],
+    if
+	length(List) == Size ->
+	    List;
+	true ->
+	    tr_soap_lib:parse_error(E, State, "Array size")
+    end.
+
 %% end
 
 %%%-----------------------------------------------------------------------------
@@ -436,3 +472,5 @@ parse_iso8601_test() ->
 
 
 -endif.
+
+
