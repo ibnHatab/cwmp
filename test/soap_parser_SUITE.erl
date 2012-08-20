@@ -13,7 +13,7 @@
 -include_lib("common_test/include/ct.hrl").
 
 -import(tr_soap_lib, [get_QName/2]).
--import(tr_soap_types, [convert_iso8601_date/1,parse_string/1,parse_int/1]).
+-import(tr_soap_types, [convert_iso8601_date/1,parse_string/1,parse_int/1,parse_unsignedInt/1]).
 
 
 
@@ -113,7 +113,8 @@ groups() ->
     [{soap_parse_types, [sequence], [parse_boolean_tc,
 				     parse_iso8601_tc,
 				     parse_string_tc,
-				     parse_int_tc
+				     parse_int_tc,
+				     parse_unsignedInt_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -131,7 +132,8 @@ all() ->
     [parse_boolean_tc,
      parse_iso8601_tc,
      parse_string_tc,
-     parse_int_tc
+     parse_int_tc,
+     parse_unsignedInt_tc
     ].
      %% 	,
     %% [{group, soap_parse_types},
@@ -153,6 +155,9 @@ parse_string_tc() ->
     [].
 
 parse_int_tc() ->
+    [].
+
+parse_unsignedInt_tc() ->
     [].
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
@@ -239,11 +244,13 @@ parse_int_tc(_Config) ->
      end
       ||
 	{Expect, String} <- [
-			     {123,  "123"}
-			     , {12, "   12"}
-			     , { 0, "0  "}
-			     , { 1, " 1   "}
-			     , {11, "  11  "}
+			     { -123, "-123"}
+			     , { 12, "   12"}
+			     , {  0, "+0  "}
+			     , {-21, " -21 "}
+			     , {  1, " +1   "}
+			     , { 11, "  11  "}
+			     , {  0, "   -0  "}
 			    ]],
     ok.
     
@@ -254,6 +261,34 @@ parse_int_check(Expect, String) ->
     Res = parse_int(E),
     %assert
     Expect = Res.
+
+
+parse_unsignedInt_tc(_Config) ->
+    [
+     begin
+	 parse_unsignedInt_check(Expect, String),
+	 ct:print("--> ~p ~p ~n",[Expect, parse_unsignedInt_check(Expect, String)])
+     end
+      ||
+	{Expect, String} <- [
+			     {123,  "123"}
+			     , {12, "   12"}
+			     , { 0, "-0  "}
+			     , { 1, " 1   "}
+			     , {11, "  11  "}
+			     , { 0, " +0 "}
+			    ]],
+    ok.
+
+
+parse_unsignedInt_check(Expect, String) ->
+    %setup
+    E = make_Element("ParseUnsignedInt", String),
+    %execute
+    Res = parse_unsignedInt(E),
+    %assert
+    Expect = Res.
+
     
 %%--------------------------------------------------------------------
 %%% Local API
