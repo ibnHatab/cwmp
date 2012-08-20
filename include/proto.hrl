@@ -322,9 +322,9 @@
 	  access_list :: access_list
 	  }).
 
--record(parameter_attribute_list, {
-	  parameter_attribute_struct :: [#parameter_attribute_struct{}]
-	 }).
+%% -record(parameter_attribute_list, {
+%% 	  parameter_attribute_struct :: [#parameter_attribute_struct{}]
+%% 	 }).
 
 %%    Schedule Download Time Window Type Definitions
 
@@ -336,9 +336,9 @@
 	  max_retries  :: integer()
 	 }).
 
--record(time_window_list, {
-	  time_window_struct :: [#time_window_struct{}]
-	 }).
+%% -record(time_window_list, {
+%% 	  time_window_struct :: [#time_window_struct{}]
+%% 	 }).
 
 %%    TransferComplete Type Definitions
 -type transfer_state_type() :: 1 % Not yet started
@@ -351,9 +351,9 @@
 	  state :: transfer_state_type()
 	 }).
 
--record(transfer_list, {
-	  queued_transfer_struct :: [#queued_transfer_struct{}]
-	 }).
+%% -record(transfer_list, {
+%% 	  queued_transfer_struct :: [#queued_transfer_struct{}]
+%% 	 }).
 
 -record(all_queued_transfer_struct, {
 	  command_key :: command_key_type(),
@@ -446,9 +446,9 @@
 	 }).
 
 %%   Voucher and Option Type Definitions
--record(voucher_list, {
-	  base64 :: [binary()]
-	 }).
+%% -record(voucher_list, {
+%% 	  base64 :: [binary()]
+%% 	 }).
 
 -record(option_struct, {
 	  option_name :: string(),
@@ -579,7 +579,7 @@
 
 %% @doc GetParameterAttributesResponse message - Annex A.3.2.5 
 -record(get_parameter_attributes_response, {
-	   parameter_list :: #parameter_attribute_list{}
+	   parameter_list :: [#parameter_attribute_struct{}]
 	  }).
 
 %% @doc AddObject message - Annex A.3.2.6 xmlText
@@ -651,7 +651,7 @@
 
 %% @doc GetQueuedTransfersResponse message - Annex A.4.1.1 
 -record(get_queued_transfers_response, {
-	   transfer_list :: #transfer_list{}
+	   transfer_list ::  [#queued_transfer_struct{}]
 	  }).
 
 %% @doc ScheduleInform message - Annex A.4.1.2 
@@ -666,7 +666,7 @@
 
 %% @doc SetVouchers message - Annex A.4.1.3 
 -record(set_vouchers, {
-	   voucher_list :: #voucher_list{}
+	   voucher_list :: [binary()]
 	  }).
 
 %% @doc SetVouchersResponse message - Annex A.4.1.3 
@@ -728,7 +728,7 @@
 	   password :: string(),
 	   file_size :: non_neg_integer(),
 	   target_file_name :: string(),
-	   time_window_list :: #time_window_list{}
+	   time_window_list ::  [#time_window_struct{}]
 	  }).
 
 %% @doc ScheduleDownloadResponse message - Annex A.4.1.8 

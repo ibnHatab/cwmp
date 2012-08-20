@@ -309,14 +309,17 @@ parse_DeploymentUnitFaultStruct(#xmlElement{content = Content} = E, S) ->
                 #deployment_unit_fault_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 -spec parse_ParameterNames(#xmlElement{},#parser{}) -> [string()].
-parse_ParameterNames(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('cwmp:ParameterNames', E, S),
-    [case get_local_name(Elem#xmlElement.name) of
-    	 'string' ->
-    	     parse_string(Elem);
-    	 _ ->
-    	     parse_error(Elem, State)
-     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
+parse_ParameterNames(E, S) ->
+    NewState = check_namespace('cwmp:ParameterNames', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'string' ->
+				   parse_string(Elem);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:string', NewState).
 
 -spec parse_ParameterValueStruct(#xmlElement{},#parser{}) -> #parameter_value_struct{}.
 parse_ParameterValueStruct(#xmlElement{content = Content} = E, S) ->
@@ -337,24 +340,30 @@ parse_ParameterValueStruct(#xmlElement{content = Content} = E, S) ->
                 #parameter_value_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 -spec parse_ParameterValueList(#xmlElement{},#parser{}) -> [#parameter_value_struct{}].
-parse_ParameterValueList(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('cwmp:ParameterValueList', E, S),
-    [case get_local_name(Elem#xmlElement.name) of
-	 'ParameterValueStruct' ->
-	     parse_ParameterValueStruct(Elem, State);
-	 _ ->
-	     parse_error(Elem, State)
-     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
+parse_ParameterValueList(E, S) ->
+    NewState = check_namespace('cwmp:ParameterValueList', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'ParameterValueStruct' ->
+				   parse_ParameterValueStruct(Elem, State);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:ParameterValueStruct', NewState).
 
 -spec parse_MethodList(#xmlElement{},#parser{}) -> [string()].
-parse_MethodList(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('cwmp:MethodList', E, S),
-    [case get_local_name(Elem#xmlElement.name) of
-    	 'string' ->
-    	     parse_string(Elem);
-    	 _ ->
-    	     parse_error(Elem, State)
-     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
+parse_MethodList(E, S) ->
+    NewState = check_namespace('cwmp:MethodList', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'string' ->
+				   parse_string(Elem);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:string', NewState).
 
 -spec parse_DeviceIdStruct(#xmlElement{},#parser{}) -> #device_id_struct{}.
 parse_DeviceIdStruct(#xmlElement{content = Content} = E, S) ->
@@ -396,14 +405,17 @@ parse_EventStruct(#xmlElement{content = Content} = E, S) ->
                 #event_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 -spec parse_EventList(#xmlElement{},#parser{}) -> [#event_struct{}].
-parse_EventList(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('cwmp:EventList', E, S),
-    [case get_local_name(Elem#xmlElement.name) of
-	 'EventStruct' ->
-	     parse_EventStruct(Elem, State);
-	 _ ->
-	     parse_error(Elem, State)
-     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
+parse_EventList(E, S) ->
+    NewState = check_namespace('cwmp:EventList', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'EventStruct' ->
+				   parse_EventStruct(Elem, State);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:EventStruct', NewState).
 
 -spec parse_ParameterInfoStruct(#xmlElement{},#parser{}) -> #parameter_info_struct{}.
 parse_ParameterInfoStruct(#xmlElement{content = Content} = E, S) ->
@@ -426,34 +438,27 @@ parse_ParameterInfoStruct(#xmlElement{content = Content} = E, S) ->
 parse_ParameterInfoList(E, S) ->
     NewState = check_namespace('cwmp:ParameterInfoList', E, S),
     parse_XS_Array(fun (Elem, State) ->
-			                 case get_local_name(Elem#xmlElement.name) of
-			                     'ParameterInfoStruct' ->
-				                 parse_ParameterInfoStruct(Elem, State);
-			                     _ ->
-				                 parse_error(Elem, State)
-			                 end
-		                 end,
-		                 E, 'cwmp:ParameterInfoStruct', NewState).
+			   case get_local_name(Elem#xmlElement.name) of
+			       'ParameterInfoStruct' ->
+				   parse_ParameterInfoStruct(Elem, State);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:ParameterInfoStruct', NewState).
 
 -spec parse_AccessList(#xmlElement{},#parser{}) -> [access_list_value_type()].
-parse_AccessList(#xmlElement{content = Content} = E, #parser{ns = Nss} = S) ->
-    State = check_namespace('cwmp:AccessList', E, S),
-    AttrName = get_QName(local_ns('soap-enc', Nss), 'arrayType'),
-    Value = parse_attribete(E, AttrName, int),
-    List = [case get_local_name(Elem#xmlElement.name) of
-		'string' ->
-		    check_namespace('cwmp:string', Elem, State),
-		    parse_string(Elem);
-		_ ->
-		    parse_error(Elem, State)
-	    end || Elem <- Content, tr_soap_lib:xmlElement(Elem)],
-    if
-	length(List) == Value ->
-	    List;
-	true ->
-	    parse_error(E, State, "Array size")
-    end.
-
+parse_AccessList(E, S) ->
+    NewState = check_namespace('cwmp:AccessList', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'string' ->
+				   parse_string(Elem);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:string', NewState).
 
 
 -spec parse_SetParameterAttributesStruct(#xmlElement{},#parser{}) -> #set_parameter_attributes_struct{}.
@@ -484,23 +489,17 @@ parse_SetParameterAttributesStruct(#xmlElement{content = Content} = E, S) ->
                 #set_parameter_attributes_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 -spec parse_SetParameterAttributesList(#xmlElement{},#parser{}) -> #set_parameter_attributes_list{}.
-parse_SetParameterAttributesList(#xmlElement{content = Content} = E,
-				 #parser{ns = Nss} = S) ->
-    State = check_namespace('cwmp:SetParameterAttributesList', E, S),
-    AttrName = get_QName(local_ns('soap-enc', Nss), 'arrayType'),
-    Value = parse_attribete(E, AttrName, int),
-    List = [case get_local_name(Elem#xmlElement.name) of
-		'SetParameterAttributesStruct' ->
-		    parse_SetParameterAttributesStruct(Elem, State);
-		_ ->
-		    parse_error(Elem, State)
-	    end || Elem <- Content, tr_soap_lib:xmlElement(Elem)],
-    if
-	length(List) == Value ->
-	    List;
-	true ->
-	    parse_error(E, State, "Array size")
-    end.
+parse_SetParameterAttributesList(E, S) ->
+    NewState = check_namespace('cwmp:SetParameterAttributesList', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'SetParameterAttributesStruct' ->
+				   parse_SetParameterAttributesStruct(Elem, State);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:SetParameterAttributesStruct', NewState).
 
 
 %% -spec parse_ParameterAttributeStruct(#xmlElement{},#parser{}) -> #parameter_attribute_struct{}.
@@ -524,20 +523,19 @@ parse_ParameterAttributeStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #parameter_attribute_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ParameterAttributeList(#xmlElement{},#parser{}) -> #parameter_attribute_list{}.
-parse_ParameterAttributeList(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('cwmp:ParameterAttributeList', E, S),
-    lists:foldl(fun(Elem, ParameterAttributeList) ->
-                        case get_local_name(Elem#xmlElement.name) of
+-spec parse_ParameterAttributeList(#xmlElement{},#parser{}) -> [#parameter_attribute_struct{}].
+parse_ParameterAttributeList(E, S) ->
+    NewState = check_namespace('cwmp:ParameterAttributeList', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'ParameterAttributeStruct' ->
+				   parse_ParameterAttributeStruct(Elem, State);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:ParameterAttributeStruct', NewState).
 
-                            'ParameterAttributeStruct' ->
-                                ParameterAttributeList#parameter_attribute_list{parameter_attribute_struct = parse_ParameterAttributeStruct(Elem, State)};
-
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #parameter_attribute_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_TimeWindowStruct(#xmlElement{},#parser{}) -> #time_window_struct{}.
 parse_TimeWindowStruct(#xmlElement{content = Content} = E, S) ->
@@ -566,20 +564,18 @@ parse_TimeWindowStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #time_window_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_TimeWindowList(#xmlElement{},#parser{}) -> #time_window_list{}.
-parse_TimeWindowList(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('cwmp:TimeWindowList', E, S),
-    lists:foldl(fun(Elem, TimeWindowList) ->
-                        case get_local_name(Elem#xmlElement.name) of
-
-                            'TimeWindowStruct' ->
-                                TimeWindowList#time_window_list{time_window_struct = parse_TimeWindowStruct(Elem, State)};
-
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #time_window_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
+-spec parse_TimeWindowList(#xmlElement{},#parser{}) ->  [#time_window_struct{}].
+parse_TimeWindowList(E, S) ->
+    NewState = check_namespace('cwmp:TimeWindowList', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'TimeWindowStruct' ->
+				   parse_TimeWindowStruct(Elem, State);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:TimeWindowStruct', NewState).
 
 %% -spec parse_QueuedTransferStruct(#xmlElement{},#parser{}) -> #queued_transfer_struct{}.
 parse_QueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
@@ -599,20 +595,19 @@ parse_QueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #queued_transfer_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
--spec parse_TransferList(#xmlElement{},#parser{}) -> #transfer_list{}.
-parse_TransferList(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('cwmp:TransferList', E, S),
-    lists:foldl(fun(Elem, TransferList) ->
-                        case get_local_name(Elem#xmlElement.name) of
+-spec parse_TransferList(#xmlElement{},#parser{}) ->  [#queued_transfer_struct{}].
+parse_TransferList(E, S) ->
+    NewState = check_namespace('cwmp:TransferList', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'QueuedTransferStruct' ->
+				   parse_QueuedTransferStruct(Elem, State);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:QueuedTransferStruct', NewState).
 
-                            'QueuedTransferStruct' ->
-                                TransferList#transfer_list{queued_transfer_struct = parse_QueuedTransferStruct(Elem, State)};
-
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #transfer_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 %% -spec parse_AllQueuedTransferStruct(#xmlElement{},#parser{}) -> #all_queued_transfer_struct{}.
 parse_AllQueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
@@ -645,14 +640,17 @@ parse_AllQueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
                 #all_queued_transfer_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
 -spec parse_AllTransferList(#xmlElement{},#parser{}) -> [#all_queued_transfer_struct{}].
-parse_AllTransferList(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('cwmp:AllTransferList', E, S),
-    [case get_local_name(Elem#xmlElement.name) of
-	 'AllQueuedTransferStruct' ->
-	     parse_AllQueuedTransferStruct(Elem, State);
-	 _ ->
-	     parse_error(Elem, State)
-     end || Elem <- Content, tr_soap_lib:xmlElement(Elem)].
+parse_AllTransferList(E, S) ->
+    NewState = check_namespace('cwmp:AllTransferList', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'AllQueuedTransferStruct' ->
+				   parse_AllQueuedTransferStruct(Elem, State);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:AllQueuedTransferStruct', NewState).
 
 -spec parse_OperationStruct(#xmlElement{},#parser{}) -> operation_struct().
 parse_OperationStruct(#xmlElement{content = Content} = E, S) ->
@@ -791,20 +789,18 @@ parse_AutonOpResultStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #auton_op_result_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_VoucherList(#xmlElement{},#parser{}) -> #voucher_list{}.
-parse_VoucherList(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('cwmp:VoucherList', E, S),
-    lists:foldl(fun(Elem, VoucherList) ->
-                        case get_local_name(Elem#xmlElement.name) of
-
-                            'base64' ->
-                                VoucherList#voucher_list{base64 = parse_base64(Elem)};
-
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #voucher_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
+-spec parse_VoucherList(#xmlElement{},#parser{}) -> [binary()].
+parse_VoucherList(E, S) ->
+    NewState = check_namespace('cwmp:VoucherList', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'base64' ->
+				   parse_base64(Elem);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:base64', NewState).
 
 %% -spec parse_OptionStruct(#xmlElement{},#parser{}) -> #option_struct{}.
 parse_OptionStruct(#xmlElement{content = Content} = E, S) ->
@@ -839,20 +835,18 @@ parse_OptionStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #option_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_OptionList(#xmlElement{},#parser{}) -> #option_list{}.
-parse_OptionList(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('cwmp:OptionList', E, S),
-    lists:foldl(fun(Elem, OptionList) ->
-                        case get_local_name(Elem#xmlElement.name) of
-
-                            'OptionStruct' ->
-                                OptionList#option_list{option_struct = parse_OptionStruct(Elem, State)};
-
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #option_list{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
+-spec parse_OptionList(#xmlElement{},#parser{}) -> [#option_struct{}].
+parse_OptionList(E, S) ->
+    NewState = check_namespace('cwmp:OptionList', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'OptionStruct' ->
+				   parse_OptionStruct(Elem, State);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:OptionStruct', NewState).
 
 %% -spec parse_ArgStruct(#xmlElement{},#parser{}) -> #arg_struct{}.
 parse_ArgStruct(#xmlElement{content = Content} = E, S) ->
@@ -872,21 +866,18 @@ parse_ArgStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #arg_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_FileTypeArg(#xmlElement{},#parser{}) -> #file_type_arg{}.
-parse_FileTypeArg(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('cwmp:FileTypeArg', E, S),
-    lists:foldl(fun(Elem, FileTypeArg) ->
-                        case get_local_name(Elem#xmlElement.name) of
-
-                            'ArgStruct' ->
-                                FileTypeArg#file_type_arg{arg_struct = parse_ArgStruct(Elem, State)};
-
-                            _ ->
-                                parse_error(Elem, State)
-                        end
-                end,
-                #file_type_arg{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
-
+-spec parse_FileTypeArg(#xmlElement{},#parser{}) ->  [#arg_struct{}].
+parse_FileTypeArg(E, S) ->
+    NewState = check_namespace('cwmp:FileTypeArg', E, S),
+    parse_XS_Array(fun (Elem, State) ->
+			   case get_local_name(Elem#xmlElement.name) of
+			       'ArgStruct' ->
+				   parse_ArgStruct(Elem, State);
+			       _ ->
+				   parse_error(Elem, State)
+			   end
+		   end,
+		   E, 'cwmp:string', NewState).
 
 -spec parse_SoapFaultDetail(#xmlElement{},#parser{}) -> #fault{}.
 parse_SoapFaultDetail(#xmlElement{content = Content} = E, S) ->
@@ -1744,7 +1735,7 @@ parse_root_test() ->
 	 "../test/data/Simple.xml"
 	],
     A = array:from_list(T),
-    F = array:get(4,  A),
+    F = array:get(7,  A),
     ?DBG(F),
     {Doc, _Rest} = xmerl_scan:file(F),
     Rpc = parse(Doc, #parser{}),

@@ -85,8 +85,7 @@
 	]).
 
 -import(tr_soap_lib, [return_error/2, parse_error/2, parse_error/3,
-		      get_local_name/1, get_QName/2,
-		      local_ns/2, local_name/1
+		      get_QName/2, local_ns/2, normalize_to_local_ns/2
 		     ]).
 
 %%%-----------------------------------------------------------------------------
@@ -365,16 +364,16 @@ parse_EventCodeType(Elem, State) ->
 		    Event
 	    end
     end.
-    
 
 parse_ArraySize(Value, ContentTag, Nss) ->
-    {NsL, Name} = tr_soap_lib:local_name (ContentTag),
-    Ns = tr_soap_lib:local_ns(NsL, Nss),
-    ContentName = atom_to_list(tr_soap_lib:get_QName(Name, Ns)),
     case re:run(Value, "\(.*\)\\[\(.*\)\\]") of
 	{match,[_All, {TagStart,TagLength},{DigitStart,DigitLength}]} ->
-	    TagStr = string:substr(Value, TagStart+1, TagLength),
-	    if ContentName == TagStr ->
+	    ValueStr = string:substr(Value, TagStart+1, TagLength),
+
+	    {ValueName, ValueNs} = normalize_to_local_ns(list_to_atom(ValueStr), Nss),
+	    {ContentName, ContentNs} = normalize_to_local_ns(ContentTag, Nss),
+	    
+	    if {ContentName, ContentNs} == {ValueName, ValueNs} ->
 		    DigitStr = string:substr(Value, DigitStart+1, DigitLength),
 		    case string:to_integer(DigitStr) of
 			{error, Reason} ->

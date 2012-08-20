@@ -23,6 +23,8 @@
 
 -export([match_cwmp_ns_and_version/1, check_namespace/3]).
 
+-export([normalize_to_local_ns/2]).
+
 -import(lists, [map/2, reverse/1]).
 -import(string, [join/2]).
 
@@ -156,10 +158,16 @@ check_namespace(RefQName, #xmlElement{name = QName} = Elem, #parser{ns=Nss} = St
 	    State
     end.
 
+normalize_to_local_ns(Tag, Nss) ->
+    {NsL, Name} = local_name (Tag),
+    Ns = local_ns(NsL, Nss),
+    {Name, Ns}.
+
 local_ns('soap-env', Nss) ->  Nss#rpc_ns.ns_envelop;
 local_ns('soap-enc', Nss) ->  Nss#rpc_ns.ns_encoding;
 local_ns('cwmp', Nss)     ->  Nss#rpc_ns.ns_cwmp;
-local_ns('xsd', Nss)      ->  Nss#rpc_ns.ns_xsd.
+local_ns('xsd', Nss)      ->  Nss#rpc_ns.ns_xsd;
+local_ns('', Nss)         ->  Nss#rpc_ns.inherited.
 
 set_local_ns('soap-env', Nss, LocalNs) -> Nss#rpc_ns{ns_envelop = LocalNs};
 set_local_ns('soap-enc', Nss, LocalNs) -> Nss#rpc_ns{ns_encoding = LocalNs};
@@ -297,3 +305,5 @@ meck_test()->
 
 -endif.
 
+
+    
