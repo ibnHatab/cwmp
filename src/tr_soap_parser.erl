@@ -36,7 +36,7 @@
 			parse_FaultCode/1,
 			parse_FaultString/1,
 			parse_FileSize/1,
-			parse_FileType/1,
+			parse_FileType/2,
 			parse_InstanceNumber/1,
 			parse_IsDownload/1,
 			parse_IsTransferable/1,
@@ -624,7 +624,7 @@ parse_AllQueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
                                 AllQueuedTransferStruct#all_queued_transfer_struct{is_download = parse_IsDownload(Elem)};
 
                             'FileType' ->
-                                AllQueuedTransferStruct#all_queued_transfer_struct{file_type = parse_FileType(Elem)};
+                                AllQueuedTransferStruct#all_queued_transfer_struct{file_type = parse_FileType('TransferFileType', Elem)};
 
                             'FileSize' ->
                                 AllQueuedTransferStruct#all_queued_transfer_struct{file_size = parse_FileSize(Elem)};
@@ -1187,7 +1187,7 @@ parse_Download(#xmlElement{content = Content} = E, S) ->
                                 Download#download{command_key = parse_CommandKeyType(Elem)};
 
                             'FileType' ->
-                                Download#download{file_type = parse_FileType(Elem)};
+                                Download#download{file_type = parse_FileType('DownloadFileType', Elem)};
 
                             'URL' ->
                                 Download#download{url = parse_URL(Elem)};
@@ -1355,7 +1355,7 @@ parse_Upload(#xmlElement{content = Content} = E, S) ->
                                 Upload#upload{command_key = parse_CommandKeyType(Elem)};
 
                             'FileType' ->
-                                Upload#upload{file_type = parse_FileType(Elem)};
+                                Upload#upload{file_type = parse_FileType('UploadFileType', Elem)};
 
                             'URL' ->
                                 Upload#upload{url = parse_URL(Elem)};
@@ -1431,7 +1431,8 @@ parse_ScheduleDownload(#xmlElement{content = Content} = E, S) ->
                                 ScheduleDownload#schedule_download{command_key = parse_CommandKeyType(Elem)};
 
                             'FileType' ->
-                                ScheduleDownload#schedule_download{file_type = parse_FileType(Elem)};
+                                ScheduleDownload#schedule_download{
+				  file_type = parse_FileType('DownloadFileType', Elem)};
 
                             'URL' ->
                                 ScheduleDownload#schedule_download{url = parse_URL(Elem)};
@@ -1578,7 +1579,7 @@ parse_AutonomousTransferComplete(#xmlElement{content = Content} = E, S) ->
                                 AutonomousTransferComplete#autonomous_transfer_complete{is_download = parse_IsDownload(Elem)};
 
                             'FileType' ->
-                                AutonomousTransferComplete#autonomous_transfer_complete{file_type = parse_FileType(Elem)};
+                                AutonomousTransferComplete#autonomous_transfer_complete{file_type = parse_FileType('TransferFileType', Elem)};
 
                             'FileSize' ->
                                 AutonomousTransferComplete#autonomous_transfer_complete{file_size = parse_FileSize(Elem)};
@@ -1650,7 +1651,7 @@ parse_RequestDownload(#xmlElement{content = Content} = E, S) ->
                         case get_local_name(Elem#xmlElement.name) of
 
                             'FileType' ->
-                                RequestDownload#request_download{file_type = parse_FileType(Elem)};
+                                RequestDownload#request_download{file_type = parse_FileType('DownloadFileType', Elem)};
 
                             'FileTypeArg' ->
                                 RequestDownload#request_download{file_type_arg = parse_FileTypeArg(Elem, State)};

@@ -29,7 +29,7 @@
 	  parse_FaultCode/1,
 	  parse_FaultString/1,
 	  parse_FileSize/1,
-	  parse_FileType/1,
+	  parse_FileType/2,
 	  parse_InstanceNumber/1,
 	  parse_IsDownload/1,
 	  parse_IsTransferable/1,
@@ -281,10 +281,9 @@ parse_ExecutionEnvRef(E)      -> parse_string(E).
 parse_ExecutionUnitRefList(E) -> parse_string(E).
 parse_ExpirationDate(E)       -> parse_dateTime(E).
 parse_FailureURL(E)           -> parse_anyURI(E).
-parse_FaultCode(E)            -> parse_unsignedInt(E).
+
 parse_FaultString(E)          -> parse_string(E).
 parse_FileSize(E)             -> parse_unsignedInt(E).
-parse_FileType(E)             -> parse_string(E).
 parse_InstanceNumber(E)       -> parse_unsignedInt(E).
 parse_IsDownload(E)           -> parse_boolean(E).
 parse_IsTransferable(E)       -> parse_int(E).
@@ -297,7 +296,7 @@ parse_Next(E)                 -> parse_string(E).
 parse_NextLevel(E)            -> parse_boolean(E).
 parse_NextURL(E)              -> parse_anyURI(E).
 parse_NotificationChange(E)   -> parse_boolean(E).
-parse_Notification(E)         -> parse_int(E).
+
 parse_ObjectNameType(E)       -> parse_string(E).
 parse_OptionName(E)           -> parse_string(E).
 parse_OUI(E)                  -> parse_string(E).
@@ -326,7 +325,7 @@ parse_Value(E)                -> parse_string(E).
 parse_Version(E)              -> parse_string(E).
 parse_VoucherSN(E)            -> parse_unsignedInt(E).
 parse_WindowEnd(E)            -> parse_unsignedInt(E).
-parse_WindowMode(E)           -> parse_string(E).
+
 parse_WindowStart(E)          -> parse_unsignedInt(E).
 parse_Writable(E)             -> parse_boolean(E).
 
@@ -403,6 +402,50 @@ parse_XS_Array(Mapper, #xmlElement{content = Content} = E,
 	true ->
 	    parse_error(E, State, "Array size")
     end.
+
+parse_FileType('TransferFileType', E) ->
+    parse_withSuportedValues(E, ?SUPPORTED_TRANSFER_FILE_TYPE);
+parse_FileType('DownloadFileType', E) ->
+    parse_withSuportedValues(E, ?SUPPORTED_DOWNLOAD_FILE_TYPE);
+parse_FileType('UploadFileType', E) ->
+    parse_withSuportedValues(E, ?SUPPORTED_UPLOAD_FILE_TYPE).
+					      
+parse_withSuportedValues(E, SuportedValues) ->
+    String = parse_string(E),
+    Key = case string:to_integer(String) of
+	      {error, _Reason} ->
+		  list_to_atom(String);
+	      {Int, _Rest} ->
+		  Int
+	  end,    
+    case lists:keyfind(Key, 1, SuportedValues) of
+	{K, _S} ->
+	    K;
+	false ->
+	    parse_error(E, String, "Value")
+    end.
+
+parse_FaultCode(E) ->
+    Code = parse_unsignedInt(E),
+    case lists:keyfind(Code, 1, ?SUPPORTED_CPE_FAULT_CODES) of
+	{K, _S} ->
+	    K;
+	false ->
+	    parse_error(E, Code, "Fault Code")
+    end.
+
+parse_Notification(E) ->
+    Value =parse_int(E),
+    if
+	0 =< Value, Value =< 6	->
+	    Value;
+	true -> 
+	    parse_error(E, Value, "Notification Value")
+    end.
+
+parse_WindowMode(E) ->
+    parse_withSuportedValues(E, ?SUPPORTED_TIME_WINDOW_MODE_VALUE_TYPE).
+
 
 %% end
 
