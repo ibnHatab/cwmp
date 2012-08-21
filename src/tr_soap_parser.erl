@@ -13,8 +13,7 @@
 
 -export([main/1]).
 
--import(tr_soap_lib, [parse_error/2, parse_error/3,
-		      get_local_name/1, get_QName/2, local_ns/2, 
+-import(tr_soap_lib, [parse_error/2, get_local_name/1, get_QName/2, 
 		      match_cwmp_ns_and_version/1, check_namespace/3]).
 
 -import(tr_soap_types, [
@@ -88,7 +87,7 @@
 			parse_base64/1,
 			parse_anyURI/1,
 			parse_attribete/3,
-			parse_anySimpleType/2,
+			parse_anySimpleType/1,
 			parse_XS_Array/4
 		       ]).
 
@@ -144,7 +143,7 @@ parse_Document(#xmlElement{name=QName, namespace = Namespace} = Doc, State) when
               end,
     #rpc_data{data = Envelop}.
 
--spec parse_Namespace(#xmlNamespace{}) -> {#rpc_ns{}, cwmp_version()}.
+-spec parse_Namespace(#xmlNamespace{}) -> #rpc_ns{}.
 parse_Namespace(Nss) ->
     match_cwmp_ns_and_version(Nss).
 
@@ -270,7 +269,7 @@ parse_HoldRequests(Elem, #parser{ns=Nss} = _State) ->
     Value = parse_boolean(Elem),
     QName = get_QName('mustUnderstand', Nss#rpc_ns.ns_envelop),
     MustuNderstand = parse_attribete(Elem, QName, boolean),
-    #id{mustUnderstand = MustuNderstand, value = Value}.
+    #hold_requests{mustUnderstand = MustuNderstand, value = Value}.
 
 -spec parse_TransferCompleteFaultStruct(#xmlElement{},#parser{}) -> #transfer_complete_fault_struct{}.
 parse_TransferCompleteFaultStruct(#xmlElement{content = Content} = E, S) ->
@@ -331,7 +330,7 @@ parse_ParameterValueStruct(#xmlElement{content = Content} = E, S) ->
                                 ParameterValueStruct#parameter_value_struct{name = parse_Name(Elem)};
 
                             'Value' ->
-                                ParameterValueStruct#parameter_value_struct{value = parse_anySimpleType(Elem, State)};
+                                ParameterValueStruct#parameter_value_struct{value = parse_anySimpleType(Elem)};
 
                             _ ->
                                 parse_error(Elem, State)
@@ -488,7 +487,7 @@ parse_SetParameterAttributesStruct(#xmlElement{content = Content} = E, S) ->
                 end,
                 #set_parameter_attributes_struct{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
--spec parse_SetParameterAttributesList(#xmlElement{},#parser{}) -> #set_parameter_attributes_list{}.
+-spec parse_SetParameterAttributesList(#xmlElement{},#parser{}) ->  [#set_parameter_attributes_struct{}].
 parse_SetParameterAttributesList(E, S) ->
     NewState = check_namespace('cwmp:SetParameterAttributesList', E, S),
     parse_XS_Array(fun (Elem, State) ->
@@ -502,7 +501,7 @@ parse_SetParameterAttributesList(E, S) ->
 		   E, 'cwmp:SetParameterAttributesStruct', NewState).
 
 
-%% -spec parse_ParameterAttributeStruct(#xmlElement{},#parser{}) -> #parameter_attribute_struct{}.
+-spec parse_ParameterAttributeStruct(#xmlElement{},#parser{}) -> #parameter_attribute_struct{}.
 parse_ParameterAttributeStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:ParameterAttributeStruct', E, S),
     lists:foldl(fun(Elem, ParameterAttributeStruct) ->
@@ -537,7 +536,7 @@ parse_ParameterAttributeList(E, S) ->
 		   E, 'cwmp:ParameterAttributeStruct', NewState).
 
 
-%% -spec parse_TimeWindowStruct(#xmlElement{},#parser{}) -> #time_window_struct{}.
+-spec parse_TimeWindowStruct(#xmlElement{},#parser{}) -> #time_window_struct{}.
 parse_TimeWindowStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:TimeWindowStruct', E, S),
     lists:foldl(fun(Elem, TimeWindowStruct) ->
@@ -577,7 +576,7 @@ parse_TimeWindowList(E, S) ->
 		   end,
 		   E, 'cwmp:TimeWindowStruct', NewState).
 
-%% -spec parse_QueuedTransferStruct(#xmlElement{},#parser{}) -> #queued_transfer_struct{}.
+-spec parse_QueuedTransferStruct(#xmlElement{},#parser{}) -> #queued_transfer_struct{}.
 parse_QueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:QueuedTransferStruct', E, S),
     lists:foldl(fun(Elem, QueuedTransferStruct) ->
@@ -609,7 +608,7 @@ parse_TransferList(E, S) ->
 		   E, 'cwmp:QueuedTransferStruct', NewState).
 
 
-%% -spec parse_AllQueuedTransferStruct(#xmlElement{},#parser{}) -> #all_queued_transfer_struct{}.
+-spec parse_AllQueuedTransferStruct(#xmlElement{},#parser{}) -> #all_queued_transfer_struct{}.
 parse_AllQueuedTransferStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:AllQueuedTransferStruct', E, S),
     lists:foldl(fun(Elem, AllQueuedTransferStruct) ->
@@ -652,9 +651,9 @@ parse_AllTransferList(E, S) ->
 		   end,
 		   E, 'cwmp:AllQueuedTransferStruct', NewState).
 
--spec parse_OperationStruct(#xmlElement{},#parser{}) -> operation_struct().
+-spec parse_OperationStruct(#xmlElement{},#parser{}) -> [operation_struct()].
 parse_OperationStruct(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('cwmp:OperationStruct', E, S),
+    State = check_namespace('cwmp:Operations', E, S),
     [case get_local_name(Elem#xmlElement.name) of
 	 'InstallOpStruct' ->
 	     parse_InstallOpStruct(Elem, State);
@@ -802,7 +801,7 @@ parse_VoucherList(E, S) ->
 		   end,
 		   E, 'cwmp:base64', NewState).
 
-%% -spec parse_OptionStruct(#xmlElement{},#parser{}) -> #option_struct{}.
+-spec parse_OptionStruct(#xmlElement{},#parser{}) -> #option_struct{}.
 parse_OptionStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:OptionStruct', E, S),
     lists:foldl(fun(Elem, OptionStruct) ->
@@ -848,7 +847,7 @@ parse_OptionList(E, S) ->
 		   end,
 		   E, 'cwmp:OptionStruct', NewState).
 
-%% -spec parse_ArgStruct(#xmlElement{},#parser{}) -> #arg_struct{}.
+-spec parse_ArgStruct(#xmlElement{},#parser{}) -> #arg_struct{}.
 parse_ArgStruct(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:ArgStruct', E, S),
     lists:foldl(fun(Elem, ArgStruct) ->
@@ -950,10 +949,10 @@ parse_Fault(#xmlElement{content = Content} = E, S) ->
                 end,
                 #fault{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetRPCMethods(#xmlElement{},#parser{}) -> #get_rpc_methods{}.
+-spec parse_GetRPCMethods(#xmlElement{},#parser{}) -> #get_rpc_methods{}.
 parse_GetRPCMethods(_, _) -> #get_rpc_methods{}.
 
-%% -spec parse_GetRPCMethodsResponse(#xmlElement{},#parser{}) -> #get_rpc_methods_response{}.
+-spec parse_GetRPCMethodsResponse(#xmlElement{},#parser{}) -> #get_rpc_methods_response{}.
 parse_GetRPCMethodsResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:GetRPCMethodsResponse', E, S),
     lists:foldl(fun(Elem, GetRPCMethodsResponse) ->
@@ -967,7 +966,7 @@ parse_GetRPCMethodsResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #get_rpc_methods_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetParameterValues(#xmlElement{},#parser{}) -> #set_parameter_values{}.
+-spec parse_SetParameterValues(#xmlElement{},#parser{}) -> #set_parameter_values{}.
 parse_SetParameterValues(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:SetParameterValues', E, S),
     lists:foldl(fun(Elem, SetParameterValues) ->
@@ -985,7 +984,7 @@ parse_SetParameterValues(#xmlElement{content = Content} = E, S) ->
                 end,
                 #set_parameter_values{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetParameterValuesResponse(#xmlElement{},#parser{}) -> #set_parameter_values_response{}.
+-spec parse_SetParameterValuesResponse(#xmlElement{},#parser{}) -> #set_parameter_values_response{}.
 parse_SetParameterValuesResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:SetParameterValuesResponse', E, S),
     lists:foldl(fun(Elem, SetParameterValuesResponse) ->
@@ -1000,7 +999,7 @@ parse_SetParameterValuesResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #set_parameter_values_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetParameterValues(#xmlElement{},#parser{}) -> #get_parameter_values{}.
+-spec parse_GetParameterValues(#xmlElement{},#parser{}) -> #get_parameter_values{}.
 parse_GetParameterValues(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:GetParameterValues', E, S),
     lists:foldl(fun(Elem, GetParameterValues) ->
@@ -1015,7 +1014,7 @@ parse_GetParameterValues(#xmlElement{content = Content} = E, S) ->
                 end,
                 #get_parameter_values{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetParameterValuesResponse(#xmlElement{},#parser{}) -> #get_parameter_values_response{}.
+-spec parse_GetParameterValuesResponse(#xmlElement{},#parser{}) -> #get_parameter_values_response{}.
 parse_GetParameterValuesResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:GetParameterValuesResponse', E, S),
     lists:foldl(fun(Elem, GetParameterValuesResponse) ->
@@ -1030,7 +1029,7 @@ parse_GetParameterValuesResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #get_parameter_values_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetParameterNames(#xmlElement{},#parser{}) -> #get_parameter_names{}.
+-spec parse_GetParameterNames(#xmlElement{},#parser{}) -> #get_parameter_names{}.
 parse_GetParameterNames(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:GetParameterNames', E, S),
     lists:foldl(fun(Elem, GetParameterNames) ->
@@ -1048,7 +1047,7 @@ parse_GetParameterNames(#xmlElement{content = Content} = E, S) ->
                 end,
                 #get_parameter_names{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetParameterNamesResponse(#xmlElement{},#parser{}) -> #get_parameter_names_response{}.
+-spec parse_GetParameterNamesResponse(#xmlElement{},#parser{}) -> #get_parameter_names_response{}.
 parse_GetParameterNamesResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:GetParameterNamesResponse', E, S),
     lists:foldl(fun(Elem, GetParameterNamesResponse) ->
@@ -1076,10 +1075,10 @@ parse_SetParameterAttributes(#xmlElement{content = Content} = E, S) ->
                 end,
                 #set_parameter_attributes{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetParameterAttributesResponse(#xmlElement{},#parser{}) -> #set_parameter_attributes_response{}.
+-spec parse_SetParameterAttributesResponse(#xmlElement{},#parser{}) -> #set_parameter_attributes_response{}.
 parse_SetParameterAttributesResponse(_, _) -> #set_parameter_attributes_response{}.
 
-%% -spec parse_GetParameterAttributes(#xmlElement{},#parser{}) -> #get_parameter_attributes{}.
+-spec parse_GetParameterAttributes(#xmlElement{},#parser{}) -> #get_parameter_attributes{}.
 parse_GetParameterAttributes(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:GetParameterAttributes', E, S),
     lists:foldl(fun(Elem, GetParameterAttributes) ->
@@ -1109,7 +1108,7 @@ parse_GetParameterAttributesResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #get_parameter_attributes_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AddObject(#xmlElement{},#parser{}) -> #add_object{}.
+-spec parse_AddObject(#xmlElement{},#parser{}) -> #add_object{}.
 parse_AddObject(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:AddObject', E, S),
     lists:foldl(fun(Elem, AddObject) ->
@@ -1127,7 +1126,7 @@ parse_AddObject(#xmlElement{content = Content} = E, S) ->
                 end,
                 #add_object{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AddObjectResponse(#xmlElement{},#parser{}) -> #add_object_response{}.
+-spec parse_AddObjectResponse(#xmlElement{},#parser{}) -> #add_object_response{}.
 parse_AddObjectResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:AddObjectResponse', E, S),
     lists:foldl(fun(Elem, AddObjectResponse) ->
@@ -1145,7 +1144,7 @@ parse_AddObjectResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #add_object_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_DeleteObject(#xmlElement{},#parser{}) -> #delete_object{}.
+-spec parse_DeleteObject(#xmlElement{},#parser{}) -> #delete_object{}.
 parse_DeleteObject(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:DeleteObject', E, S),
     lists:foldl(fun(Elem, DeleteObject) ->
@@ -1163,7 +1162,7 @@ parse_DeleteObject(#xmlElement{content = Content} = E, S) ->
                 end,
                 #delete_object{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_DeleteObjectResponse(#xmlElement{},#parser{}) -> #delete_object_response{}.
+-spec parse_DeleteObjectResponse(#xmlElement{},#parser{}) -> #delete_object_response{}.
 parse_DeleteObjectResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:DeleteObjectResponse', E, S),
     lists:foldl(fun(Elem, DeleteObjectResponse) ->
@@ -1220,7 +1219,7 @@ parse_Download(#xmlElement{content = Content} = E, S) ->
                 end,
                 #download{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_DownloadResponse(#xmlElement{},#parser{}) -> #download_response{}.
+-spec parse_DownloadResponse(#xmlElement{},#parser{}) -> #download_response{}.
 parse_DownloadResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:DownloadResponse', E, S),
     lists:foldl(fun(Elem, DownloadResponse) ->
@@ -1241,7 +1240,7 @@ parse_DownloadResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #download_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_Reboot(#xmlElement{},#parser{}) -> #reboot{}.
+-spec parse_Reboot(#xmlElement{},#parser{}) -> #reboot{}.
 parse_Reboot(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:Reboot', E, S),
     lists:foldl(fun(Elem, Reboot) ->
@@ -1256,10 +1255,10 @@ parse_Reboot(#xmlElement{content = Content} = E, S) ->
                 end,
                 #reboot{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_RebootResponse(#xmlElement{},#parser{}) -> #reboot_response{}.
+-spec parse_RebootResponse(#xmlElement{},#parser{}) -> #reboot_response{}.
 parse_RebootResponse(_, _) -> #reboot_response{}.
 
-%% -spec parse_GetQueuedTransfers(#xmlElement{},#parser{}) -> #get_queued_transfers{}.
+-spec parse_GetQueuedTransfers(#xmlElement{},#parser{}) -> #get_queued_transfers{}.
 parse_GetQueuedTransfers(_, _) -> #get_queued_transfers{}.
 
 -spec parse_GetQueuedTransfersResponse(#xmlElement{},#parser{}) -> #get_queued_transfers_response{}.
@@ -1277,7 +1276,7 @@ parse_GetQueuedTransfersResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #get_queued_transfers_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ScheduleInform(#xmlElement{},#parser{}) -> #schedule_inform{}.
+-spec parse_ScheduleInform(#xmlElement{},#parser{}) -> #schedule_inform{}.
 parse_ScheduleInform(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:ScheduleInform', E, S),
     lists:foldl(fun(Elem, ScheduleInform) ->
@@ -1295,10 +1294,10 @@ parse_ScheduleInform(#xmlElement{content = Content} = E, S) ->
                 end,
                 #schedule_inform{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ScheduleInformResponse(#xmlElement{},#parser{}) -> #schedule_inform_response{}.
+-spec parse_ScheduleInformResponse(#xmlElement{},#parser{}) -> #schedule_inform_response{}.
 parse_ScheduleInformResponse(_, _) -> #schedule_inform_response{}.
 
-%% -spec parse_SetVouchers(#xmlElement{},#parser{}) -> #set_vouchers{}.
+-spec parse_SetVouchers(#xmlElement{},#parser{}) -> #set_vouchers{}.
 parse_SetVouchers(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:SetVouchers', E, S),
     lists:foldl(fun(Elem, SetVouchers) ->
@@ -1313,10 +1312,10 @@ parse_SetVouchers(#xmlElement{content = Content} = E, S) ->
                 end,
                 #set_vouchers{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_SetVouchersResponse(#xmlElement{},#parser{}) -> #set_vouchers_response{}.
+-spec parse_SetVouchersResponse(#xmlElement{},#parser{}) -> #set_vouchers_response{}.
 parse_SetVouchersResponse(_, _) -> #set_vouchers_response{}.
 
-%% -spec parse_GetOptions(#xmlElement{},#parser{}) -> #get_options{}.
+-spec parse_GetOptions(#xmlElement{},#parser{}) -> #get_options{}.
 parse_GetOptions(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:GetOptions', E, S),
     lists:foldl(fun(Elem, GetOptions) ->
@@ -1331,7 +1330,7 @@ parse_GetOptions(#xmlElement{content = Content} = E, S) ->
                 end,
                 #get_options{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_GetOptionsResponse(#xmlElement{},#parser{}) -> #get_options_response{}.
+-spec parse_GetOptionsResponse(#xmlElement{},#parser{}) -> #get_options_response{}.
 parse_GetOptionsResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:GetOptionsResponse', E, S),
     lists:foldl(fun(Elem, GetOptionsResponse) ->
@@ -1346,7 +1345,7 @@ parse_GetOptionsResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #get_options_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_Upload(#xmlElement{},#parser{}) -> #upload{}.
+-spec parse_Upload(#xmlElement{},#parser{}) -> #upload{}.
 parse_Upload(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:Upload', E, S),
     lists:foldl(fun(Elem, Upload) ->
@@ -1376,7 +1375,7 @@ parse_Upload(#xmlElement{content = Content} = E, S) ->
                 end,
                 #upload{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_UploadResponse(#xmlElement{},#parser{}) -> #upload_response{}.
+-spec parse_UploadResponse(#xmlElement{},#parser{}) -> #upload_response{}.
 parse_UploadResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:UploadResponse', E, S),
     lists:foldl(fun(Elem, UploadResponse) ->
@@ -1397,13 +1396,13 @@ parse_UploadResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #upload_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_FactoryReset(#xmlElement{},#parser{}) -> #factory_reset{}.
+-spec parse_FactoryReset(#xmlElement{},#parser{}) -> #factory_reset{}.
 parse_FactoryReset(_, _) -> #factory_reset{}.
 
-%% -spec parse_FactoryResetResponse(#xmlElement{},#parser{}) -> #factory_reset_response{}.
+-spec parse_FactoryResetResponse(#xmlElement{},#parser{}) -> #factory_reset_response{}.
 parse_FactoryResetResponse(_, _) -> #factory_reset_response{}.
 
-%% -spec parse_GetAllQueuedTransfers(#xmlElement{},#parser{}) -> #get_all_queued_transfers{}.
+-spec parse_GetAllQueuedTransfers(#xmlElement{},#parser{}) -> #get_all_queued_transfers{}.
 parse_GetAllQueuedTransfers(_, _) -> #get_all_queued_transfers{}.
 
 -spec parse_GetAllQueuedTransfersResponse(#xmlElement{},#parser{}) -> #get_all_queued_transfers_response{}.
@@ -1419,9 +1418,10 @@ parse_GetAllQueuedTransfersResponse(#xmlElement{content = Content} = E, S) ->
                                 parse_error(Elem, State)
                         end
                 end,
-                #get_all_queued_transfers_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
+                #get_all_queued_transfers_response{},
+		lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ScheduleDownload(#xmlElement{},#parser{}) -> #schedule_download{}.
+-spec parse_ScheduleDownload(#xmlElement{},#parser{}) -> #schedule_download{}.
 parse_ScheduleDownload(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:ScheduleDownload', E, S),
     lists:foldl(fun(Elem, ScheduleDownload) ->
@@ -1457,10 +1457,10 @@ parse_ScheduleDownload(#xmlElement{content = Content} = E, S) ->
                 end,
                 #schedule_download{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ScheduleDownloadResponse(#xmlElement{},#parser{}) -> #schedule_download_response{}.
+-spec parse_ScheduleDownloadResponse(#xmlElement{},#parser{}) -> #schedule_download_response{}.
 parse_ScheduleDownloadResponse(_, _) -> #schedule_download_response{}.
 
-%% -spec parse_CancelTransfer(#xmlElement{},#parser{}) -> #cancel_transfer{}.
+-spec parse_CancelTransfer(#xmlElement{},#parser{}) -> #cancel_transfer{}.
 parse_CancelTransfer(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:CancelTransfer', E, S),
     lists:foldl(fun(Elem, CancelTransfer) ->
@@ -1475,10 +1475,10 @@ parse_CancelTransfer(#xmlElement{content = Content} = E, S) ->
                 end,
                 #cancel_transfer{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_CancelTransferResponse(#xmlElement{},#parser{}) -> #cancel_transfer_response{}.
+-spec parse_CancelTransferResponse(#xmlElement{},#parser{}) -> #cancel_transfer_response{}.
 parse_CancelTransferResponse(_, _) -> #cancel_transfer_response{}.
 
-%% -spec parse_ChangeDUState(#xmlElement{},#parser{}) -> #change_d_u_state{}.
+-spec parse_ChangeDUState(#xmlElement{},#parser{}) -> #change_du_state{}.
 parse_ChangeDUState(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:ChangeDUState', E, S),
     lists:foldl(fun(Elem, ChangeDUState) ->
@@ -1496,10 +1496,10 @@ parse_ChangeDUState(#xmlElement{content = Content} = E, S) ->
                 end,
                 #change_du_state{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_ChangeDUStateResponse(#xmlElement{},#parser{}) -> #change_du_state_response{}.
+-spec parse_ChangeDUStateResponse(#xmlElement{},#parser{}) -> #change_du_state_response{}.
 parse_ChangeDUStateResponse(_, _) -> #change_du_state_response{}.
 
-%% -spec parse_Inform(#xmlElement{},#parser{}) -> #inform{}.
+-spec parse_Inform(#xmlElement{},#parser{}) -> #inform{}.
 parse_Inform(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:Inform', E, S),
     lists:foldl(fun(Elem, Inform) ->
@@ -1535,7 +1535,7 @@ parse_InformResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #inform_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_TransferComplete(#xmlElement{},#parser{}) -> #transfer_complete{}.
+-spec parse_TransferComplete(#xmlElement{},#parser{}) -> #transfer_complete{}.
 parse_TransferComplete(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:TransferComplete', E, S),
     lists:foldl(fun(Elem, TransferComplete) ->
@@ -1559,10 +1559,10 @@ parse_TransferComplete(#xmlElement{content = Content} = E, S) ->
                 end,
                 #transfer_complete{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_TransferCompleteResponse(#xmlElement{},#parser{}) -> #transfer_complete_response{}.
+-spec parse_TransferCompleteResponse(#xmlElement{},#parser{}) -> #transfer_complete_response{}.
 parse_TransferCompleteResponse(_, _) -> #transfer_complete_response{}.
 
-%% -spec parse_AutonomousTransferComplete(#xmlElement{},#parser{}) -> #autonomous_transfer_complete{}.
+-spec parse_AutonomousTransferComplete(#xmlElement{},#parser{}) -> #autonomous_transfer_complete{}.
 parse_AutonomousTransferComplete(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:AutonomousTransferComplete', E, S),
     lists:foldl(fun(Elem, AutonomousTransferComplete) ->
@@ -1601,10 +1601,10 @@ parse_AutonomousTransferComplete(#xmlElement{content = Content} = E, S) ->
                 end,
                 #autonomous_transfer_complete{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AutonomousTransferCompleteResponse(#xmlElement{},#parser{}) -> #autonomous_transfer_complete_response{}.
+-spec parse_AutonomousTransferCompleteResponse(#xmlElement{},#parser{}) -> #autonomous_transfer_complete_response{}.
 parse_AutonomousTransferCompleteResponse(_, _) -> #autonomous_transfer_complete_response{}.
 
-%% -spec parse_Kicked(#xmlElement{},#parser{}) -> #kicked{}.
+-spec parse_Kicked(#xmlElement{},#parser{}) -> #kicked{}.
 parse_Kicked(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:Kicked', E, S),
     lists:foldl(fun(Elem, Kicked) ->
@@ -1628,7 +1628,7 @@ parse_Kicked(#xmlElement{content = Content} = E, S) ->
                 end,
                 #kicked{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_KickedResponse(#xmlElement{},#parser{}) -> #kicked_response{}.
+-spec parse_KickedResponse(#xmlElement{},#parser{}) -> #kicked_response{}.
 parse_KickedResponse(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:KickedResponse', E, S),
     lists:foldl(fun(Elem, KickedResponse) ->
@@ -1643,7 +1643,7 @@ parse_KickedResponse(#xmlElement{content = Content} = E, S) ->
                 end,
                 #kicked_response{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_RequestDownload(#xmlElement{},#parser{}) -> #request_download{}.
+-spec parse_RequestDownload(#xmlElement{},#parser{}) -> #request_download{}.
 parse_RequestDownload(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:RequestDownload', E, S),
     lists:foldl(fun(Elem, RequestDownload) ->
@@ -1661,10 +1661,10 @@ parse_RequestDownload(#xmlElement{content = Content} = E, S) ->
                 end,
                 #request_download{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_RequestDownloadResponse(#xmlElement{},#parser{}) -> #request_download_response{}.
+-spec parse_RequestDownloadResponse(#xmlElement{},#parser{}) -> #request_download_response{}.
 parse_RequestDownloadResponse(_, _) -> #request_download_response{}.
 
-%% -spec parse_DUStateChangeComplete(#xmlElement{},#parser{}) -> #du_state_change_complete{}.
+-spec parse_DUStateChangeComplete(#xmlElement{},#parser{}) -> #du_state_change_complete{}.
 parse_DUStateChangeComplete(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:DUStateChangeComplete', E, S),
     lists:foldl(fun(Elem, DUStateChangeComplete) ->
@@ -1681,9 +1681,10 @@ parse_DUStateChangeComplete(#xmlElement{content = Content} = E, S) ->
                 end,
                 #du_state_change_complete{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_DUStateChangeCompleteResponse(#xmlElement{},#parser{}) -> #du_state_change_complete_response{}.
+-spec parse_DUStateChangeCompleteResponse(#xmlElement{},#parser{}) -> #du_state_change_complete_response{}.
 parse_DUStateChangeCompleteResponse(_, _) -> #du_state_change_complete_response{}.
-%% -spec parse_AutonomousDUStateChangeComplete(#xmlElement{},#parser{}) -> #autonomous_du_state_change_complete{}.
+
+-spec parse_AutonomousDUStateChangeComplete(#xmlElement{},#parser{}) -> #autonomous_du_state_change_complete{}.
 parse_AutonomousDUStateChangeComplete(#xmlElement{content = Content} = E, S) ->
     State = check_namespace('cwmp:AutonomousDUStateChangeComplete', E, S),
     lists:foldl(fun(Elem, AutonomousDUStateChangeComplete) ->
@@ -1698,7 +1699,7 @@ parse_AutonomousDUStateChangeComplete(#xmlElement{content = Content} = E, S) ->
                 end,
                 #autonomous_du_state_change_complete{}, lists:filter(fun tr_soap_lib:xmlElement/1, Content)).
 
-%% -spec parse_AutonomousDUStateChangeCompleteResponse(#xmlElement{},#parser{}) -> #autonomous_du_state_change_complete_response{}.
+-spec parse_AutonomousDUStateChangeCompleteResponse(#xmlElement{},#parser{}) -> #autonomous_du_state_change_complete_response{}.
 parse_AutonomousDUStateChangeCompleteResponse(_, _) -> #autonomous_du_state_change_complete_response{}.
 
 %% end

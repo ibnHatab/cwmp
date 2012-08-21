@@ -86,7 +86,7 @@ soap_encode(_Any, #encoder{}) ->
 return_error(Tag, Message) ->
     throw({error, {Tag, Message}}).
 
--spec parse_error(#xmlElement{}, #parser{}) -> no_return().
+-spec parse_error(tuple() | string(), #parser{},string()) -> no_return().
 parse_error(Elem, State, Msg) when is_record(Elem, xmlElement)->
 %    ?DBG(erlang:get_stacktrace()),
     Path = [Elem#xmlElement.name | [N || {N, _Id} <- Elem#xmlElement.parents]],
@@ -96,6 +96,7 @@ parse_error(Tag, State, Msg) ->
     return_error(Tag, {State, Msg}).
 
 
+-spec parse_error(#xmlElement{}, #parser{}) -> no_return().
 parse_error(Elem, State) ->
     parse_error(Elem, State, "Unknown element").
 
@@ -169,13 +170,14 @@ local_ns('cwmp', Nss)     ->  Nss#rpc_ns.ns_cwmp;
 local_ns('xsd', Nss)      ->  Nss#rpc_ns.ns_xsd;
 local_ns('', Nss)         ->  Nss#rpc_ns.inherited.
 
+-spec set_local_ns(atom(), #rpc_ns{}, atom()) -> #rpc_ns{}.
 set_local_ns('soap-env', Nss, LocalNs) -> Nss#rpc_ns{ns_envelop = LocalNs};
 set_local_ns('soap-enc', Nss, LocalNs) -> Nss#rpc_ns{ns_encoding = LocalNs};
 set_local_ns('cwmp', Nss, LocalNs)     -> Nss#rpc_ns{ns_cwmp = LocalNs, cwmp_version = 1};
 set_local_ns('cwmp_v2', Nss, LocalNs)  -> Nss#rpc_ns{ns_cwmp = LocalNs, cwmp_version = 2};
 set_local_ns('xsd',  Nss, LocalNs)     -> Nss#rpc_ns{ns_xsd = LocalNs}.
 
--spec match_cwmp_ns_and_version(#xmlNamespace{}) -> {#rpc_ns{}, cwmp_version()}.
+-spec match_cwmp_ns_and_version(#xmlNamespace{}) -> #rpc_ns{}.
 match_cwmp_ns_and_version(#xmlNamespace{default = _Default, nodes = Nodes}) ->
     NsMap = [{'soap-enc', 'http://schemas.xmlsoap.org/soap/encoding/'},
 	     {'soap-env', 'http://schemas.xmlsoap.org/soap/envelope/'},

@@ -214,7 +214,7 @@ parse_dateTime(#xmlElement{name=Name, content = Content} = _E) when is_tuple(_E)
     parse_dateTime(ValueString);
 parse_dateTime(String) when is_list(String) ->
     convert_iso8601_date(String).
-
+ 
 parse_base64(_E) ->
     <<"aa">>.
 
@@ -267,7 +267,7 @@ parse_DeploymentUnitOperationType(E) ->
     end.
 
 parse_AccessListChange(E)     -> parse_boolean(E).
-parse_AnnounceURL(E)          -> parse_string(E).
+parse_AnnounceURL(E)          -> parse_anyURI(E).
 parse_anySimpleType(E)        -> parse_string(E).
 parse_Arg(E)                  -> parse_string(E).
 parse_Command(E)              -> parse_string(E).
@@ -280,7 +280,7 @@ parse_DeploymentUnitState(E)  -> parse_string(E).
 parse_ExecutionEnvRef(E)      -> parse_string(E).
 parse_ExecutionUnitRefList(E) -> parse_string(E).
 parse_ExpirationDate(E)       -> parse_dateTime(E).
-parse_FailureURL(E)           -> parse_string(E).
+parse_FailureURL(E)           -> parse_anyURI(E).
 parse_FaultCode(E)            -> parse_unsignedInt(E).
 parse_FaultString(E)          -> parse_string(E).
 parse_FileSize(E)             -> parse_unsignedInt(E).
@@ -295,7 +295,7 @@ parse_Mode(E)                 -> parse_int(E).
 parse_Name(E)                 -> parse_string(E).
 parse_Next(E)                 -> parse_string(E).
 parse_NextLevel(E)            -> parse_boolean(E).
-parse_NextURL(E)              -> parse_string(E).
+parse_NextURL(E)              -> parse_anyURI(E).
 parse_NotificationChange(E)   -> parse_boolean(E).
 parse_Notification(E)         -> parse_int(E).
 parse_ObjectNameType(E)       -> parse_string(E).
@@ -313,9 +313,11 @@ parse_StartDate(E)            -> parse_dateTime(E).
 parse_StartTime(E)            -> parse_dateTime(E).
 parse_State(E)                -> parse_unsignedInt(E).
 parse_Status(E)               -> parse_int(E).
-parse_SuccessURL(E)           -> parse_string(E).
+
+parse_SuccessURL(E)           -> parse_anyURI(E).
+
 parse_TargetFileName(E)       -> parse_string(E).
-parse_TransferURL(E)          -> parse_string(E).
+parse_TransferURL(E)          -> parse_anyURI(E).
 parse_URL(E)                  -> parse_anyURI(E).
 parse_UserMessage(E)          -> parse_string(E).
 parse_Username(E)             -> parse_string(E).

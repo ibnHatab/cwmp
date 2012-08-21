@@ -1,5 +1,5 @@
-%%%-----------------------------------------------------------------------------
 %%% Use is subject to License terms.
+%%%-----------------------------------------------------------------------------
 %%%-----------------------------------------------------------------------------
 
 -define(CWMP_VERSION_1_URL,'urn:dslforum-org:cwmp-1-0').
@@ -14,7 +14,8 @@
 -type qName()     :: string().
 -type url()       :: tuple().
 -type anyURI()    :: tuple().
--type date_time() :: string().
+-type date_time() :: {{integer(), integer(), integer()},
+		      {integer(), integer(), integer()}}.
 
 -type cwmp_method() ::
         'AddObject'                       | 'AddObjectResponse' 
@@ -153,6 +154,7 @@
 %% @doc
 %%        This type is used for AllQueuedTransferStruct and AutonomousTransferComplete
 %%
+%FIXME: check file types
 -define(SUPPORTED_TRANSFER_FILE_TYPE,
 	%% Pattern allows the following File Types:
 	[ {1, "Firmware Upgrade, Image"}
@@ -165,7 +167,7 @@
 	  , {7, "Vendor Log File, [1-9]\d*"}
 	  , {'X', "OUI Vendor speceific, ID"}
 	]).
--type transfer_file_type() :: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 'X'.
+-type transfer_file_type() :: integer() | string().
 
 
 %% @doc This type is used for Download and RequestDownload
@@ -178,7 +180,7 @@
 	  , {5, "Ringer, File"}
 	  , {'X', "OUI Vendor speceific, ID"}
 	]).
--type download_file_type() :: 1 | 2 | 3 | 4 | 5 | 'X'.
+-type download_file_type() :: integer() | string().
 
 %% @doc This type is used for Upload
 -define(SUPPORTED_UPLOAD_FILE_TYPE,
@@ -189,7 +191,7 @@
 	  , {4, "Vendor Log File, [1-9]\d*"}
 	  , {'X', "OUI Vendor speceific, ID"}
 	]).
--type upload_file_type() :: 1 | 2 | 3 | 4 | 'X'.
+-type upload_file_type() :: integer() | string().
 
 -define(SUPPORTED_EVENT_CODE_TYPE,
         %%    This pattern allows the following Event Codes:
@@ -296,9 +298,9 @@
 
 -type access_list_value_type() :: string().
 
--record(access_list,{
-	 string :: [access_list_value_type()]
-	 }).
+%% -record(access_list,{
+%% 	 string :: [access_list_value_type()]
+%% 	 }).
 
 
 -type parameter_attribute_notification_value_type() :: 1 | 2 | 3 | 4 | 5 | 6.
@@ -308,18 +310,18 @@
 	  notification_change :: boolean(),
 	  notification :: parameter_attribute_notification_value_type(),
 	  access_list_change :: boolean(),
-	  access_list :: #access_list{}
+	  access_list :: [access_list_value_type()]
 	 }).
 
--record(set_parameter_attributes_list, {
-	  set_parameter_attributes_struct :: [#set_parameter_attributes_list{}]
-	 }).
+%% -record(set_parameter_attributes_list, {
+%% 	  set_parameter_attributes_struct :: [#set_parameter_attributes_struct{}]
+%% 	 }).
 
 
 -record(parameter_attribute_struct, {
 	  name :: string(),
 	  notification :: parameter_attribute_notification_value_type(),
-	  access_list :: access_list
+	  access_list :: [access_list_value_type()]
 	  }).
 
 %% -record(parameter_attribute_list, {
@@ -352,21 +354,21 @@
 	 }).
 
 %% -record(transfer_list, {
-%% 	  queued_transfer_struct :: [#queued_transfer_struct{}]
+%% 	  quseued_transfer_struct :: [#queued_transfer_struct{}]
 %% 	 }).
 
 -record(all_queued_transfer_struct, {
 	  command_key :: command_key_type(),
 	  state :: transfer_state_type(),
 	  is_download :: boolean(),
-	  file_type :: transfer_file_type(),
+	  file_type :: string(),
 	  file_size :: non_neg_integer(),
 	  target_file_name :: string()
 	 }).
 
--record(all_transfer_list, {
-	  all_queued_transfer_struct :: [#all_queued_transfer_struct{}]
-	 }).
+%% -record(all_transfer_list, {
+%% 	  all_queued_transfer_struct :: [#all_queued_transfer_struct{}]
+%% 	 }).
 
 %% @doc
 %%        A unique identifier for a Deployment Unit
@@ -376,12 +378,12 @@
 %% @doc
 %%        The state of a Deployment Unit on the device
 %%
--type deployment_unit_state() :: 'Installed' | 'Uninstalled' | 'Failed'.
+-define(SUPPORTED_DEPLOYMENT_UNIT_STATE,
+	['Installed', 'Uninstalled', 'Failed']).
 
--type default_deployment_unit_operation_type() :: 'Install' | 'Update' | 'Uninstall'.
+-define(SUPPORTED_DEPLOYMENT_UNIT_OPERATION_TYPE,
+	['Install', 'Update', 'Uninstall']).
 
--type deployment_unit_operation_type() :: default_deployment_unit_operation_type()
-					  | string().
 
 
 %% @doc
@@ -428,7 +430,7 @@
 	  uuid :: deployment_unit_uuid(),
 	  deployment_unit_ref :: string(),
 	  version :: string(),
-	  current_state :: deployment_unit_state(),
+	  current_state :: string(),
 	  resolved :: boolean(),
 	  execution_unit_ref_list :: string(),
 	  start_time :: date_time(),
@@ -442,7 +444,7 @@
 %%
 -record(auton_op_result_struct, {
 	  op_result_struct :: #op_result_struct{},
-	  operation_performed :: deployment_unit_operation_type()
+	  operation_performed :: string()
 	 }).
 
 %%   Voucher and Option Type Definitions
@@ -468,9 +470,9 @@
 			   | 1 % Transferable
 	 }).
 
--record(option_list, {
-	  option_struct :: #option_struct{}
-	 }).
+%% -record(option_list, {
+%% 	  option_struct :: #option_struct{}
+%% 	 }).
 
 -record(arg_struct, {
 	  name :: string(),
@@ -478,9 +480,9 @@
 	 }).
 
 
--record(file_type_arg, {
-	  arg_struct :: [#arg_struct{}]
-	 }).
+%% -record(file_type_arg, {
+%% 	  arg_struct :: [#arg_struct{}]
+%% 	 }).
 
 
 
@@ -564,7 +566,7 @@
 
 %% @doc SetParameterAttributes message - Annex A.3.2.4 
 -record(set_parameter_attributes, {
-	   parameter_list :: #set_parameter_attributes_list{}
+	   parameter_list ::  [#set_parameter_attributes_struct{}]
 	  }).
 
 %% @doc SetParameterAttributesResponse message - Annex A.3.2.4 
@@ -680,7 +682,7 @@
 
 %% @doc GetOptionsResponse message - Annex A.4.1.4 
 -record(get_options_response, {
-	   option_list :: #option_list{}
+	   option_list :: [#option_struct{}]
 	  }).
 
 %% @doc Upload message - Annex A.4.1.5 
@@ -716,7 +718,7 @@
 
 %% @doc GetAllQueuedTransfersResponse message - Annex A.4.1.7 
 -record(get_all_queued_transfers_response, {
-	   transfer_list :: #all_transfer_list{}
+	   transfer_list :: [#all_queued_transfer_struct{}]
 	  }).
 
 %% @doc ScheduleDownload message - Annex A.4.1.8 
@@ -792,7 +794,7 @@
 	   announce_url :: url(),
 	   transfer_url :: url(),
 	   is_download :: boolean(),
-	   file_type :: transfer_file_type(),
+	   file_type :: string(),
 	   file_size :: non_neg_integer(),
 	   target_file_name :: string(),
 	   fault_struct :: #transfer_complete_fault_struct{},
@@ -824,9 +826,9 @@
 
 %% @doc RequestDownload message - Annex A.4.2.2 
 -record(request_download, {
-	   file_type :: download_file_type(),
-	   file_type_arg :: #file_type_arg{}
-	  }).
+	  file_type :: download_file_type(),
+	  file_type_arg :: [#arg_struct{}]
+	 }).
 
 %% @doc RequestDownloadResponse message - Annex A.4.2.2 
 -record(request_download_response, {
@@ -948,9 +950,9 @@
 	  ns_envelop :: atom(),
 	  ns_encoding:: atom(),
 	  ns_cwmp    :: atom(),
-	  cwmp_version = 0 :: cwmp_version(),
+	  cwmp_version = 1 :: cwmp_version(),
 	  inherited  :: atom()
-		}).
+	 }).
 
 -record(parser, { version = 1  :: cwmp_version(),
                   object_hook = null,

@@ -5,7 +5,7 @@ REBAR='./rebar'
 
 .PHONY: deps clean test
 
-dir-local: compile
+dir-local: dialyzer
 
 all: compile
 
@@ -52,9 +52,9 @@ dialyzer: all
 	  -Wunmatched_returns 	\
 	  -Werror_handling 	\
 	  -Wrace_conditions 	\
-	  -Wunderspecs		\
 	  ./ebin
 
+#	  -Wunderspecs		\
 # hardcheck
 #	  -Wspecdiffs		\
 #	  -Woverspecs 		\
