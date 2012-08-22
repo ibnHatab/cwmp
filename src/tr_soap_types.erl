@@ -281,7 +281,6 @@ parse_ExecutionEnvRef(E)      -> parse_string(E).
 parse_ExecutionUnitRefList(E) -> parse_string(E).
 parse_ExpirationDate(E)       -> parse_dateTime(E).
 parse_FailureURL(E)           -> parse_anyURI(E).
-
 parse_FaultString(E)          -> parse_string(E).
 parse_FileSize(E)             -> parse_unsignedInt(E).
 parse_InstanceNumber(E)       -> parse_unsignedInt(E).
@@ -296,7 +295,6 @@ parse_Next(E)                 -> parse_string(E).
 parse_NextLevel(E)            -> parse_boolean(E).
 parse_NextURL(E)              -> parse_anyURI(E).
 parse_NotificationChange(E)   -> parse_boolean(E).
-
 parse_ObjectNameType(E)       -> parse_string(E).
 parse_OptionName(E)           -> parse_string(E).
 parse_OUI(E)                  -> parse_string(E).
@@ -312,9 +310,7 @@ parse_StartDate(E)            -> parse_dateTime(E).
 parse_StartTime(E)            -> parse_dateTime(E).
 parse_State(E)                -> parse_unsignedInt(E).
 parse_Status(E)               -> parse_int(E).
-
 parse_SuccessURL(E)           -> parse_anyURI(E).
-
 parse_TargetFileName(E)       -> parse_string(E).
 parse_TransferURL(E)          -> parse_anyURI(E).
 parse_URL(E)                  -> parse_anyURI(E).
@@ -390,7 +386,7 @@ parse_ArraySize(Value, ContentTag, Nss) ->
     end.
 
 parse_XS_Array(Mapper, #xmlElement{content = Content} = E,
-	       ContentTag, #parser{ns = Nss} = State) ->
+	       ContentTag, #parser{ns = Nss} = State) when is_function(Mapper) ->
     NsSoapEnc = local_ns('soap-enc', Nss),
     AttrName = get_QName('arrayType', NsSoapEnc),
     Value = parse_attribete(E, AttrName, string),
@@ -412,9 +408,10 @@ parse_FileType('UploadFileType', E) ->
 					      
 parse_withSuportedValues(E, SuportedValues) ->
     String = parse_string(E),
-    Key = case string:to_integer(String) of
+    [Type | _Descr] = string:tokens(String, " "),
+    Key = case string:to_integer(Type) of
 	      {error, _Reason} ->
-		  list_to_atom(String);
+		  list_to_atom(Type);
 	      {Int, _Rest} ->
 		  Int
 	  end,    

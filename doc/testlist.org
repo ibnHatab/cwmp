@@ -48,16 +48,32 @@
 
 
 
-** SOAP encoding [3/5]
-   - [ ] Parse SOAP format
+** SOAP encoding [7/9]
    - [X] Parse SOAP boolean types
-   - [ ] Parse SOAP dateTime types 
-     same as boolean
+   - [X] Parse SOAP dateTime types 
+   - [X] Parse SOAP int types
+   - [X] Parse SOAP unsignedInt types
+   - [X] Parse SOAP string types
    - [X] Parse ISO 8601 date time aka [[http://www.w3.org/TR/xmlschema-2/#dateTime][xs:dateTime]]
-     tr_soap_types.erl/utest
-     
    - [X] Check SOAP version from envelop
+     
+   - [ ] Parse SOAP URI types
+   - [ ] Parse SOAP namespace types (copy from libs)
    
+parse_EventCodeType
+parse_ArraySize
+parse_FileType
+"2 Web Content"
+“3 Vendor Configuration File”
+“4 Tone File” (see [25] Appendix B)
+“5 Ringer File” (see [25] Appendix B)
+
+parse_FaultCode
+
+parse_Notification
+
+parse_WindowMode
+FEX: http://www.broadband-forum.org/technical/download/TR-069_Amendment-3.pdf
 
 ** ACS location update [1/1]
    - [X] Parse URI / xmerl_tests:parse_URI_test

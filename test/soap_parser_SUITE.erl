@@ -12,10 +12,6 @@
 
 -include_lib("common_test/include/ct.hrl").
 
--import(tr_soap_lib, [get_QName/2]).
--import(tr_soap_types, [convert_iso8601_date/1,parse_string/1,parse_int/1,parse_unsignedInt/1]).
-
-
 
 %%--------------------------------------------------------------------
 %% @spec suite() -> Info
@@ -181,7 +177,7 @@ parse_boolean_tc(_Config) ->
 
 parse_boolean_check(Expect, String) ->
     %% setup
-    E = make_Element("NoMoreRequests", String),
+    E = make_Element('NoMoreRequests', String),
     %% execute
     ?line Res = tr_soap_types:parse_boolean(E),
     %assert
@@ -209,7 +205,7 @@ parse_iso8601_tc(_Config) ->
 
 parse_iso8601_check(Expect, String) ->
     %execute
-    Res = convert_iso8601_date(String),
+    Res = tr_soap_types:convert_iso8601_date(String),
     %assert
     Expect = Res.
 
@@ -230,9 +226,9 @@ parse_string_tc(_Config) ->
 			   
 parse_string_check(Expect, String) ->
     %setup
-    E = make_Element("ParseString",String),
+    E = make_Element('ParseString',String),
     %execute
-    Res = parse_string(E),
+    Res = tr_soap_types:parse_string(E),
     %assert
     Expect = Res.
 
@@ -256,9 +252,9 @@ parse_int_tc(_Config) ->
     
 parse_int_check(Expect, String) ->
     %setup
-    E = make_Element("ParseInt", String),
+    E = make_Element('ParseInt', String),
     %execute
-    Res = parse_int(E),
+    Res = tr_soap_types:parse_int(E),
     %assert
     Expect = Res.
 
@@ -283,9 +279,9 @@ parse_unsignedInt_tc(_Config) ->
 
 parse_unsignedInt_check(Expect, String) ->
     %setup
-    E = make_Element("ParseUnsignedInt", String),
+    E = make_Element('ParseUnsignedInt', String),
     %execute
-    Res = parse_unsignedInt(E),
+    Res = tr_soap_types:parse_unsignedInt(E),
     %assert
     Expect = Res.
 
@@ -294,8 +290,8 @@ parse_unsignedInt_check(Expect, String) ->
 %%% Local API
 %%--------------------------------------------------------------------
 
-make_Element(Name, Text) when is_list(Name) ->
-    QName = get_QName(Name, "cwmp"),
+make_Element(Name, Text) when is_atom(Name) ->
+    QName = tr_soap_lib:get_QName(Name, 'cwmp'),
  %   ?DBG(QName),    
     {xmlElement, QName, QName,
      {"cwmp", Name},
