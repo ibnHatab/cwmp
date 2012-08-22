@@ -939,12 +939,6 @@
 %%%        Parser context
 %%%-----------------------------------------------------------------------------
 
--type encoder_option() :: {version, cwmp_version()} | {handler, function()}.
--type parser_option() :: {version, cwmp_version()} | {object_hook, function()}.
-
--record(encoder, {version = 1  :: cwmp_version(),
-                  handler = null}).
-
 -record(rpc_ns, {
 	  ns_xsd     :: atom(),
 	  ns_envelop :: atom(),
@@ -953,6 +947,14 @@
 	  cwmp_version = 1 :: cwmp_version(),
 	  inherited  :: atom()
 	 }).
+
+-type builder_option() :: {version, cwmp_version()} | {handler, function()}.
+-type parser_option() :: {version, cwmp_version()} | {object_hook, function()}.
+
+-record(builder, {version = 1  :: cwmp_version(),
+                  handler = null,
+		  ns :: #rpc_ns{}
+		 }).
 
 -record(parser, { version = 1  :: cwmp_version(),
                   object_hook = null,

@@ -11,15 +11,16 @@
 
 -export([read_xml/1, write_xml/1]).
 
--export([return_error/2, parse_error/2, parse_error/3,
-	 parse_warning/2, parse_warning/3,
+-export([return_error/2,
+	 parse_error/2, parse_error/3, parse_warning/2, parse_warning/3,
+	 build_error/2, build_error/3, build_warning/2, build_warning/3,
+	 
 	 get_QName/2, get_local_name/1,
 	 local_name/1, local_ns/2,
 	 xmlText/1,
 	 xmlElement/1
 	]).
 
--export([encoder/1, encode/1]).
 
 -export([match_cwmp_ns_and_version/1, check_namespace/3]).
 
@@ -46,35 +47,6 @@ read_xml(Str) ->
 write_xml(Doc) ->
     Bin = xmerl:export_simple([Doc], xmerl_xml),
     unicode:characters_to_list(Bin).
-
-
-%%%-----------------------------------------------------------------------------
-%%%        SOAP Encoder
-%%%-----------------------------------------------------------------------------
-
-
-%% @doc Create an encoder/1 with the given options.
--spec encoder([encoder_option()]) -> function().
-encoder(Options) ->
-    State = parse_encoder_options(Options, #encoder{}),
-    fun (O) -> soap_encode(O, State) end.
-
-%% @doc Encode the given as SOAP to an rpc_data.
--spec encode(#rpc_data{}) -> #xmlElement{}.
-encode(Any) ->
-    soap_encode(Any, #encoder{}).
-
-parse_encoder_options([], State) ->
-    State;
-parse_encoder_options([{version, Version} | Rest], State) ->
-    parse_encoder_options(Rest, State#encoder{version=Version});
-parse_encoder_options([{handler, Handler} | Rest], State) ->
-    parse_encoder_options(Rest, State#encoder{handler=Handler}).
-
--spec soap_encode(#rpc_data{}, #encoder{}) -> #xmlElement{}.
-soap_encode(_Any, #encoder{}) ->
-    #xmlElement{}.
-
 
 
 %%%-----------------------------------------------------------------------------
@@ -109,6 +81,29 @@ parse_warning(Elem, State, Msg) ->
 
 parse_warning(Elem, State) ->
     parse_warning(Elem, State, "Unknown element").
+
+
+
+-spec build_error(body_type(), #builder{}, string()) -> no_return().
+build_error(Data, State, Msg) when is_tuple(Data) ->
+    Method = element(1, Data),
+    return_error(Method, {State, Msg});
+build_error(Tag, State, Msg) ->
+    return_error(Tag, {State, Msg}).  
+    
+-spec build_error(body_type(), #builder{}) -> no_return().
+build_error(Data, State) ->
+    build_error(Data, State, "Unknown method").
+
+
+-spec build_warning(body_type(), #builder{}) -> no_return().
+build_warning(Data, State, Msg) ->
+    Method = element(1, Data),
+    io:format(user, ":~p ~n Expect: ~p, ~p ~n", [Method, State, Msg]).
+
+build_warning(Elem, State) ->
+    build_warning(Elem, State, "Unknown element").
+
 
 %% Usefull filtering predicates
 -compile({nowarn_unused_function, xmlText/1}).
