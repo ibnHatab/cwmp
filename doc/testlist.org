@@ -6,7 +6,7 @@
 	watchfs '*/*.erl' 'rebar eunit -v skip_deps=true suite=xmerl'
 
 * RPC protocol Unitary tests
-
+  
 ** Protocol
    list_to_atom(element(2, split_ns("soap:Envelope"))).
    
@@ -79,7 +79,7 @@
 ** ACS location update [1/1]
    - [X] Parse URI / xmerl_tests:parse_URI_test
      
-
+     
 * System tests
 ** Application state management [0/3]
    - [ ] GProc cookies OFO
@@ -88,3 +88,4 @@
 
    - [ ] Application:get_env/2 
      oriv/sys.config
+     
