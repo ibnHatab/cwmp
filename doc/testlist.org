@@ -49,7 +49,7 @@
 
 
 
-** SOAP encoding [8/15]
+** SOAP encoding [9/15]
    - [X] Parse SOAP boolean types
    - [X] Parse SOAP dateTime types 
    - [X] Parse SOAP int types
@@ -59,7 +59,7 @@
    - [X] Check SOAP version from envelop
      
    - [X] Parse SOAP URI types
-   - [ ] Parse SOAP namespace types (copy from libs)
+   - [X] Parse SOAP namespace types (copy from libs)
    
    - [ ] parse_EventCodeType
    - [ ] parse_ArraySize
