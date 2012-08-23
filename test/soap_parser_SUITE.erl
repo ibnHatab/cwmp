@@ -106,11 +106,14 @@ end_per_testcase(_TestCase, _Config) ->
 %% @end
 %%--------------------------------------------------------------------
 groups() ->
-    [{soap_parse_types, [sequence], [parse_boolean_tc,
-				     parse_iso8601_tc,
-				     parse_string_tc,
-				     parse_int_tc,
-				     parse_unsignedInt_tc
+    [{soap_parse_types, [sequence], [
+				     parse_boolean_tc
+				     ,parse_iso8601_tc
+				     ,parse_string_tc
+				     ,parse_int_tc
+				     ,parse_unsignedInt_tc
+				     ,parse_anyURI_tc
+				     ,name_namespace_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -125,11 +128,14 @@ groups() ->
 %% @end
 %%--------------------------------------------------------------------
 all() ->    
-    [parse_boolean_tc,
-     parse_iso8601_tc,
-     parse_string_tc,
-     parse_int_tc,
-     parse_unsignedInt_tc
+    [
+     parse_boolean_tc
+     ,parse_iso8601_tc
+     ,parse_string_tc
+     ,parse_int_tc
+     ,parse_unsignedInt_tc
+     ,parse_anyURI_tc
+     ,name_namespace_tc
     ].
      %% 	,
     %% [{group, soap_parse_types},
@@ -155,6 +161,13 @@ parse_int_tc() ->
 
 parse_unsignedInt_tc() ->
     [].
+
+parse_anyURI_tc() ->
+    [].
+
+name_namespace_tc() ->
+    [].
+
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
 %%               ok | exit() | {skip,Reason} | {comment,Comment} |
@@ -165,12 +178,14 @@ parse_unsignedInt_tc() ->
 %% @end
 %%--------------------------------------------------------------------
 parse_boolean_tc(_Config) ->
-    [parse_boolean_check(Expect, String)
-     || {Expect, String} <- [
-			     {false,   "0"}
-			     , {false, "false"}
-			     , {true,  "1"}
-			     , {true,  "true"}
+    [
+     parse_boolean_check(Expect, String)
+     ||
+	{Expect, String} <- [
+			     {false,    "0"}
+			     , {false,  "false"}
+			     , { true,  "1"}
+			     , { true,  "true"}
 			    ]],
     ok.
 
@@ -195,11 +210,11 @@ parse_iso8601_tc(_Config) ->
 					,{ {2000, 01, 12},  {0,   0,  0}}
 					,{ {2009, 06, 25},  {04, 32, 31}}
 				       ],
-				       [ "2004-10-31T21:40:35.5-07:00",
-					 "2004-11-01T04:40:35.5Z",
-					 "-2000-01-12T12:13:14Z",
-					 "2000-01-12T00:00:00Z",
-					 "2009-06-25T05:32:31+01:00"
+				       [ "2004-10-31T21:40:35.5-07:00"
+					 ,"2004-11-01T04:40:35.5Z"
+					 ,"-2000-01-12T12:13:14Z"
+					 ,"2000-01-12T00:00:00Z"
+					 ,"2009-06-25T05:32:31+01:00"
 				       ])],
     ok.
 
@@ -209,24 +224,25 @@ parse_iso8601_check(Expect, String) ->
     %assert
     Expect = Res.
 
+
 parse_string_tc(_Config) ->
     [
      begin
-	 parse_string_check(Expect, String),
-	 ct:print("--> ~p ~p ~n",[Expect, parse_string_check(Expect, String)])
+	 parse_string_check(Expect, String)
+	 %% ct:print("--> ~p ~p ~n",[Expect, parse_string_check(Expect, String)])
      end
       ||
 	{Expect, String} <- [
 			     {"This is a sentence", "This is a sentence"}
-			     , {"false", "false"}
-			     , {"1", "1"}
-			     , {"true", "true"}
+			     , {           "false", "false"}
+			     , {               "1", "1"}
+			     , {            "true", "true"}
 			    ]],
     ok.
 			   
 parse_string_check(Expect, String) ->
     %setup
-    E = make_Element('ParseString',String),
+    E = make_Element('ParseString', String),
     %execute
     Res = tr_soap_types:parse_string(E),
     %assert
@@ -235,8 +251,8 @@ parse_string_check(Expect, String) ->
 parse_int_tc(_Config) ->
     [
      begin
-	 parse_int_check(Expect, String),
-	 ct:print("--> ~p ~p ~n",[Expect, parse_int_check(Expect, String)])
+	 parse_int_check(Expect, String)
+	 %% ct:print("--> ~p ~p ~n",[Expect, parse_int_check(Expect, String)])
      end
       ||
 	{Expect, String} <- [
@@ -262,8 +278,8 @@ parse_int_check(Expect, String) ->
 parse_unsignedInt_tc(_Config) ->
     [
      begin
-	 parse_unsignedInt_check(Expect, String),
-	 ct:print("--> ~p ~p ~n",[Expect, parse_unsignedInt_check(Expect, String)])
+	 parse_unsignedInt_check(Expect, String)
+	 %% ct:print("--> ~p ~p ~n",[Expect, parse_unsignedInt_check(Expect, String)])
      end
       ||
 	{Expect, String} <- [
@@ -276,7 +292,6 @@ parse_unsignedInt_tc(_Config) ->
 			    ]],
     ok.
 
-
 parse_unsignedInt_check(Expect, String) ->
     %setup
     E = make_Element('ParseUnsignedInt', String),
@@ -285,6 +300,50 @@ parse_unsignedInt_check(Expect, String) ->
     %assert
     Expect = Res.
 
+parse_anyURI_tc(_Config) ->
+     [
+     begin
+	 parse_anyURI_check(Expect, String)
+	 %% ct:print("--> ~p ~p ~n",[Expect, parse_anyURI_check(Expect, String)])
+     end
+      ||
+	 {Expect, String} <- lists:zip([{http, "schemas.xmlsoap.org", 80, "/soap/envelope/", [] }
+					,{http, "schemas.xmlsoap.org", 80, "/soap/encoding/", [] }
+					,{http, "www.w3.org", 80, "/2001/XMLSchema", []}
+					,{http, "www.w3.org", 80, "/2001/XMLSchema-instance", []}
+				       ],
+				       [ "http://schemas.xmlsoap.org/soap/envelope/"
+					 ,"http://schemas.xmlsoap.org/soap/encoding/"
+					 ,"http://www.w3.org/2001/XMLSchema"
+					 ,"http://www.w3.org/2001/XMLSchema-instance"
+				       ])],
+    ok.
+
+parse_anyURI_check(Expect, String) ->
+    %setup
+    E = make_Element('ParseAnyURI', String),
+    %execute
+    Res = tr_soap_types:parse_anyURI(E),
+    %assert
+    Expect = Res.
+
+
+name_namespace_tc(_Config) ->
+    {'','name'} = tr_soap_lib:local_name('name'),
+
+    'name' = tr_soap_lib:get_local_name('ns:name'),
+    
+    {Name, Ns} = {'ns:name', 'ns'},
+    Name = tr_soap_lib:get_QName(tr_soap_lib:get_local_name(Name), Ns),
+    
+    ok.
+
+name_namespace_check(_Expect, _String) ->  
+    ok.
+    
+
+    
+    
     
 %%--------------------------------------------------------------------
 %%% Local API

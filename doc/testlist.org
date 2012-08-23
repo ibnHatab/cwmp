@@ -1,11 +1,12 @@
 
 
 
+
 * RUN
 	watchfs '*/*.erl' 'rebar eunit -v skip_deps=true suite=xmerl'
 
 * RPC protocol Unitary tests
-
+  
 ** Protocol
    list_to_atom(element(2, split_ns("soap:Envelope"))).
    
@@ -48,7 +49,7 @@
 
 
 
-** SOAP encoding [7/9]
+** SOAP encoding [8/15]
    - [X] Parse SOAP boolean types
    - [X] Parse SOAP dateTime types 
    - [X] Parse SOAP int types
@@ -57,28 +58,28 @@
    - [X] Parse ISO 8601 date time aka [[http://www.w3.org/TR/xmlschema-2/#dateTime][xs:dateTime]]
    - [X] Check SOAP version from envelop
      
-   - [ ] Parse SOAP URI types
+   - [X] Parse SOAP URI types
    - [ ] Parse SOAP namespace types (copy from libs)
    
-parse_EventCodeType
-parse_ArraySize
-parse_FileType
-"2 Web Content"
-“3 Vendor Configuration File”
-“4 Tone File” (see [25] Appendix B)
-“5 Ringer File” (see [25] Appendix B)
+   - [ ] parse_EventCodeType
+   - [ ] parse_ArraySize
+   - [ ] parse_FileType
+   "2 Web Content"
+   “3 Vendor Configuration File”
+   “4 Tone File” (see [25] Appendix B)
+   “5 Ringer File” (see [25] Appendix B)
+   
+   - [ ] parse_FaultCode
 
-parse_FaultCode
+   - [ ] parse_Notification
 
-parse_Notification
-
-parse_WindowMode
-FEX: http://www.broadband-forum.org/technical/download/TR-069_Amendment-3.pdf
+   - [ ] parse_WindowMode
+   FEX: http://www.broadband-forum.org/technical/download/TR-069_Amendment-3.pdf
 
 ** ACS location update [1/1]
    - [X] Parse URI / xmerl_tests:parse_URI_test
      
-
+     
 * System tests
 ** Application state management [0/3]
    - [ ] GProc cookies OFO
@@ -87,3 +88,4 @@ FEX: http://www.broadband-forum.org/technical/download/TR-069_Amendment-3.pdf
 
    - [ ] Application:get_env/2 
      oriv/sys.config
+     
