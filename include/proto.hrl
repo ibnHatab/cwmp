@@ -948,7 +948,7 @@
 	  inherited  :: atom()
 	 }).
 
--type builder_option() :: {version, cwmp_version()} | {handler, function()}.
+-type builder_option() :: {version, cwmp_version()} | {handler, function()} | {namespaces, #rpc_ns{}}.
 -type parser_option() :: {version, cwmp_version()} | {object_hook, function()}.
 
 -record(builder, {version = 1  :: cwmp_version(),
@@ -961,3 +961,15 @@
                   state       = null,
                   ns :: #rpc_ns{}
                  }).
+
+-type export_element() :: { atom(), list(), list()}
+			| {atom(), list()}
+			| atom()
+			| string()
+			| #xmlText{}
+			| #xmlElement{}
+			| #xmlPI{}
+			| #xmlComment{}
+			| #xmlDecl{}
+			  .
+
