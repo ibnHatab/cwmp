@@ -11,7 +11,10 @@
 -compile(export_all).
 
 -include_lib("common_test/include/ct.hrl").
+-include_lib("xmerl/include/xmerl.hrl").
 
+-include("proto.hrl").
+-include("tr69.hrl").
 
 %%--------------------------------------------------------------------
 %% @spec suite() -> Info
@@ -114,6 +117,7 @@ groups() ->
 				     ,parse_unsignedInt_tc
 				     ,parse_anyURI_tc
 				     ,name_namespace_tc
+				     ,check_namespace_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -136,6 +140,7 @@ all() ->
      ,parse_unsignedInt_tc
      ,parse_anyURI_tc
      ,name_namespace_tc
+     ,check_namespace_tc
     ].
      %% 	,
     %% [{group, soap_parse_types},
@@ -167,6 +172,10 @@ parse_anyURI_tc() ->
 
 name_namespace_tc() ->
     [].
+
+check_namespace_tc()->
+    [].
+
 
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
@@ -338,10 +347,35 @@ name_namespace_tc(_Config) ->
     
     ok.
 
-name_namespace_check(_Expect, _String) ->  
-    ok.
-    
+%% name_namespace_check(_Expect, _String) ->  
+%%     ok.
 
+-define(XML_NAMESPACE,
+	{xmlNamespace,[],
+	 [{"soapenc",'http://schemas.xmlsoap.org/soap/encoding/'},
+	  {"soapenv",'http://schemas.xmlsoap.org/soap/envelope/'},
+	  {"cwmp",'urn:dslforum-org:cwmp-1-0'}]}
+       ).
+
+
+check_namespace_tc(_Config) ->
+    Nss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
+    State = tr_soap_lib:check_namespace('soap-env:Envelope',
+     			    #xmlElement {name='soapenv:Envelope'}, #parser{ns=Nss}),
+    
+    ct:print(">>> ~p ~n>>> ~p ~n",[Nss#rpc_ns{inherited='soapenv'},State#parser.ns]),
+    %% illegal pattern 
+    %%Nss#rpc_ns{inherited='soapenv'} =  State#parser.ns,
+    
+    Body = tr_soap_lib:check_namespace('soap-env:Body',#xmlElement {name='soapenv:Body'}, State),
+    State = Body,
+    ct:print(">>> ~p ~n>>> ~p ~n",[State, Body]),
+
+    Header = tr_soap_lib:check_namespace('soap-env:Header',#xmlElement {name='soapenv:Header'}, State),
+    State = Header,
+    ct:print(">>> ~p ~n>>> ~p ~n",[State, Header]),
+
+    ok.
     
     
     
