@@ -118,6 +118,7 @@ groups() ->
 				     ,parse_anyURI_tc
 				     ,name_namespace_tc
 				     ,check_namespace_tc
+				     ,parse_EventCodeType
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -141,6 +142,7 @@ all() ->
      ,parse_anyURI_tc
      ,name_namespace_tc
      ,check_namespace_tc
+     ,parse_EventCodeType
     ].
      %% 	,
     %% [{group, soap_parse_types},
@@ -174,6 +176,8 @@ name_namespace_tc() ->
     [].
 
 check_namespace_tc()->
+    [].
+parse_EventCodeType() ->
     [].
 
 
@@ -363,22 +367,31 @@ check_namespace_tc(_Config) ->
     State = tr_soap_lib:check_namespace('soap-env:Envelope',
      			    #xmlElement {name='soapenv:Envelope'}, #parser{ns=Nss}),
     
-    ct:print(">>> ~p ~n>>> ~p ~n",[Nss#rpc_ns{inherited='soapenv'},State#parser.ns]),
+%%    ct:print(">>> ~p ~n>>> ~p ~n",[Nss#rpc_ns{inherited='soapenv'},State#parser.ns]),
     %% illegal pattern 
     %%Nss#rpc_ns{inherited='soapenv'} =  State#parser.ns,
     
     Body = tr_soap_lib:check_namespace('soap-env:Body',#xmlElement {name='soapenv:Body'}, State),
     State = Body,
-    ct:print(">>> ~p ~n>>> ~p ~n",[State, Body]),
+%%    ct:print(">>> ~p ~n>>> ~p ~n",[State, Body]),
 
     Header = tr_soap_lib:check_namespace('soap-env:Header',#xmlElement {name='soapenv:Header'}, State),
     State = Header,
-    ct:print(">>> ~p ~n>>> ~p ~n",[State, Header]),
+%%    ct:print(">>> ~p ~n>>> ~p ~n",[State, Header]),
 
     ok.
     
+
+parse_EventCodeType(_Config) ->
+    Elem = make_Element('ParseEventCodeType',"0 BOOTSTRAP"),
+    State = #parser{},
+
+    ct:print("--> ~p returned --> ~p ~n",[tr_soap_types:parse_string(Elem), tr_soap_types:parse_EventCodeType(Elem, State)]),
     
-    
+    E = make_Element('ParseEventCodeType',"M Reboot"),
+    ct:print("--> ~p returned --> ~p ~n",[tr_soap_types:parse_string(E), tr_soap_types:parse_EventCodeType(E, State)]),
+    ok.
+
 %%--------------------------------------------------------------------
 %%% Local API
 %%--------------------------------------------------------------------

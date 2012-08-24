@@ -195,19 +195,19 @@
 
 -define(SUPPORTED_EVENT_CODE_TYPE,
         %%    This pattern allows the following Event Codes:
-	[ {0, "BOOTSTRAP"}
-	  , {1, "BOOT"}
-	  , {2, "PERIODIC"}
-	  , {3, "SCHEDULED"}
-	  , {4, "VALUE, CHANGE"}
-	  , {5, "KICKED"}
-	  , {6, "CONNECTION, REQUEST"}
-	  , {7, "TRANSFER, COMPLETE"}
-	  , {8, "DIAGNOSTICS, COMPLETE"}
-	  , {9, "REQUEST, DOWNLOAD"}
-	  , {10, "AUTONOMOUS TRANSFER, COMPLETE"}
-	  , {11, "DU STATE CHANGE, COMPLETE"}
-	  , {12, "AUTONOMOUS DU STATE CHANGE, COMPLETE"}
+	[ {0,  "0 BOOTSTRAP"}
+	  , {1,  "1 BOOT"}
+	  , {2,  "2 PERIODIC"}
+	  , {3,  "3 SCHEDULED"}
+	  , {4,  "4 VALUE, CHANGE"}
+	  , {5,  "5 KICKED"}
+	  , {6,  "6 CONNECTION, REQUEST"}
+	  , {7,  "7 TRANSFER, COMPLETE"}
+	  , {8,  "8 DIAGNOSTICS, COMPLETE"}
+	  , {9,  "9 REQUEST, DOWNLOAD"}
+	  , {10, "10 AUTONOMOUS TRANSFER, COMPLETE"}
+	  , {11, "11 DU STATE CHANGE, COMPLETE"}
+	  , {12, "12 AUTONOMOUS DU STATE CHANGE, COMPLETE"}
 	  , {'Reboot',		 "M Reboot"}
 	  , {'ScheduleInform',	 "M ScheduleInform"}
 	  , {'Download',	 "M Download"}

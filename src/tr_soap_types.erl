@@ -340,7 +340,7 @@ match_event_code(Code, Description) ->
 	    case string:to_integer(S) of
 		{error, Reason} ->
 		    {error,Reason};
-		OpCode ->
+		{OpCode, _Rest} ->
 		    OpCode
 	    end
     end.
@@ -358,7 +358,7 @@ parse_EventCodeType(Elem, State) ->
 		{error,Reason} ->
 		    parse_error(Elem, Reason);
 		Event ->
-		    Event
+		    Event	       			
 	    end
     end.
 
