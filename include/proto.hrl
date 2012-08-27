@@ -157,15 +157,15 @@
 %FIXME: check file types
 -define(SUPPORTED_TRANSFER_FILE_TYPE,
 	%% Pattern allows the following File Types:
-	[ {1, "Firmware Upgrade, Image"}
-	  , {2, "Web, Content"}
-	  , {3, "Vendor Configuration, File"}
-	  , {4, "Vendor Log, File"}
-	  , {4, "Tone, File"}
-	  , {5, "Ringer, File"}
-	  , {6, "Vendor Configuration File, [1-9]\d*"}
-	  , {7, "Vendor Log File, [1-9]\d*"}
-	  , {'X', "OUI Vendor speceific, ID"}
+	[ {1, "1 Firmware Upgrade, Image"}
+	  , {2, "2 Web, Content"}
+	  , {3, "3 Vendor Configuration, File"}
+	  , {4, "4 Vendor Log, File"}
+	  , {4, "5 Tone, File"}
+	  , {5, "6 Ringer, File"}
+	  , {6, "7 Vendor Configuration File, [1-9]\d*"}
+	  , {7, "8 Vendor Log File, [1-9]\d*"}
+	  , {'X', "X OUI Vendor speceific, ID"}
 	]).
 -type transfer_file_type() :: integer() | string().
 
@@ -173,23 +173,23 @@
 %% @doc This type is used for Download and RequestDownload
 -define(SUPPORTED_DOWNLOAD_FILE_TYPE,
 	%% This pattern allows the following File Types:
-	[ {1, "Firmware Upgrade, Image"}
-	  , {2, "Web, Content"}
-	  , {3, "Vendor Configuration, File"}
-	  , {4, "Tone, File"}
-	  , {5, "Ringer, File"}
-	  , {'X', "OUI Vendor speceific, ID"}
+	[ {1, "1 Firmware Upgrade, Image"}
+	  , {2, "2 Web, Content"}
+	  , {3, "3 Vendor Configuration, File"}
+	  , {4, "4 Tone, File"}
+	  , {5, "5 Ringer, File"}
+	  , {'X', "X OUI Vendor speceific, ID"}
 	]).
 -type download_file_type() :: integer() | string().
 
 %% @doc This type is used for Upload
 -define(SUPPORTED_UPLOAD_FILE_TYPE,
 	%% This pattern allows the following File Types:
-	[ {1, "Vendor Configuration, File"}
-	  , {2, "Vendor Log, File"}
-	  , {3, "Vendor Configuration File, [1-9]\d*"}
-	  , {4, "Vendor Log File, [1-9]\d*"}
-	  , {'X', "OUI Vendor speceific, ID"}
+	[ {1, "1 Vendor Configuration, File"}
+	  , {2, "2 Vendor Log, File"}
+	  , {3, "3 Vendor Configuration File, [1-9]\d*"}
+	  , {4, "4 Vendor Log File, [1-9]\d*"}
+	  , {'X', "X OUI Vendor speceific, ID"}
 	]).
 -type upload_file_type() :: integer() | string().
 

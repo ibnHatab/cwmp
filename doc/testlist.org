@@ -49,7 +49,7 @@
 
 
 
-** SOAP encoding [9/15]
+** SOAP encoding [10/15]
    - [X] Parse SOAP boolean types
    - [X] Parse SOAP dateTime types 
    - [X] Parse SOAP int types
@@ -63,7 +63,8 @@
    
    - [ ] parse_EventCodeType
    - [ ] parse_ArraySize
-   - [ ] parse_FileType
+   - [X] parse_FileType
+   "1 Firmware Upgrade, Image
    "2 Web Content"
    “3 Vendor Configuration File”
    “4 Tone File” (see [25] Appendix B)

@@ -118,7 +118,9 @@ groups() ->
 				     ,parse_anyURI_tc
 				     ,name_namespace_tc
 				     ,check_namespace_tc
-				     ,parse_EventCodeType
+				     ,parse_EventCodeType_tc
+				     ,parse_ArraySize_tc
+				     ,parse_FileType_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -142,9 +144,11 @@ all() ->
      ,parse_anyURI_tc
      ,name_namespace_tc
      ,check_namespace_tc
-     ,parse_EventCodeType
+     ,parse_EventCodeType_tc
+     ,parse_ArraySize_tc
+     ,parse_FileType_tc
     ].
-     %% 	,
+%% 	,
     %% [{group, soap_parse_types},
     %%  {group, soap_parse_doc}].
 
@@ -177,10 +181,15 @@ name_namespace_tc() ->
 
 check_namespace_tc()->
     [].
-parse_EventCodeType() ->
+
+parse_EventCodeType_tc() ->
     [].
 
+parse_ArraySize_tc() ->
+    [].
 
+parse_FileType_tc() ->
+    [].
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
 %%               ok | exit() | {skip,Reason} | {comment,Comment} |
@@ -367,30 +376,66 @@ check_namespace_tc(_Config) ->
     State = tr_soap_lib:check_namespace('soap-env:Envelope',
      			    #xmlElement {name='soapenv:Envelope'}, #parser{ns=Nss}),
     
-%%    ct:print(">>> ~p ~n>>> ~p ~n",[Nss#rpc_ns{inherited='soapenv'},State#parser.ns]),
+    %%    ct:print(">>> ~p ~n>>> ~p ~n",[Nss#rpc_ns{inherited='soapenv'},State#parser.ns]),
     %% illegal pattern 
     %%Nss#rpc_ns{inherited='soapenv'} =  State#parser.ns,
     
     Body = tr_soap_lib:check_namespace('soap-env:Body',#xmlElement {name='soapenv:Body'}, State),
     State = Body,
-%%    ct:print(">>> ~p ~n>>> ~p ~n",[State, Body]),
+    %%    ct:print(">>> ~p ~n>>> ~p ~n",[State, Body]),
 
     Header = tr_soap_lib:check_namespace('soap-env:Header',#xmlElement {name='soapenv:Header'}, State),
     State = Header,
-%%    ct:print(">>> ~p ~n>>> ~p ~n",[State, Header]),
+    %%    ct:print(">>> ~p ~n>>> ~p ~n",[State, Header]),
 
     ok.
     
-
-parse_EventCodeType(_Config) ->
-    Elem = make_Element('ParseEventCodeType',"0 BOOTSTRAP"),
+%% FIXME
+parse_EventCodeType_tc(_Config) ->
+    Elem = make_Element('ParseEventCodeType',"9 REQUEST, DOWNLOAD"),
     State = #parser{},
-
-    ct:print("--> ~p returned --> ~p ~n",[tr_soap_types:parse_string(Elem), tr_soap_types:parse_EventCodeType(Elem, State)]),
     
-    E = make_Element('ParseEventCodeType',"M Reboot"),
+    ct:print(">>>  ~p ~n",[tr_soap_types:parse_EventCodeType(Elem, State)]),
+    
+    E = make_Element('ParseEventCodeType',"M ChangeDUState"),
     ct:print("--> ~p returned --> ~p ~n",[tr_soap_types:parse_string(E), tr_soap_types:parse_EventCodeType(E, State)]),
+    
+    M = make_Element('ParseEventCodeType',"M ScheduleInform"),
+    ct:print("--> ~p returned --> ~p ~n",[tr_soap_types:parse_string(E), tr_soap_types:parse_EventCodeType(M, State)]),
+
     ok.
+
+parse_ArraySize_tc(_Config) ->
+    %% Nss = #parser{},
+    %% ct:print(">>> ~p ~n",[tr_soap_types:parse_ArraySize("10", "abc", Nss)]),
+    ok.
+
+
+%%FIXME when String = "OUI Vendor speceific, ID"
+parse_FileType_tc(_Config) ->
+    [
+     begin
+	 parse_FileType_check(Expect, String, Type)
+	 %% ,ct:print(">> ~p ~p ~p ~n",[Expect, String, Type])
+     end
+     ||
+	{Expect, String, Type} <- [{ 1, "1 Firmware Upgrade, Image"             , 'DownloadFileType'}
+				   ,{ 3, "3 Vendor Configuration, File"         , 'DownloadFileType'}
+				   ,{ 2, "2 Vendor Log, File"                   , 'UploadFileType'}
+				   ,{ 3, "3 Vendor Configuration File, [1-9]\d*", 'UploadFileType'}
+				   ,{ 4, "4 Vendor Log, File"                   , 'TransferFileType'}
+				   ,{ 6, "6 Ringer, File"                       , 'TransferFileType'}
+				  ]],			    	    
+    ok.
+
+parse_FileType_check(Expect, String, Type) ->
+    %setup
+    E = make_Element(Type, String),
+    %execute
+    Res = tr_soap_types:parse_FileType(Type, E),
+    %assert
+    Expect = Res.
+
 
 %%--------------------------------------------------------------------
 %%% Local API
