@@ -423,12 +423,20 @@ parse_withSuportedValues(E, SuportedValues) ->
     end.
 
 parse_FaultCode(E) ->
-    Code = parse_unsignedInt(E),
-    case lists:keyfind(Code, 1, ?SUPPORTED_CPE_FAULT_CODES) of
+    String = parse_string(E),
+    [Type | _Descr] = string:tokens(String, " "),
+    %%Code = parse_unsignedInt(Type),
+    Key = case string:to_integer(Type) of
+	      {error, _Reason} ->
+		  list_to_atom(Type);
+	      {Int, _Rest} ->
+		  Int
+	  end,    
+    case lists:keyfind(Key, 1, ?SUPPORTED_CPE_FAULT_CODES) of
 	{K, _S} ->
 	    K;
 	false ->
-	    parse_error(E, Code, "Fault Code")
+	    parse_error(E, Key, "Fault Code")
     end.
 
 parse_Notification(E) ->

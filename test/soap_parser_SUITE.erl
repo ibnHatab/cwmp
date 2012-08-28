@@ -121,6 +121,7 @@ groups() ->
 				     ,parse_EventCodeType_tc
 				     ,parse_ArraySize_tc
 				     ,parse_FileType_tc
+				     ,parse_FaultCode_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -147,6 +148,7 @@ all() ->
      ,parse_EventCodeType_tc
      ,parse_ArraySize_tc
      ,parse_FileType_tc
+     ,parse_FaultCode_tc
     ].
 %% 	,
     %% [{group, soap_parse_types},
@@ -190,6 +192,10 @@ parse_ArraySize_tc() ->
 
 parse_FileType_tc() ->
     [].
+
+parse_FaultCode_tc() ->
+    [].
+
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
 %%               ok | exit() | {skip,Reason} | {comment,Comment} |
@@ -227,16 +233,16 @@ parse_iso8601_tc(_Config) ->
       parse_iso8601_check(Expect, String)
       ||
 	 {Expect, String} <- lists:zip([{{2004, 11, 01},    {04, 40, 35}}
-					,{ {2004, 11, 01},  {04, 40, 35}}
-					,{{-2000, 01, 12},  {12, 13, 14}}
-					,{ {2000, 01, 12},  {0,   0,  0}}
-					,{ {2009, 06, 25},  {04, 32, 31}}
+					, { {2004, 11, 01},  {04, 40, 35}}
+					, {{-2000, 01, 12},  {12, 13, 14}}
+					, { {2000, 01, 12},  {0,   0,  0}}
+					, { {2009, 06, 25},  {04, 32, 31}}
 				       ],
 				       [ "2004-10-31T21:40:35.5-07:00"
-					 ,"2004-11-01T04:40:35.5Z"
-					 ,"-2000-01-12T12:13:14Z"
-					 ,"2000-01-12T00:00:00Z"
-					 ,"2009-06-25T05:32:31+01:00"
+					 , "2004-11-01T04:40:35.5Z"
+					 , "-2000-01-12T12:13:14Z"
+					 , "2000-01-12T00:00:00Z"
+					 , "2009-06-25T05:32:31+01:00"
 				       ])],
     ok.
 
@@ -251,7 +257,6 @@ parse_string_tc(_Config) ->
     [
      begin
 	 parse_string_check(Expect, String)
-	 %% ct:print("--> ~p ~p ~n",[Expect, parse_string_check(Expect, String)])
      end
       ||
 	{Expect, String} <- [
@@ -301,7 +306,6 @@ parse_unsignedInt_tc(_Config) ->
     [
      begin
 	 parse_unsignedInt_check(Expect, String)
-	 %% ct:print("--> ~p ~p ~n",[Expect, parse_unsignedInt_check(Expect, String)])
      end
       ||
 	{Expect, String} <- [
@@ -326,7 +330,6 @@ parse_anyURI_tc(_Config) ->
      [
      begin
 	 parse_anyURI_check(Expect, String)
-	 %% ct:print("--> ~p ~p ~n",[Expect, parse_anyURI_check(Expect, String)])
      end
       ||
 	 {Expect, String} <- lists:zip([{http, "schemas.xmlsoap.org", 80, "/soap/envelope/", [] }
@@ -376,47 +379,46 @@ check_namespace_tc(_Config) ->
     State = tr_soap_lib:check_namespace('soap-env:Envelope',
      			    #xmlElement {name='soapenv:Envelope'}, #parser{ns=Nss}),
     
-    %%    ct:print(">>> ~p ~n>>> ~p ~n",[Nss#rpc_ns{inherited='soapenv'},State#parser.ns]),
+    ct:print(">>> ~p ~n>>> ~p ~n",[Nss#rpc_ns{inherited='soapenv'},State#parser.ns]),
     %% illegal pattern 
     %%Nss#rpc_ns{inherited='soapenv'} =  State#parser.ns,
     
     Body = tr_soap_lib:check_namespace('soap-env:Body',#xmlElement {name='soapenv:Body'}, State),
     State = Body,
-    %%    ct:print(">>> ~p ~n>>> ~p ~n",[State, Body]),
+    ct:print(">>> ~p ~n>>> ~p ~n",[State, Body]),
 
     Header = tr_soap_lib:check_namespace('soap-env:Header',#xmlElement {name='soapenv:Header'}, State),
     State = Header,
-    %%    ct:print(">>> ~p ~n>>> ~p ~n",[State, Header]),
+    ct:print(">>> ~p ~n>>> ~p ~n",[State, Header]),
 
     ok.
     
 %% FIXME
 parse_EventCodeType_tc(_Config) ->
-    Elem = make_Element('ParseEventCodeType',"9 REQUEST, DOWNLOAD"),
-    State = #parser{},
+    %% Elem = make_Element('ParseEventCodeType',"9 REQUEST, DOWNLOAD"),
+    %% State = #parser{},
     
-    ct:print(">>>  ~p ~n",[tr_soap_types:parse_EventCodeType(Elem, State)]),
+    %% ct:print(">>>  ~p ~n",[tr_soap_types:parse_EventCodeType(Elem, State)]),
     
-    E = make_Element('ParseEventCodeType',"M ChangeDUState"),
-    ct:print("--> ~p returned --> ~p ~n",[tr_soap_types:parse_string(E), tr_soap_types:parse_EventCodeType(E, State)]),
+    %% E = make_Element('ParseEventCodeType',"M ChangeDUState"),
+    %% ct:print("--> ~p returned --> ~p ~n",[tr_soap_types:parse_string(E), tr_soap_types:parse_EventCodeType(E, State)]),
     
-    M = make_Element('ParseEventCodeType',"M ScheduleInform"),
-    ct:print("--> ~p returned --> ~p ~n",[tr_soap_types:parse_string(E), tr_soap_types:parse_EventCodeType(M, State)]),
+    %% M = make_Element('ParseEventCodeType',"M ScheduleInform"),
+    %% ct:print("--> ~p returned --> ~p ~n",[tr_soap_types:parse_string(E), tr_soap_types:parse_EventCodeType(M, State)]),
 
     ok.
 
+%% FIXME
 parse_ArraySize_tc(_Config) ->
     %% Nss = #parser{},
     %% ct:print(">>> ~p ~n",[tr_soap_types:parse_ArraySize("10", "abc", Nss)]),
     ok.
 
 
-%%FIXME when String = "OUI Vendor speceific, ID"
 parse_FileType_tc(_Config) ->
     [
      begin
 	 parse_FileType_check(Expect, String, Type)
-	 %% ,ct:print(">> ~p ~p ~p ~n",[Expect, String, Type])
      end
      ||
 	{Expect, String, Type} <- [{ 1, "1 Firmware Upgrade, Image"             , 'DownloadFileType'}
@@ -435,6 +437,31 @@ parse_FileType_check(Expect, String, Type) ->
     Res = tr_soap_types:parse_FileType(Type, E),
     %assert
     Expect = Res.
+
+parse_FaultCode_tc(_Config) ->
+   [
+     begin
+	 parse_FaultCode_check(Expect, String)
+     end
+      ||
+	{Expect, String} <- [
+			     { 9000,  "9000"}
+			     ,{ 9021, "9021"}
+			     ,{ 9027, "9027"}
+			     ,{ 9007, "9007"}
+			     ,{ 9011, "9011"}
+			     ,{ 9032, "9032"}
+			    ]],
+    ok.
+
+parse_FaultCode_check(Expect, String) ->
+    %setup
+    E = make_Element('ParseFaultCode' , String),
+    %execute
+    Res = tr_soap_types:parse_FaultCode(E),
+    %assert
+    Expect = Res.
+
 
 
 %%--------------------------------------------------------------------

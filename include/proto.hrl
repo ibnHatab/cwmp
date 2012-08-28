@@ -91,39 +91,39 @@
 -define(SUPPORTED_CPE_FAULT_CODES,
 	[
 	 %%        CPE Fault Codes from 9000 to 9799
-	   {9000, "Method not supported"}
-	 , {9001, "Request denied (no reason specified)"}
-	 , {9002, "Internal error"}
-	 , {9003, "Invalid arguments"}
-	 , {9004, "Resources exceeded"}
-	 , {9005, "Invalid parameter name"}
-	 , {9006, "Invalid parameter type"}
-	 , {9007, "Invalid parameter value"}
-	 , {9008, "Attempt to set a non-writable parameter"}
-	 , {9009, "Notification request rejected"}
-	 , {9010, "File transfer failure"}
-	 , {9011, "Upload failure"}
-	 , {9012, "File transfer server authentication failure"}
-	 , {9013, "Unsupported protocol for file transfer"}
-	 , {9014, "File transfer failure: unable to join multicast group"}
-	 , {9015, "File transfer failure: unable to contact file server"}
-	 , {9016, "File transfer failure: unable to access file"}
-	 , {9017, "File transfer failure: unable to complete download"}
-	 , {9018, "File transfer failure: file corrupted"}
-	 , {9019, "File transfer failure: file authentication failure"}
-	 , {9020, "File transfer failure: unable to complete download within specified time windows"}
-	 , {9021, "Cancelation of file transfer not permitted in current transfer state"}
-	 , {9022, "Invalid UUID Format"}
-	 , {9023, "Unknown Execution Environment"}
-	 , {9024, "Disabled Execution Environment"}
-	 , {9025, "Deployment Unit to Execution Environment Mismatch"}
-	 , {9026, "Duplicate Deployment Unit"}
-	 , {9027, "System Resources Exceeded"}
-	 , {9028, "Unknown Deployment Unit"}
-	 , {9029, "Invalid Deployment Unit State"}
-	 , {9030, "Invalid Deployement Unit Update – Downgrade not permitted"}
-	 , {9031, "Invalid Deployement Unit Update – Version not specified"}
-	 , {9032, "Invalid Deployment Unit Update – Version already exists"}
+	   {9000, "9000 - Method not supported"}
+	 , {9001, "9001 - Request denied (no reason specified)"}
+	 , {9002, "9002 - Internal error"}
+	 , {9003, "9003 - Invalid arguments"}
+	 , {9004, "9004 - Resources exceeded"}
+	 , {9005, "9005 - Invalid parameter name"}
+	 , {9006, "9006 - Invalid parameter type"}
+	 , {9007, "9007 - Invalid parameter value"}
+	 , {9008, "9008 - Attempt to set a non-writable parameter"}
+	 , {9009, "9009 - Notification request rejected"}
+	 , {9010, "9010 - File transfer failure"}
+	 , {9011, "9011 - Upload failure"}
+	 , {9012, "9012 - File transfer server authentication failure"}
+	 , {9013, "9013 - Unsupported protocol for file transfer"}
+	 , {9014, "9014 - File transfer failure: unable to join multicast group"}
+	 , {9015, "9015 - File transfer failure: unable to contact file server"}
+	 , {9016, "9016 - File transfer failure: unable to access file"}
+	 , {9017, "9017 - File transfer failure: unable to complete download"}
+	 , {9018, "9018 - File transfer failure: file corrupted"}
+	 , {9019, "9019 - File transfer failure: file authentication failure"}
+	 , {9020, "9020 - File transfer failure: unable to complete download within specified time windows"}
+	 , {9021, "9021 - Cancelation of file transfer not permitted in current transfer state"}
+	 , {9022, "9022 - Invalid UUID Format"}
+	 , {9023, "9023 - Unknown Execution Environment"}
+	 , {9024, "9024 - Disabled Execution Environment"}
+	 , {9025, "9025 - Deployment Unit to Execution Environment Mismatch"}
+	 , {9026, "9026 - Duplicate Deployment Unit"}
+	 , {9027, "9027 - System Resources Exceeded"}
+	 , {9028, "9028 - Unknown Deployment Unit"}
+	 , {9029, "9029 - Invalid Deployment Unit State"}
+	 , {9030, "9030 - Invalid Deployement Unit Update – Downgrade not permitted"}
+	 , {9031, "9031 - Invalid Deployement Unit Update – Version not specified"}
+	 , {9032, "9032 - Invalid Deployment Unit Update – Version already exists"}
 	]).
 -type cpe_fault_code_type() :: non_neg_integer().
 

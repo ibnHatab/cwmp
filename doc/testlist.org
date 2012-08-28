@@ -49,7 +49,7 @@
 
 
 
-** SOAP encoding [10/15]
+** SOAP encoding [11/15]
    - [X] Parse SOAP boolean types
    - [X] Parse SOAP dateTime types 
    - [X] Parse SOAP int types
@@ -70,7 +70,7 @@
    “4 Tone File” (see [25] Appendix B)
    “5 Ringer File” (see [25] Appendix B)
    
-   - [ ] parse_FaultCode
+   - [X] parse_FaultCode
 
    - [ ] parse_Notification
 
