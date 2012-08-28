@@ -123,6 +123,7 @@ groups() ->
 				     ,parse_FileType_tc
 				     ,parse_FaultCode_tc
 				     ,parse_Notification_tc
+				     ,parse_WindowMode_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -151,6 +152,7 @@ all() ->
      ,parse_FileType_tc
      ,parse_FaultCode_tc
      ,parse_Notification_tc
+     ,parse_WindowMode_tc
     ].
 %% 	,
     %% [{group, soap_parse_types},
@@ -201,6 +203,9 @@ parse_FaultCode_tc() ->
 parse_Notification_tc() ->
     [].
 
+parse_WindowMode_tc() ->
+    [].
+
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
 %%               ok | exit() | {skip,Reason} | {comment,Comment} |
@@ -212,7 +217,7 @@ parse_Notification_tc() ->
 %%--------------------------------------------------------------------
 
 %%-------------------------------------------
-%% Parse Boolean Test
+%%% Parse Boolean Test
 %%-------------------------------------------
 
 parse_boolean_tc(_Config) ->
@@ -226,8 +231,6 @@ parse_boolean_tc(_Config) ->
 			     , { true,  "true"}
 			    ]],
     ok.
-
-
 parse_boolean_check(Expect, String) ->
     %% setup
     E = make_Element('NoMoreRequests', String),
@@ -238,7 +241,7 @@ parse_boolean_check(Expect, String) ->
 
 
 %%-------------------------------------------
-%% Parse ISO8601 Test
+%%% Parse ISO8601 Test
 %%-------------------------------------------
 
 parse_iso8601_tc(_Config) ->
@@ -258,7 +261,6 @@ parse_iso8601_tc(_Config) ->
 					 , "2009-06-25T05:32:31+01:00"
 				       ])],
     ok.
-
 parse_iso8601_check(Expect, String) ->
     %execute
     Res = tr_soap_types:convert_iso8601_date(String),
@@ -267,7 +269,7 @@ parse_iso8601_check(Expect, String) ->
 
 
 %%-------------------------------------------
-%% Parse String Test
+%%% Parse String Test
 %%-------------------------------------------
 
 parse_string_tc(_Config) ->
@@ -282,8 +284,7 @@ parse_string_tc(_Config) ->
 			     , {               "1", "1"}
 			     , {            "true", "true"}
 			    ]],
-    ok.
-			   
+    ok.		   
 parse_string_check(Expect, String) ->
     %setup
     E = make_Element('ParseString', String),
@@ -294,7 +295,7 @@ parse_string_check(Expect, String) ->
 
 
 %%-------------------------------------------
-%% Parse Int Test
+%%% Parse Int Test
 %%-------------------------------------------
 
 parse_int_tc(_Config) ->
@@ -313,8 +314,7 @@ parse_int_tc(_Config) ->
 			     , { 11, "  11  "}
 			     , {  0, "   -0  "}
 			    ]],
-    ok.
-    
+    ok.  
 parse_int_check(Expect, String) ->
     %setup
     E = make_Element('ParseInt', String),
@@ -325,7 +325,7 @@ parse_int_check(Expect, String) ->
 
 
 %%-------------------------------------------
-%% Parse UnsignedInt Test
+%%% Parse UnsignedInt Test
 %%-------------------------------------------
 
 parse_unsignedInt_tc(_Config) ->
@@ -343,7 +343,6 @@ parse_unsignedInt_tc(_Config) ->
 			     , { 0, " +0 "}
 			    ]],
     ok.
-
 parse_unsignedInt_check(Expect, String) ->
     %setup
     E = make_Element('ParseUnsignedInt', String),
@@ -354,7 +353,7 @@ parse_unsignedInt_check(Expect, String) ->
 
 
 %%-------------------------------------------
-%% Parse AnyURI Test
+%%% Parse AnyURI Test
 %%-------------------------------------------
 
 parse_anyURI_tc(_Config) ->
@@ -374,7 +373,6 @@ parse_anyURI_tc(_Config) ->
 					 ,"http://www.w3.org/2001/XMLSchema-instance"
 				       ])],
     ok.
-
 parse_anyURI_check(Expect, String) ->
     %setup
     E = make_Element('ParseAnyURI', String),
@@ -385,7 +383,7 @@ parse_anyURI_check(Expect, String) ->
 
 
 %%-------------------------------------------
-%% Parse Namespace Test
+%%% Parse Namespace Test
 %%-------------------------------------------
 
 name_namespace_tc(_Config) ->
@@ -430,7 +428,7 @@ check_namespace_tc(_Config) ->
 
 
 %%-------------------------------------------
-%% Parse EventCodeType Test
+%%% Parse EventCodeType Test
 %%-------------------------------------------
 
 %% FIXME
@@ -450,7 +448,7 @@ parse_EventCodeType_tc(_Config) ->
 
 
 %%-------------------------------------------
-%% Parse ArraySize Test
+%%% Parse ArraySize Test
 %%-------------------------------------------
 
 %% FIXME
@@ -462,7 +460,7 @@ parse_ArraySize_tc(_Config) ->
 
 
 %%-------------------------------------------
-%% Parse FileType Test
+%%% Parse FileType Test
 %%-------------------------------------------
 
 parse_FileType_tc(_Config) ->
@@ -479,7 +477,6 @@ parse_FileType_tc(_Config) ->
 				   ,{ 6, "6 Ringer, File"                       , 'TransferFileType'}
 				  ]],			    	    
     ok.
-
 parse_FileType_check(Expect, String, Type) ->
     %setup
     E = make_Element(Type, String),
@@ -490,7 +487,7 @@ parse_FileType_check(Expect, String, Type) ->
 
 
 %%-------------------------------------------
-%% Parse FaultCode Test
+%%% Parse FaultCode Test
 %%-------------------------------------------
 
 parse_FaultCode_tc(_Config) ->
@@ -508,7 +505,6 @@ parse_FaultCode_tc(_Config) ->
 			     ,{ 9032, "9032"}
 			    ]],
     ok.
-
 parse_FaultCode_check(Expect, String) ->
     %setup
     E = make_Element('ParseFaultCode' , String),
@@ -519,15 +515,14 @@ parse_FaultCode_check(Expect, String) ->
 
 
 %%-------------------------------------------
-%% Parse Notification Test
+%%% Parse Notification Test
 %%-------------------------------------------
 
 
 parse_Notification_tc(_Config) ->
    [
      begin
-	 parse_Notification_check(Expect, String),
-	 ct:print("--> ~p ~p ~n",[Expect, parse_Notification_check(Expect, String)])
+	 parse_Notification_check(Expect, String)
      end
       ||
 	{Expect, String} <- [
@@ -539,7 +534,6 @@ parse_Notification_tc(_Config) ->
 			     ,{ 4, "4"}
 			    ]],
     ok.
-
 parse_Notification_check(Expect, String) ->
     %setup
     E = make_Element('ParseNotification' , String),
@@ -547,6 +541,33 @@ parse_Notification_check(Expect, String) ->
     Res = tr_soap_types:parse_Notification(E),
     %assert
     Expect = Res.
+
+
+%%-------------------------------------------
+%%% Parse WindowMode Test
+%%-------------------------------------------
+
+parse_WindowMode_tc(_Config) ->
+   [
+     begin
+	 parse_WindowMode_check(Expect, String)
+     end
+    ||
+       {Expect, String} <- [
+			    { 1,  "1 At Any, Time"}
+			    , { 2, "2 Immediately"}
+			    , { 3, "3 When, Idle"}
+			    , { 4, "4 Confirmation, Needed"}
+			   ]],
+    ok.
+parse_WindowMode_check(Expect, String) ->
+    %setup
+    E = make_Element('ParseWindowMode' , String),
+    %execute
+    Res = tr_soap_types:parse_WindowMode(E),
+    %assert
+    Expect = Res.
+
 
 
 

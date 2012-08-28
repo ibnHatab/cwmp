@@ -221,10 +221,10 @@
 %%    Extendable Time Window Mode Definition
 -define(SUPPORTED_TIME_WINDOW_MODE_VALUE_TYPE,
 	%%     This pattern allows the following Time Window Modes:
-	[ {1,     "At Any, Time"}
-	  , {2,	  "Immediately"}
-	  , {3,	  "When, Idle"}
-	  , {4,	  "Confirmation, Needed"}
+	[ {1,     "1 At Any, Time"}
+	  , {2,	  "2 Immediately"}
+	  , {3,	  "3 When, Idle"}
+	  , {4,	  "4 Confirmation, Needed"}
 	  , {'X', "OUI Vendor speceific, ID"}
 	]).
 -type time_window_mode_value_type() :: any().
