@@ -122,6 +122,7 @@ groups() ->
 				     ,parse_ArraySize_tc
 				     ,parse_FileType_tc
 				     ,parse_FaultCode_tc
+				     ,parse_Notification_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -149,6 +150,7 @@ all() ->
      ,parse_ArraySize_tc
      ,parse_FileType_tc
      ,parse_FaultCode_tc
+     ,parse_Notification_tc
     ].
 %% 	,
     %% [{group, soap_parse_types},
@@ -196,6 +198,9 @@ parse_FileType_tc() ->
 parse_FaultCode_tc() ->
     [].
 
+parse_Notification_tc() ->
+    [].
+
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
 %%               ok | exit() | {skip,Reason} | {comment,Comment} |
@@ -205,6 +210,11 @@ parse_FaultCode_tc() ->
 %% Comment = term()
 %% @end
 %%--------------------------------------------------------------------
+
+%%-------------------------------------------
+%% Parse Boolean Test
+%%-------------------------------------------
+
 parse_boolean_tc(_Config) ->
     [
      parse_boolean_check(Expect, String)
@@ -227,6 +237,9 @@ parse_boolean_check(Expect, String) ->
     Expect = Res.
 
 
+%%-------------------------------------------
+%% Parse ISO8601 Test
+%%-------------------------------------------
 
 parse_iso8601_tc(_Config) ->
      [
@@ -253,6 +266,10 @@ parse_iso8601_check(Expect, String) ->
     Expect = Res.
 
 
+%%-------------------------------------------
+%% Parse String Test
+%%-------------------------------------------
+
 parse_string_tc(_Config) ->
     [
      begin
@@ -274,6 +291,11 @@ parse_string_check(Expect, String) ->
     Res = tr_soap_types:parse_string(E),
     %assert
     Expect = Res.
+
+
+%%-------------------------------------------
+%% Parse Int Test
+%%-------------------------------------------
 
 parse_int_tc(_Config) ->
     [
@@ -302,6 +324,10 @@ parse_int_check(Expect, String) ->
     Expect = Res.
 
 
+%%-------------------------------------------
+%% Parse UnsignedInt Test
+%%-------------------------------------------
+
 parse_unsignedInt_tc(_Config) ->
     [
      begin
@@ -325,6 +351,11 @@ parse_unsignedInt_check(Expect, String) ->
     Res = tr_soap_types:parse_unsignedInt(E),
     %assert
     Expect = Res.
+
+
+%%-------------------------------------------
+%% Parse AnyURI Test
+%%-------------------------------------------
 
 parse_anyURI_tc(_Config) ->
      [
@@ -352,6 +383,10 @@ parse_anyURI_check(Expect, String) ->
     %assert
     Expect = Res.
 
+
+%%-------------------------------------------
+%% Parse Namespace Test
+%%-------------------------------------------
 
 name_namespace_tc(_Config) ->
     {'','name'} = tr_soap_lib:local_name('name'),
@@ -392,7 +427,12 @@ check_namespace_tc(_Config) ->
     ct:print(">>> ~p ~n>>> ~p ~n",[State, Header]),
 
     ok.
-    
+
+
+%%-------------------------------------------
+%% Parse EventCodeType Test
+%%-------------------------------------------
+
 %% FIXME
 parse_EventCodeType_tc(_Config) ->
     %% Elem = make_Element('ParseEventCodeType',"9 REQUEST, DOWNLOAD"),
@@ -408,12 +448,22 @@ parse_EventCodeType_tc(_Config) ->
 
     ok.
 
+
+%%-------------------------------------------
+%% Parse ArraySize Test
+%%-------------------------------------------
+
 %% FIXME
 parse_ArraySize_tc(_Config) ->
     %% Nss = #parser{},
     %% ct:print(">>> ~p ~n",[tr_soap_types:parse_ArraySize("10", "abc", Nss)]),
     ok.
 
+
+
+%%-------------------------------------------
+%% Parse FileType Test
+%%-------------------------------------------
 
 parse_FileType_tc(_Config) ->
     [
@@ -438,6 +488,11 @@ parse_FileType_check(Expect, String, Type) ->
     %assert
     Expect = Res.
 
+
+%%-------------------------------------------
+%% Parse FaultCode Test
+%%-------------------------------------------
+
 parse_FaultCode_tc(_Config) ->
    [
      begin
@@ -459,6 +514,37 @@ parse_FaultCode_check(Expect, String) ->
     E = make_Element('ParseFaultCode' , String),
     %execute
     Res = tr_soap_types:parse_FaultCode(E),
+    %assert
+    Expect = Res.
+
+
+%%-------------------------------------------
+%% Parse Notification Test
+%%-------------------------------------------
+
+
+parse_Notification_tc(_Config) ->
+   [
+     begin
+	 parse_Notification_check(Expect, String),
+	 ct:print("--> ~p ~p ~n",[Expect, parse_Notification_check(Expect, String)])
+     end
+      ||
+	{Expect, String} <- [
+			     { 3,  "3"}
+			     ,{ 5, "5"}
+			     ,{ 0, "0"}
+			     ,{ 6, "6"}
+			     ,{ 1, "1"}
+			     ,{ 4, "4"}
+			    ]],
+    ok.
+
+parse_Notification_check(Expect, String) ->
+    %setup
+    E = make_Element('ParseNotification' , String),
+    %execute
+    Res = tr_soap_types:parse_Notification(E),
     %assert
     Expect = Res.
 
