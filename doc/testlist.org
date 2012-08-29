@@ -48,8 +48,8 @@
    | Kicked                (DEPRECATED) | OPTIONAL | OPTIONAL   |   |
 
 
-
-** SOAP encoding [11/15]
+    
+** SOAP encoding [14/15]
    - [X] Parse SOAP boolean types
    - [X] Parse SOAP dateTime types 
    - [X] Parse SOAP int types
@@ -61,20 +61,15 @@
    - [X] Parse SOAP URI types
    - [X] Parse SOAP namespace types (copy from libs)
    
-   - [ ] parse_EventCodeType
+   - [X] parse_EventCodeType
    - [ ] parse_ArraySize
    - [X] parse_FileType
-   "1 Firmware Upgrade, Image
-   "2 Web Content"
-   “3 Vendor Configuration File”
-   “4 Tone File” (see [25] Appendix B)
-   “5 Ringer File” (see [25] Appendix B)
-   
+
    - [X] parse_FaultCode
 
-   - [ ] parse_Notification
+   - [X] parse_Notification
 
-   - [ ] parse_WindowMode
+   - [X] parse_WindowMode 
    FEX: http://www.broadband-forum.org/technical/download/TR-069_Amendment-3.pdf
 
 ** ACS location update [1/1]

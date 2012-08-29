@@ -433,18 +433,32 @@ check_namespace_tc(_Config) ->
 
 %% FIXME
 parse_EventCodeType_tc(_Config) ->
-    %% Elem = make_Element('ParseEventCodeType',"9 REQUEST, DOWNLOAD"),
-    %% State = #parser{},
+    Elem = make_Element('ParseEventCodeType',"9 REQUEST, DOWNLOAD"),
+    State = #parser{},
+    ct:print(">>>  ~p ~n",[tr_soap_types:parse_EventCodeType(Elem, State)]),
     
-    %% ct:print(">>>  ~p ~n",[tr_soap_types:parse_EventCodeType(Elem, State)]),
-    
-    %% E = make_Element('ParseEventCodeType',"M ChangeDUState"),
-    %% ct:print("--> ~p returned --> ~p ~n",[tr_soap_types:parse_string(E), tr_soap_types:parse_EventCodeType(E, State)]),
-    
-    %% M = make_Element('ParseEventCodeType',"M ScheduleInform"),
-    %% ct:print("--> ~p returned --> ~p ~n",[tr_soap_types:parse_string(E), tr_soap_types:parse_EventCodeType(M, State)]),
-
+    [
+     begin
+	 parse_EventCodeType_check(Expect, String)
+	 ,ct:print("--> ~p  ~p ~n",[Expect, parse_EventCodeType_check(Expect, String)])
+     end
+      ||
+	{Expect, String} <- [
+			     {'ChangeDUState',    "M ChangeDUState"}
+			     , {'ScheduleInform', "M ScheduleInform"}
+			     , {'Download',       "M Download"}
+			     , {'Reboot',	  "M Reboot"}
+			   %%  , {   9,             "9 REQUEST, DOWNLOAD"}
+			     ]],
     ok.
+parse_EventCodeType_check(Expect, String) ->
+    %setup
+    E = make_Element('ParseEventCodeType', String),
+    State = #parser{},
+    %execute
+    Res = tr_soap_types:parse_EventCodeType(E, State),
+    %assert
+    Expect = Res.
 
 
 %%-------------------------------------------
