@@ -10,7 +10,8 @@ dir-local: dialyzer
 all: compile
 
 compile:
-	$(REBAR) -v compile
+	$(REBAR) -v compile 
+#skip_deps=true
 
 deps:
 	$(REBAR) check-deps || $(REBAR) get-deps

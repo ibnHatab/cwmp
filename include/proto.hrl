@@ -18,33 +18,33 @@
 		      {integer(), integer(), integer()}}.
 
 -type cwmp_method() ::
-        'AddObject'                       | 'AddObjectResponse' 
-      | 'AutonomousDUStateChangeComplete' | 'AutonomousDUStateChangeCompleteResponse' 
-      | 'AutonomousTransferComplete'      | 'AutonomousTransferCompleteResponse' 
-      | 'CancelTransfer'                  | 'CancelTransferResponse' 
-      | 'ChangeDUState'                   | 'ChangeDUStateResponse' 
-      | 'DeleteObject'                    | 'DeleteObjectResponse' 
-      | 'Download'                        | 'DownloadResponse' 
-      | 'DUStateChangeComplete'           | 'DUStateChangeCompleteResponse' 
-      | 'FactoryReset'                    | 'FactoryResetResponse' 
-      | 'Fault'                           
-      | 'GetAllQueuedTransfers'           | 'GetAllQueuedTransfersResponse' 
-      | 'GetOptions'                      | 'GetOptionsResponse' 
-      | 'GetParameterAttributes'          | 'GetParameterAttributesResponse' 
-      | 'GetParameterNames'               | 'GetParameterNamesResponse' 
-      | 'GetParameterValues'              | 'GetParameterValuesResponse' 
-      | 'GetQueuedTransfers'              | 'GetQueuedTransfersResponse' 
-      | 'GetRPCMethods'                   | 'GetRPCMethodsResponse' 
-      | 'Inform'                          | 'InformResponse' 
-      | 'Kicked'                          | 'KickedResponse' 
-      | 'Reboot'                          | 'RebootResponse' 
-      | 'RequestDownload'                 | 'RequestDownloadResponse' 
-      | 'ScheduleDownload'                | 'ScheduleDownloadResponse' 
-      | 'ScheduleInform'                  | 'ScheduleInformResponse' 
-      | 'SetParameterAttributes'          | 'SetParameterAttributesResponse' 
-      | 'SetParameterValues'              | 'SetParameterValuesResponse' 
-      | 'SetVouchers'                     | 'SetVouchersResponse' 
-      | 'TransferComplete'                | 'TransferCompleteResponse' 
+        'AddObject'                       | 'AddObjectResponse'
+      | 'AutonomousDUStateChangeComplete' | 'AutonomousDUStateChangeCompleteResponse'
+      | 'AutonomousTransferComplete'      | 'AutonomousTransferCompleteResponse'
+      | 'CancelTransfer'                  | 'CancelTransferResponse'
+      | 'ChangeDUState'                   | 'ChangeDUStateResponse'
+      | 'DeleteObject'                    | 'DeleteObjectResponse'
+      | 'Download'                        | 'DownloadResponse'
+      | 'DUStateChangeComplete'           | 'DUStateChangeCompleteResponse'
+      | 'FactoryReset'                    | 'FactoryResetResponse'
+      | 'Fault'
+      | 'GetAllQueuedTransfers'           | 'GetAllQueuedTransfersResponse'
+      | 'GetOptions'                      | 'GetOptionsResponse'
+      | 'GetParameterAttributes'          | 'GetParameterAttributesResponse'
+      | 'GetParameterNames'               | 'GetParameterNamesResponse'
+      | 'GetParameterValues'              | 'GetParameterValuesResponse'
+      | 'GetQueuedTransfers'              | 'GetQueuedTransfersResponse'
+      | 'GetRPCMethods'                   | 'GetRPCMethodsResponse'
+      | 'Inform'                          | 'InformResponse'
+      | 'Kicked'                          | 'KickedResponse'
+      | 'Reboot'                          | 'RebootResponse'
+      | 'RequestDownload'                 | 'RequestDownloadResponse'
+      | 'ScheduleDownload'                | 'ScheduleDownloadResponse'
+      | 'ScheduleInform'                  | 'ScheduleInformResponse'
+      | 'SetParameterAttributes'          | 'SetParameterAttributesResponse'
+      | 'SetParameterValues'              | 'SetParameterValuesResponse'
+      | 'SetVouchers'                     | 'SetVouchersResponse'
+      | 'TransferComplete'                | 'TransferCompleteResponse'
       | 'Upload'                          | 'UploadResponse'
         .
 
@@ -265,16 +265,8 @@
 	  value :: any()
 	 }).
 
-%% -record(parameter_value_list,{
-%% 	  parameter_value_struct :: [#parameter_value_struct{}]
-%% 	 }).
 
 %%    GetRPCMethods Type Definition
-
-%% -record(method_list,{
-%% 	 string :: [string()]
-%% 	 }).
-
 -record(device_id_struct,{
 	  manufacturer :: string(),
 	  oui :: string(),
@@ -298,11 +290,6 @@
 
 -type access_list_value_type() :: string().
 
-%% -record(access_list,{
-%% 	 string :: [access_list_value_type()]
-%% 	 }).
-
-
 -type parameter_attribute_notification_value_type() :: 1 | 2 | 3 | 4 | 5 | 6.
 
 -record(set_parameter_attributes_struct, {
@@ -313,20 +300,11 @@
 	  access_list :: [access_list_value_type()]
 	 }).
 
-%% -record(set_parameter_attributes_list, {
-%% 	  set_parameter_attributes_struct :: [#set_parameter_attributes_struct{}]
-%% 	 }).
-
-
 -record(parameter_attribute_struct, {
 	  name :: string(),
 	  notification :: parameter_attribute_notification_value_type(),
 	  access_list :: [access_list_value_type()]
 	  }).
-
-%% -record(parameter_attribute_list, {
-%% 	  parameter_attribute_struct :: [#parameter_attribute_struct{}]
-%% 	 }).
 
 %%    Schedule Download Time Window Type Definitions
 
@@ -338,9 +316,6 @@
 	  max_retries  :: integer()
 	 }).
 
-%% -record(time_window_list, {
-%% 	  time_window_struct :: [#time_window_struct{}]
-%% 	 }).
 
 %%    TransferComplete Type Definitions
 -type transfer_state_type() :: 1 % Not yet started
@@ -353,9 +328,6 @@
 	  state :: transfer_state_type()
 	 }).
 
-%% -record(transfer_list, {
-%% 	  quseued_transfer_struct :: [#queued_transfer_struct{}]
-%% 	 }).
 
 -record(all_queued_transfer_struct, {
 	  command_key :: command_key_type(),
@@ -366,9 +338,6 @@
 	  target_file_name :: string()
 	 }).
 
-%% -record(all_transfer_list, {
-%% 	  all_queued_transfer_struct :: [#all_queued_transfer_struct{}]
-%% 	 }).
 
 %% @doc
 %%        A unique identifier for a Deployment Unit
@@ -432,7 +401,7 @@
 	  version :: string(),
 	  current_state :: string(),
 	  resolved :: boolean(),
-	  execution_unit_ref_list :: string(),
+	  execution_unit_ref_list :: string(), %FIXME: parse comma separated list: "ExecutionUnitRefList" type="xs:string"
 	  start_time :: date_time(),
 	  complete_time :: date_time(),
 	  fault :: #deployment_unit_fault_struct{}
@@ -448,9 +417,6 @@
 	 }).
 
 %%   Voucher and Option Type Definitions
-%% -record(voucher_list, {
-%% 	  base64 :: [binary()]
-%% 	 }).
 
 -record(option_struct, {
 	  option_name :: string(),
@@ -469,10 +435,6 @@
 	  is_transferable :: 0 % Non-transferable
 			   | 1 % Transferable
 	 }).
-
-%% -record(option_list, {
-%% 	  option_struct :: #option_struct{}
-%% 	 }).
 
 -record(arg_struct, {
 	  name :: string(),
@@ -530,56 +492,56 @@
 
 %% @doc SetParameterValues message - Annex A.3.2.1
 -record(set_parameter_values, {
-	   parameter_list :: [#parameter_value_struct{}], %#parameter_value_list{},
+	   parameter_list :: [#parameter_value_struct{}],
 	   parameter_key :: parameter_key_type()
 	  }).
 
-%% @doc SetParameterValuesResponse message - Annex A.3.2.1 
+%% @doc SetParameterValuesResponse message - Annex A.3.2.1
 -record(set_parameter_values_response, {
 	   status :: 0 %% All Parameter changes have been validated and applied
 		   | 1
 		     %% All Parameter changes have been validated and committed,
 		     %% but some or all are not yet applied (for example, if a reboot
-		     %% is required before the new values are applied)		     
+		     %% is required before the new values are applied)
 	  }).
 
-%% @doc GetParameterValues message - Annex A.3.2.2 
+%% @doc GetParameterValues message - Annex A.3.2.2
 -record(get_parameter_values, {
 	   parameter_names :: [string()]
 	  }).
 
-%% @doc GetParameterValuesResponse message - Annex A.3.2.2 
+%% @doc GetParameterValuesResponse message - Annex A.3.2.2
 -record(get_parameter_values_response, {
-	   parameter_list :: [#parameter_value_struct{}] %#parameter_value_list{}
+	   parameter_list :: [#parameter_value_struct{}]
 	  }).
 
-%% @doc GetParameterNames message - Annex A.3.2.3 
+%% @doc GetParameterNames message - Annex A.3.2.3
 -record(get_parameter_names, {
 	   parameter_path :: string(),
 	   next_level :: boolean()
 	  }).
 
-%% @doc GetParameterNamesResponse message - Annex A.3.2.3 
+%% @doc GetParameterNamesResponse message - Annex A.3.2.3
 -record(get_parameter_names_response, {
 	   parameter_list :: [#parameter_info_struct{}]
 	  }).
 
-%% @doc SetParameterAttributes message - Annex A.3.2.4 
+%% @doc SetParameterAttributes message - Annex A.3.2.4
 -record(set_parameter_attributes, {
 	   parameter_list ::  [#set_parameter_attributes_struct{}]
 	  }).
 
-%% @doc SetParameterAttributesResponse message - Annex A.3.2.4 
+%% @doc SetParameterAttributesResponse message - Annex A.3.2.4
 -record(set_parameter_attributes_response, {
 	   %% TODO: ref
 	  }).
 
-%% @doc GetParameterAttributes message - Annex A.3.2.5 
+%% @doc GetParameterAttributes message - Annex A.3.2.5
 -record(get_parameter_attributes, {
 	   parameter_names :: [string()]
 	  }).
 
-%% @doc GetParameterAttributesResponse message - Annex A.3.2.5 
+%% @doc GetParameterAttributesResponse message - Annex A.3.2.5
 -record(get_parameter_attributes_response, {
 	   parameter_list :: [#parameter_attribute_struct{}]
 	  }).
@@ -590,7 +552,7 @@
 	   parameter_key :: parameter_key_type()
 	  }).
 
-%% @doc AddObjectResponse message - Annex A.3.2.6 
+%% @doc AddObjectResponse message - Annex A.3.2.6
 -record(add_object_response, {
 	   instance_number :: non_neg_integer(),
 	   status :: 0 | 1
@@ -598,20 +560,20 @@
 		     %% 1 - The object creation has been validated and committed, but not yet applied
 	  }).
 
-%% @doc DeleteObject message - Annex A.3.2.7 
+%% @doc DeleteObject message - Annex A.3.2.7
 -record(delete_object, {
 	   object_name :: object_name_type(),
 	   parameter_key :: parameter_key_type()
 	  }).
 
-%% @doc DeleteObjectResponse message - Annex A.3.2.7 
+%% @doc DeleteObjectResponse message - Annex A.3.2.7
 -record(delete_object_response, {
 	   status :: 0 | 1
 		     %% The object has been deleted
 		     %% The object deletion has been validated and committed, but not yet applied
 	  }).
 
-%% @doc Download message - Annex A.3.2.8 
+%% @doc Download message - Annex A.3.2.8
 -record(download, {
 	   command_key :: command_key_type(),
 	   file_type :: download_file_type(),
@@ -625,7 +587,7 @@
 	   failure_url :: url()
 	  }).
 
-%% @doc DownloadResponse message - Annex A.3.2.8 
+%% @doc DownloadResponse message - Annex A.3.2.8
 -record(download_response, {
 	   status :: 0 | 1,
 	   %% 0 - Download has completed and been applied
@@ -634,12 +596,12 @@
 	   complete_time :: date_time()
 	  }).
 
-%% @doc Reboot message - Annex A.3.2.9 
+%% @doc Reboot message - Annex A.3.2.9
 -record(reboot, {
 	   command_key :: command_key_type()
 	  }).
 
-%% @doc RebootResponse message - Annex A.3.2.9 
+%% @doc RebootResponse message - Annex A.3.2.9
 -record(reboot_response, {
 	  }).
 
@@ -647,45 +609,45 @@
 %%%        Optional CPE messages - Annex A.4.1
 %%%-----------------------------------------------------------------------------
 
-%% @doc GetQueuedTransfers message - Annex A.4.1.1 
+%% @doc GetQueuedTransfers message - Annex A.4.1.1
 -record(get_queued_transfers, {
 	  }).
 
-%% @doc GetQueuedTransfersResponse message - Annex A.4.1.1 
+%% @doc GetQueuedTransfersResponse message - Annex A.4.1.1
 -record(get_queued_transfers_response, {
 	   transfer_list ::  [#queued_transfer_struct{}]
 	  }).
 
-%% @doc ScheduleInform message - Annex A.4.1.2 
+%% @doc ScheduleInform message - Annex A.4.1.2
 -record(schedule_inform, {
 	   delay_seconds :: non_neg_integer(),
 	   command_key :: command_key_type()
 	  }).
 
-%% @doc ScheduleInformResponse message - Annex A.4.1.2 
+%% @doc ScheduleInformResponse message - Annex A.4.1.2
 -record(schedule_inform_response, {
 	  }).
 
-%% @doc SetVouchers message - Annex A.4.1.3 
+%% @doc SetVouchers message - Annex A.4.1.3
 -record(set_vouchers, {
 	   voucher_list :: [binary()]
 	  }).
 
-%% @doc SetVouchersResponse message - Annex A.4.1.3 
+%% @doc SetVouchersResponse message - Annex A.4.1.3
 -record(set_vouchers_response, {
 	  }).
 
-%% @doc GetOptions message - Annex A.4.1.4 
+%% @doc GetOptions message - Annex A.4.1.4
 -record(get_options, {
 	   option_name :: string()
 	  }).
 
-%% @doc GetOptionsResponse message - Annex A.4.1.4 
+%% @doc GetOptionsResponse message - Annex A.4.1.4
 -record(get_options_response, {
 	   option_list :: [#option_struct{}]
 	  }).
 
-%% @doc Upload message - Annex A.4.1.5 
+%% @doc Upload message - Annex A.4.1.5
 -record(upload, {
 	   command_key :: command_key_type(),
 	   file_type :: upload_file_type(),
@@ -695,7 +657,7 @@
 	   delay_seconds :: non_neg_integer()
 	  }).
 
-%% @doc UploadResponse message - Annex A.4.1.5 
+%% @doc UploadResponse message - Annex A.4.1.5
 -record(upload_response, {
 	   status :: 0 | 1,
 	   %% 0 - Upload has been completed
@@ -704,24 +666,24 @@
 	   complete_time :: date_time()
 	  }).
 
-%% @doc FactoryReset message - Annex A.4.1.6 
+%% @doc FactoryReset message - Annex A.4.1.6
 -record(factory_reset, {
 	  }).
 
-%% @doc FactoryResetResponse message - Annex A.4.1.6 
--record(factory_reset_response, {	   
+%% @doc FactoryResetResponse message - Annex A.4.1.6
+-record(factory_reset_response, {
 	  }).
 
-%% @doc GetAllQueuedTransfers message - Annex A.4.1.7 
+%% @doc GetAllQueuedTransfers message - Annex A.4.1.7
 -record(get_all_queued_transfers, {
 	  }).
 
-%% @doc GetAllQueuedTransfersResponse message - Annex A.4.1.7 
+%% @doc GetAllQueuedTransfersResponse message - Annex A.4.1.7
 -record(get_all_queued_transfers_response, {
 	   transfer_list :: [#all_queued_transfer_struct{}]
 	  }).
 
-%% @doc ScheduleDownload message - Annex A.4.1.8 
+%% @doc ScheduleDownload message - Annex A.4.1.8
 -record(schedule_download, {
 	   command_key :: command_key_type(),
 	   file_type :: download_file_type(),
@@ -733,17 +695,17 @@
 	   time_window_list ::  [#time_window_struct{}]
 	  }).
 
-%% @doc ScheduleDownloadResponse message - Annex A.4.1.8 
+%% @doc ScheduleDownloadResponse message - Annex A.4.1.8
 -record(schedule_download_response, {
 
 	  }).
 
-%% @doc CancelTransfer message - Annex A.4.1.9 
+%% @doc CancelTransfer message - Annex A.4.1.9
 -record(cancel_transfer, {
 	   command_key :: command_key_type()
 	  }).
 
-%% @doc CancelTransferResponse message - Annex A.4.1.9 
+%% @doc CancelTransferResponse message - Annex A.4.1.9
 -record(cancel_transfer_response, {
 
 	  }).
@@ -761,22 +723,22 @@
 
 	  }).
 
-%% @doc Inform message - Annex A.3.3.1 
+%% @doc Inform message - Annex A.3.3.1
 -record(inform, {
 	   device_id :: #device_id_struct{},
 	   event :: [#event_struct{}],
 	   max_envelopes :: non_neg_integer(),
 	   current_time :: date_time(),
 	   retry_count :: non_neg_integer(),
-	   parameter_list :: [#parameter_value_struct{}] %#parameter_value_list{}
+	   parameter_list :: [#parameter_value_struct{}]
 	  }).
 
-%% @doc InformResponse message - Annex A.3.3.1 
+%% @doc InformResponse message - Annex A.3.3.1
 -record(inform_response, {
 	   max_envelopes :: non_neg_integer()
 	  }).
 
-%% @doc TransferComplete message - Annex A.3.3.2 
+%% @doc TransferComplete message - Annex A.3.3.2
 -record(transfer_complete, {
 	   command_key :: command_key_type(),
 	   fault_struct :: #transfer_complete_fault_struct{},
@@ -784,12 +746,12 @@
 	   complete_time :: date_time()
 	  }).
 
-%% @doc TransferCompleteResponse message - Annex A.3.3.2 
+%% @doc TransferCompleteResponse message - Annex A.3.3.2
 -record(transfer_complete_response, {
 	   %% TODO: ref
 	  }).
 
-%% @doc AutonomousTransferComplete message - Annex A.3.3.3 
+%% @doc AutonomousTransferComplete message - Annex A.3.3.3
 -record(autonomous_transfer_complete, {
 	   announce_url :: url(),
 	   transfer_url :: url(),
@@ -802,7 +764,7 @@
 	   complete_time :: date_time()
 	  }).
 
-%% @doc AutonomousTransferCompleteResponse message - Annex A.3.3.3 
+%% @doc AutonomousTransferCompleteResponse message - Annex A.3.3.3
 -record(autonomous_transfer_complete_response, {
 
 	  }).
@@ -811,7 +773,7 @@
 %%%       Optional ACS messages - Annex A.4.2
 %%%-----------------------------------------------------------------------------
 
-%% @doc Kicked message - Annex A.4.2.1 
+%% @doc Kicked message - Annex A.4.2.1
 -record(kicked, {
 	   command :: string(),
 	   referer :: string(),
@@ -819,18 +781,18 @@
 	   next :: string()
 	  }).
 
-%% @doc KickedResponse message - Annex A.4.2.1 
+%% @doc KickedResponse message - Annex A.4.2.1
 -record(kicked_response, {
 	   next_url :: url()
 	  }).
 
-%% @doc RequestDownload message - Annex A.4.2.2 
+%% @doc RequestDownload message - Annex A.4.2.2
 -record(request_download, {
 	  file_type :: download_file_type(),
 	  file_type_arg :: [#arg_struct{}]
 	 }).
 
-%% @doc RequestDownloadResponse message - Annex A.4.2.2 
+%% @doc RequestDownloadResponse message - Annex A.4.2.2
 -record(request_download_response, {
 	  }).
 
@@ -859,13 +821,13 @@
 %%%        SOAP Header Elements
 %%%-----------------------------------------------------------------------------
 
-%% @doc  
+%% @doc
 -record(id, {
            mustUnderstand :: boolean(),
 	   value :: string()
 	  }).
 
-%% @doc  
+%% @doc
 -record(hold_requests, {
            mustUnderstand :: boolean(),
 	   value :: boolean()
@@ -923,7 +885,7 @@
       | #set_vouchers{}                        | #set_vouchers_response{}
       | #transfer_complete{}                   | #transfer_complete_response{}
       | #upload{}                              | #upload_response{}
-      | #soap_fault{}                          
+      | #soap_fault{}
         .
 
 

@@ -64,11 +64,11 @@ build_<xsl:value-of select="$container"/>(Data, State) ->
 <!--
     Build RPC Methods
     Simple element
+-->
   <xsl:template match="*[name()='xs:schema']/*[name()='xs:element' and not(.//*[name()='xs:sequence'])]">
 <xsl:variable name="container" select="@name"/>%% -spec build_<xsl:value-of select="@name"/>(#camel_<xsl:value-of select="@name"/>{}) ->  #xmlElement{}.
     <xsl:apply-templates/>
   </xsl:template>
--->
 
   <!--
       RPC Methods Arguments

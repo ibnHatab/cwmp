@@ -64,7 +64,7 @@ parse_builder_options([{namespaces, Nss} | Rest], State) ->
 
 -spec build_rpc_data(#rpc_data{}, #builder{}) ->  [export_element()].
 build_rpc_data(#rpc_data{data=Data} = _D, State) ->
-    ?DBG(Data),
+%    ?DBG(Data),
     [build_Envelop(Data, State)].
 
 -spec build_Envelop(#envelope{}, #builder{}) ->  export_element().
@@ -87,10 +87,24 @@ build_Header(_D, _State) ->
 build_Body(Body, State) ->
     {'soap-env:Body', [],
      [case Method of
+	  #soap_fault{} = Data -> build_SoapFault(Data, State);
 	  #get_rpc_methods_response{} = Data -> build_GetRpcMethodsResponse(Data, State);
 	  _ ->
 	      build_error(Method, State)
       end || Method <- Body]}.
+
+
+-spec build_SoapFault(#soap_fault{}, #builder{}) -> export_element().
+build_SoapFault(Data, State) ->   
+    {'soap-env:Fault', [],
+     [P || P <- [
+		 {'faultcode', [], [Data#soap_fault.faultcode]}
+     %% build_FaultString(Data#fault.fault_string, State),
+     %% build_SetParameterValuesFault(Data#fault.set_parameter_values_fault, State),
+     %% build_ParameterName(Data#fault.parameter_name, State),
+     %% build_FaultCode(Data#fault.fault_code, State),
+     %% build_FaultString(Data#fault.fault_string, State),
+     ], P /= null]}.
 
 
 -spec build_GetRpcMethodsResponse(#get_rpc_methods_response{}, #builder{}) -> export_element().
@@ -120,6 +134,17 @@ build_GetRpcMethodsResponse(Data, State) ->
 	     "DeleteObject","Download","Reboot","FactoryReset"]}]}}
        ).
 
+-define(RPC_FAULT,
+	{rpc_data,
+	 {envelope,
+	  {header,
+	   {id,true,"0_THOM_TR69_ID"},
+	   {hold_requests,true,false},
+	   false},
+	  [{soap_fault,"Client","CWMP fault",undefined,
+	    {fault,9001,"Request Denied",undefined}}]}}
+       ).
+
 -define(XML_NAMESPACE,
 	{xmlNamespace,[],
 	 [{"soapenc",'http://schemas.xmlsoap.org/soap/encoding/'},
@@ -133,11 +158,12 @@ build_GetRpcMethodsResponse(Data, State) ->
 
 main() ->
     Nss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
+    ?DBG(Nss),
     Builder = builder([{namespaces, Nss}]),
-    Export = Builder(?RPC_DATA),
-    ?DBG(Export),
-    XML = xmerl:export_simple(Export, tr_soap_export, [{prolog,[]}]),
-%%    ?DBG(unicode:characters_to_list(XML)),
+    Export = Builder(?RPC_FAULT),
+%    ?DBG(Export),
+    XML = xmerl:export_simple(Export, xmerl_xml, [{prolog,[]}]),
+%    ?DBG(unicode:characters_to_list(XML)),
     ?DBG(XML),
     ok.
 
@@ -151,7 +177,7 @@ build_rpc_data_test_no() ->
     XML = build_rpc_data(?RPC_DATA, Builder),
 %    ?DBG(XML),
     ok.
-
+ 
 export_test_no() ->
     Data =
 	{'cwmp:bike',
