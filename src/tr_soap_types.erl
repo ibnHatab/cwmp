@@ -80,7 +80,7 @@
 	  parse_dateTime/1,
 	  parse_base64/1,
 	  parse_anyURI/1,
-	  parse_attribete/3,
+	  parse_attribete/3, % FIXME: attribete speling
 	  parse_anySimpleType/1
 	]).
 
@@ -89,8 +89,10 @@
 
 
 -import(tr_soap_lib, [return_error/2, parse_error/2, parse_error/3,
-		      get_QName/2, local_ns/2, normalize_to_local_ns/2
+		      get_QName/2, local_ns/2, normalize_to_local_ns/2,
+		      maybe_tag/3, maybe_tag/4
 		     ]).
+
 
 %%%-----------------------------------------------------------------------------
 %% Internal API
@@ -211,17 +213,6 @@ parse_anyURI(#xmlElement{name=Name, content = Content}) ->
 	    return_error(Name, {String, Error});
         URI -> URI
     end.
-
-build_anyURI(Data) ->
-    case Data of
-	{http, Host,Port,Path,Query} ->
-	    "http://" ++ Host ++  ":" ++ %% Port ++
-		"/" ++ Path ++ "?" ++ Query; %FIXME: normalize URI / build_host_port ?HTTP_DEFAULT_PORT
-	{ftp, Creds,Host,Port,Path} -> 
-	    "ftp://" ++ element(1, Creds) ++ "@" ++ element(2, Creds) ++ Host ++ ":" ++ Port ++ "/" ++ Path;
-	_ ->
-	    return_error(Data, "Unknown schema")
-	end.
 
 parse_dateTime(#xmlElement{name=Name, content = Content} = _E) when is_tuple(_E)->
     String = string:strip(get_xmlText(Content)),
@@ -457,6 +448,72 @@ parse_Notification(E) ->
 
 parse_WindowMode(E) ->
     parse_withSuportedValues(E, ?SUPPORTED_TIME_WINDOW_MODE_VALUE_TYPE).
+
+
+%%%-----------------------------------------------------------------------------
+%% SOAP Type builder
+%%%-----------------------------------------------------------------------------
+
+
+format_string(Data) -> Data.
+format_boolean(Data) -> atom_to_list(Data).
+format_int(Data) ->
+    integer_to_list(Data).
+format_unsignedInt(Data) ->
+    integer_to_list(Data).
+format_dateTime(Data) ->
+    Data. %FIXME: match parse
+format_base64(Data) -> Data. %FIXME: match parse
+     
+
+-define(HTTP_DEFAULT_PORT, 80).
+-define(FTP_DEFAULT_PORT, 21).
+
+build_anyURI(Data) ->
+    case Data of
+	{http, Host,Port,Path,Query} ->
+	    "http://" ++ build_HosPort(Host, Port, ?HTTP_DEFAULT_PORT) ++	       
+		"/" ++ Path ++ "?" ++ Query;	%FIXME: normalize URI / build_host_port ?HTTP_DEFAULT_PORT
+	{ftp, Creds,Host,Port,Path} -> 
+	    "ftp://" ++	build_Credentials(Creds) ++ build_HosPort(Host, Port, ?FTP_DEFAULT_PORT) ++ "/" ++ Path;
+	_ ->
+	    return_error(Data, "Unknown schema")
+	end.
+
+build_HosPort(Host, Port, DefaultPort) ->
+    if
+	Port =:= DefaultPort ->
+	    Host;
+	true ->
+	    Host ++ ":" ++ integer_to_list(Port)
+    end.    
+
+build_Credentials(Creds) -> %% FIXME: none case
+    element(1, Creds) ++ "@" ++ element(2, Creds).
+
+build_AccessListChange(Data)		-> maybe_tag('AccessListChange', fun format_boolean/1, Data).
+build_CompleteTime(Data)		-> maybe_tag('CompleteTime', fun format_dateTime/1, Data).
+build_CurrentTime(Data)			-> maybe_tag('CurrentTime', fun format_dateTime/1, Data).
+build_DelaySeconds(Data)		-> maybe_tag('DelaySeconds', fun format_unsignedInt/1, Data).
+build_DeploymentUnitRef(Data)		-> maybe_tag('DeploymentUnitRef', fun format_string/1, Data).
+build_ExecutionUnitRefList(Data)	-> maybe_tag('ExecutionUnitRefList', fun format_string/1, Data).
+build_ExpirationDate(Data)		-> maybe_tag('ExpirationDate', fun format_dateTime/1, Data).
+build_FaultString(Data)			-> maybe_tag('FaultString', fun format_string/1, Data).
+build_FileSize(Data)			-> maybe_tag('FileSize', fun format_unsignedInt/1, Data).
+build_IsDownload(Data)			-> maybe_tag('IsDownload', fun format_boolean/1, Data).
+build_MaxEnvelopes(Data)		-> maybe_tag('MaxEnvelopes', fun format_unsignedInt/1, Data).
+build_MaxRetries(Data)			-> maybe_tag('MaxRetries', fun format_int/1, Data).
+build_NextLevel(Data)			-> maybe_tag('NextLevel', fun format_boolean/1, Data).
+build_NotificationChange(Data)		-> maybe_tag('NotificationChange', fun format_boolean/1, Data).
+build_ParameterName(Data)		-> maybe_tag('ParameterName', fun format_string/1, Data).
+build_Resolved(Data)			-> maybe_tag('Resolved', fun format_boolean/1, Data).
+build_RetryCount(Data)			-> maybe_tag('RetryCount', fun format_unsignedInt/1, Data).
+build_StartDate(Data)			-> maybe_tag('StartDate', fun format_dateTime/1, Data).
+build_StartTime(Data)			-> maybe_tag('StartTime', fun format_dateTime/1, Data).
+build_VoucherSN(Data)			-> maybe_tag('VoucherSN', fun format_unsignedInt/1, Data).
+build_WindowEnd(Data)			-> maybe_tag('WindowEnd', fun format_unsignedInt/1, Data).
+build_WindowStart(Data)			-> maybe_tag('WindowStart', fun format_unsignedInt/1, Data).
+build_Writable(Data)			-> maybe_tag('Writable', fun format_boolean/1, Data).
 
 
 %% end

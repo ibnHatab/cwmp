@@ -10,6 +10,5 @@ xql:
 	| sed -e 's/_xs:/_/' -e 's/_tns:/_/' -e 's/_soapenc:/_/'\
 	| tee $@
 
-
-.PHONY: xslt
-xslt: cwmp-1-2.xsd tr_soap_parser.erl tr_soap_types.erl tr_soap_builder.erl
+xslt: tr_soap_parser.erl tr_soap_types.erl tr_soap_builder.erl
+	false

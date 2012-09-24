@@ -18,7 +18,9 @@
 	 get_QName/2, get_local_name/1,
 	 local_name/1, local_ns/2,
 	 xmlText/1,
-	 xmlElement/1
+	 xmlElement/1,
+
+	 maybe_tag/3, maybe_tag/4
 	]).
 
 
@@ -189,6 +191,20 @@ match_cwmp_ns_and_version(#xmlNamespace{default = _Default, nodes = Nodes}) ->
 				set_local_ns(Key, Nss, list_to_atom(LocalNs))
 			end
 		end, #rpc_ns{}, NsMap).
+
+
+%%%-----------------------------------------------------------------------------
+%%% Builder utils
+%%%-----------------------------------------------------------------------------
+maybe_tag(Tag, Format, Data) when Data /= undefined ->
+    {Tag, [], [Format(Data)]};
+maybe_tag(_Tag, _Format, _Data) ->
+    null.
+
+maybe_tag(Tag, Format, Data, State) when Data /= undefined ->
+    {Tag, [], [Format(Data, State)]};
+maybe_tag(_Tag, _Format, _Data, _State) ->
+    null.
 
 
 %%%-----------------------------------------------------------------------------

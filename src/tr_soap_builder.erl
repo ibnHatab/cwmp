@@ -14,9 +14,10 @@
 -export([builder/1, build/1]).
 
 -import(tr_soap_lib, [ build_error/2,
-		       get_QName/2
+		       maybe_tag/3, maybe_tag/4
 		     ]).
--import(tr_soap_types, [ build_anyURI/1
+
+-import(tr_soap_types, [
 		       ]).
 
 
@@ -101,18 +102,29 @@ build_Body(Body, State) ->
 
 
 -spec build_SoapFault(#soap_fault{}, #builder{}) -> export_element().
-build_SoapFault(Data, _State) ->
+build_SoapFault(Data, State) ->
     {'soap-env:Fault', [],
      [P || P <- [
-		 {'faultcode', [], [Data#soap_fault.faultcode]},
-		 {'faultstring', [], [Data#soap_fault.faultstring]},
-		 {'faultactor', [], [build_anyURI(Data#soap_fault.faultactor)]}
-		 %% build_SetParameterValuesFault(Data#fault.set_parameter_values_fault, State),
-     %% build_ParameterName(Data#fault.parameter_name, State),
-     %% build_FaultCode(Data#fault.fault_code, State),
-     %% build_FaultString(Data#fault.fault_string, State),
+		 maybe_tag('faultcode', fun tr_soap_types:format_string/1, Data#soap_fault.faultcode),
+		 maybe_tag('faultstring', fun tr_soap_types:format_string/1, Data#soap_fault.faultstring),
+		 maybe_tag('faultactor', fun tr_soap_types:build_anyURI/1, Data#soap_fault.faultactor),
+		 maybe_tag('detail', fun build_Fault/2, Data#soap_fault.detail, State)
      ], P /= null]}.
 
+
+-spec build_Fault(#fault{}, #builder{}) -> export_element().
+build_Fault(Data, State) when Data =:= undefined ->
+    null;
+build_Fault(Data, State)  ->
+    {'cwmp:Fault', [],
+     [P || P <- [null
+		% build_FaultCode(Data#fault.fault_code, State),
+		%% build_FaultString(Data#fault.fault_string, State),
+		%% build_SetParameterValuesFault(Data#fault.set_parameter_values_fault, State),
+		%% build_ParameterName(Data#fault.parameter_name, State),
+		%% build_FaultCode(Data#fault.fault_code, State),
+		%% build_FaultString(Data#fault.fault_string, State),
+	       ], P /= null]}.
 
 -spec build_GetRpcMethodsResponse(#get_rpc_methods_response{}, #builder{}) -> export_element().
 build_GetRpcMethodsResponse(Data, State) ->
@@ -161,6 +173,7 @@ build_GetRpcMethodsResponse(Data, State) ->
 
 -define(TAG_DATA,
 	[{'Tag', [{attr, "Attributes"}], []}]).
+
 
 
 main() ->

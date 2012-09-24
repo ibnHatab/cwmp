@@ -35,12 +35,24 @@
 %%%-----------------------------------------------------------------------------
 
 
-    <xsl:apply-templates/> 
 
+<!--
+--> 
+%% Complex Type Mapping -- maybe tag
+
+<xsl:for-each select=".//*[name()='xs:element'][@name and @type and not(@type='xs:boolean' or @type='xs:unsignedInt' or @type='xs:int' or @type='xs:string' or @type='xs:dateTime')]">
+parse_<xsl:value-of select="@name"/>(E,_S) -> parse_<xsl:value-of select="@type"/>(E,_S). </xsl:for-each>
+
+    <!-- 
+    -->
+
+    <xsl:apply-templates/> 
 %% end
   </xsl:template>
   
   <xsl:template match="text()"/>
+
+
 
 
   <!-- 
@@ -49,11 +61,11 @@
   -->
 <xsl:template match="*[name()='xs:schema']/*[name()='xs:element' and .//*[name()='xs:sequence']]">
 <xsl:variable name="container" select="@name"/>
--spec build_<xsl:value-of select="$container"/>(#camel_<xsl:value-of select="$container"/>{}, #builder{}) -> export_element().
+-spec build_<xsl:value-of select="$container"/>(#%camel%<xsl:value-of select="$container"/>{}, #builder{}) -> export_element().
 build_<xsl:value-of select="$container"/>(Data, State) ->   
     {'cwmp:<xsl:value-of select="$container"/>', [],
      [P || P - [
-    <xsl:for-each select=".//*[name()='xs:sequence']/*[name()='xs:element']"> build_<xsl:value-of select="@name"/>(Data#camel_<xsl:value-of select="$container"/>.camel_<xsl:value-of select="@name"/>, State),
+    <xsl:for-each select=".//*[name()='xs:sequence']/*[name()='xs:element']"> build_<xsl:value-of select="@name"/>(Data#%camel%<xsl:value-of select="$container"/>.%camel%<xsl:value-of select="@name"/>, State),
     </xsl:for-each> ], P /= null]}.
     <!-- 
     -->
@@ -65,12 +77,12 @@ build_<xsl:value-of select="$container"/>(Data, State) ->
     Build RPC Methods
     Simple element
 -->
+  <!--
   <xsl:template match="*[name()='xs:schema']/*[name()='xs:element' and not(.//*[name()='xs:sequence'])]">
 <xsl:variable name="container" select="@name"/>%% -spec build_<xsl:value-of select="@name"/>(#camel_<xsl:value-of select="@name"/>{}) ->  #xmlElement{}.
     <xsl:apply-templates/>
   </xsl:template>
 
-  <!--
       RPC Methods Arguments
       Complex Type Definitions
   -->

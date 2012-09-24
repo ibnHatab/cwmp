@@ -38,7 +38,6 @@ parse_URL(E,_S) -> parse_anyURI(E).
   <xsl:template match="text()"/>
 
 <!--
--->
   <xsl:template match="*[name()='xs:schema']/*[name()='xs:simpleType']/*[name()='xs:restriction']">
 parse_<xsl:value-of select="../@name"/>(E,_S) -> parse_<xsl:value-of select="@base"/>(E).<xsl:apply-templates/>
   </xsl:template>
@@ -51,6 +50,10 @@ parse_<xsl:value-of select="../@name"/>(E,_S) -> parse_<xsl:value-of select="*[n
 parse_<xsl:value-of select="@name"/>(E,_S) -> parse_<xsl:value-of select="@type"/>(E).<xsl:apply-templates/>
   </xsl:template>
 
+-->
+
+<xsl:template match="*[name()='xs:element'][@name and (@type='xs:boolean' or @type='xs:unsignedInt' or @type='xs:int' or @type='xs:string' or @type='xs:dateTime')]">build_<xsl:value-of select="@name"/>(Data) -> maybe_tag('<xsl:value-of select="@name"/>', fun format_<xsl:value-of select="@type"/>/1, Data).
+</xsl:template>
 
 
 </xsl:stylesheet>
