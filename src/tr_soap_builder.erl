@@ -13,7 +13,13 @@
 
 -export([builder/1, build/1]).
 
--import(tr_soap_lib, [build_error/2, get_QName/2]).
+-import(tr_soap_lib, [ build_error/2,
+		       get_QName/2
+		     ]).
+-import(tr_soap_types, [ build_anyURI/1
+		       ]).
+
+
 
 %%%-----------------------------------------------------------------------------
 %%%        SOAP Encoder
@@ -95,12 +101,13 @@ build_Body(Body, State) ->
 
 
 -spec build_SoapFault(#soap_fault{}, #builder{}) -> export_element().
-build_SoapFault(Data, State) ->   
+build_SoapFault(Data, _State) ->
     {'soap-env:Fault', [],
      [P || P <- [
-		 {'faultcode', [], [Data#soap_fault.faultcode]}
-     %% build_FaultString(Data#fault.fault_string, State),
-     %% build_SetParameterValuesFault(Data#fault.set_parameter_values_fault, State),
+		 {'faultcode', [], [Data#soap_fault.faultcode]},
+		 {'faultstring', [], [Data#soap_fault.faultstring]},
+		 {'faultactor', [], [build_anyURI(Data#soap_fault.faultactor)]}
+		 %% build_SetParameterValuesFault(Data#fault.set_parameter_values_fault, State),
      %% build_ParameterName(Data#fault.parameter_name, State),
      %% build_FaultCode(Data#fault.fault_code, State),
      %% build_FaultString(Data#fault.fault_string, State),
@@ -108,7 +115,7 @@ build_SoapFault(Data, State) ->
 
 
 -spec build_GetRpcMethodsResponse(#get_rpc_methods_response{}, #builder{}) -> export_element().
-build_GetRpcMethodsResponse(Data, State) ->   
+build_GetRpcMethodsResponse(Data, State) ->
     {'cwmp:GetRpcMethodsResponse', [], []
      %% [P || P <- [
      %% 		 build_MethodList (Data#get_rpc_methods_response.method_list, State)
@@ -177,7 +184,7 @@ build_rpc_data_test_no() ->
     XML = build_rpc_data(?RPC_DATA, Builder),
 %    ?DBG(XML),
     ok.
- 
+
 export_test_no() ->
     Data =
 	{'cwmp:bike',

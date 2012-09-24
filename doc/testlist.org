@@ -49,7 +49,7 @@
 
 
     
-** SOAP encoding [14/15]
+** SOAP decoding [14/15]
    - [X] Parse SOAP boolean types
    - [X] Parse SOAP dateTime types 
    - [X] Parse SOAP int types
@@ -71,6 +71,13 @@
 
    - [X] parse_WindowMode 
    FEX: http://www.broadband-forum.org/technical/download/TR-069_Amendment-3.pdf
+
+** SOAP encoding [0/1]
+   - [ ] build anyURI 
+   %%%  ftp_URL = "ftp:" "//" [ ftp_userinfo "@"] host [ ":" port ] ftp_abs_path
+   %%%  http_URL = "http:" "//" host [ ":" port ] [ abs_path [ "?" query ]]
+   %%%  http_URL = "https:" "//" host [ ":" port ] [ abs_path [ "?" query ]]
+   
 
 ** ACS location update [1/1]
    - [X] Parse URI / xmerl_tests:parse_URI_test

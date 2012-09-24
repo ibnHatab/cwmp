@@ -84,6 +84,10 @@
 	  parse_anySimpleType/1
 	]).
 
+-export([ build_anyURI/1
+	]).
+
+
 -import(tr_soap_lib, [return_error/2, parse_error/2, parse_error/3,
 		      get_QName/2, local_ns/2, normalize_to_local_ns/2
 		     ]).
@@ -208,6 +212,17 @@ parse_anyURI(#xmlElement{name=Name, content = Content}) ->
         URI -> URI
     end.
 
+build_anyURI(Data) ->
+    case Data of
+	{http, Host,Port,Path,Query} ->
+	    "http://" ++ Host ++  ":" ++ %% Port ++
+		"/" ++ Path ++ "?" ++ Query; %FIXME: normalize URI / build_host_port ?HTTP_DEFAULT_PORT
+	{ftp, Creds,Host,Port,Path} -> 
+	    "ftp://" ++ element(1, Creds) ++ "@" ++ element(2, Creds) ++ Host ++ ":" ++ Port ++ "/" ++ Path;
+	_ ->
+	    return_error(Data, "Unknown schema")
+	end.
+
 parse_dateTime(#xmlElement{name=Name, content = Content} = _E) when is_tuple(_E)->
     String = string:strip(get_xmlText(Content)),
     ValueString = check_Value(Name, String, dateTime),
@@ -215,7 +230,7 @@ parse_dateTime(#xmlElement{name=Name, content = Content} = _E) when is_tuple(_E)
 parse_dateTime(String) when is_list(String) ->
     convert_iso8601_date(String).
  
-parse_base64(_E) ->
+parse_base64(_E) -> %% FIXME: implement
     <<"aa">>.
 
 -spec parse_attribete(#xmlElement{}, atom(), atom()) -> any() | undefined.
@@ -454,8 +469,8 @@ parse_WindowMode(E) ->
 
 -include_lib("eunit/include/eunit.hrl").
 
-make_Element(Name, Text) when is_list(Name) ->
-    QName = get_QName(Name, "cwmp"),
+make_Element(Name, Text) when is_atom(Name) ->
+    QName = get_QName(Name, 'cwmp'),
  %   ?DBG(QName),
     {xmlElement, QName, QName,
      {"cwmp", Name},
@@ -473,24 +488,20 @@ make_Element(Name, Text) when is_list(Name) ->
 
 
 parse_boolean_test() ->
-    E = make_Element("NoMoreRequests", "0"),
+    E = make_Element('NoMoreRequests', "0"),
     ?assertEqual(false, parse_boolean(E)),
     ok.
 
 parse_int_test() ->
-    E = make_Element("NoMoreRequests", "42"),
+    E = make_Element('NoMoreRequests', "42"),
     ?assertEqual(42, parse_int(E)),
     ok.
 
-parse_anyURI_test() ->
-    E = make_Element("URL", "http://cpe-host-name/kick.html?command=cmd&arg=1&next=home"),
-    ?assertEqual({http,"cpe-host-name",80,"/kick.html","?command=cmd&arg=1&next=home"},
-		 parse_anyURI(E)).
 
 parse_iso8601_test() ->
     [
      begin
-	 ?DBG({DT, Str, convert_iso8601_date(Str)}),
+%	 ?DBG({DT, Str, convert_iso8601_date(Str)}),
 	 DT = convert_iso8601_date(Str)
 	     
      end
@@ -507,6 +518,30 @@ parse_iso8601_test() ->
 				 "2000-01-12T00:00:00Z",
 				 "2009-06-25T05:32:31+01:00"
 			       ])
+    ].
+
+
+parse_anyURI_test() ->
+    E = make_Element('URL', "http://cpe-host-name/kick.html?command=cmd&arg=1&next=home"),
+    ?assertEqual({http,"cpe-host-name",80,"/kick.html","?command=cmd&arg=1&next=home"},
+		 parse_anyURI(E)).
+
+-define(TEST_URI_BUILDER,
+	[
+	 "http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home",
+	 "ftp://user:pass@cpe-host-name.com:21/kick.pcap"
+	]
+       ).
+
+
+build_anyURI_test() ->
+    [
+     begin
+	 Data = parse_anyURI(make_Element('URL', URI)),
+	 ?DBG({URI, Data}),
+	 NewURI = build_anyURI(Data),
+	 ?assertEqual(URI, NewURI)
+     end ||  URI <- ?TEST_URI_BUILDER
     ].
 
 
