@@ -515,6 +515,38 @@ build_WindowEnd(Data)			-> maybe_tag('WindowEnd', fun format_unsignedInt/1, Data
 build_WindowStart(Data)			-> maybe_tag('WindowStart', fun format_unsignedInt/1, Data).
 build_Writable(Data)			-> maybe_tag('Writable', fun format_boolean/1, Data).
 
+%
+build_AnnounceURL(Data)			-> maybe_tag('AnnounceURL', fun format_string/1, Data).
+build_Arg(Data)				-> maybe_tag('Arg', fun format_string/1, Data).
+build_Command(Data)			-> maybe_tag('Command', fun format_string/1, Data).
+build_ExecutionEnvRef(Data)		-> maybe_tag('ExecutionEnvRef', fun format_string/1, Data).
+build_FailureURL(Data)			-> maybe_tag('FailureURL', fun format_string/1, Data).
+build_FaultString(Data)			-> maybe_tag('FaultString', fun format_string/1, Data).
+build_InstanceNumber(Data)		-> maybe_tag('InstanceNumber', fun format_unsignedInt/1, Data).
+build_IsTransferable(Data)		-> maybe_tag('IsTransferable', fun format_int/1, Data).
+build_Manufacturer(Data)		-> maybe_tag('Manufacturer', fun format_string/1, Data).
+build_Mode(Data)			-> maybe_tag('Mode', fun format_int/1, Data).
+build_Name(Data)			-> maybe_tag('Name', fun format_string/1, Data).
+build_Next(Data)			-> maybe_tag('Next', fun format_string/1, Data).
+build_NextURL(Data)			-> maybe_tag('NextURL', fun format_string/1, Data).
+build_OptionName(Data)			-> maybe_tag('OptionName', fun format_string/1, Data).
+build_OUI(Data)				-> maybe_tag('OUI', fun format_string/1, Data).
+build_ParameterPath(Data)		-> maybe_tag('ParameterPath', fun format_string/1, Data).
+build_Password(Data)			-> maybe_tag('Password', fun format_string/1, Data).
+build_ProductClass(Data)		-> maybe_tag('ProductClass', fun format_string/1, Data).
+build_Referer(Data)			-> maybe_tag('Referer', fun format_string/1, Data).
+build_SerialNumber(Data)		-> maybe_tag('SerialNumber', fun format_string/1, Data).
+build_State(Data)			-> maybe_tag('State', fun format_unsignedInt/1, Data).
+build_Status(Data)			-> maybe_tag('Status', fun format_int/1, Data).
+build_string(Data)			-> maybe_tag('string', fun format_string/1, Data).
+build_SuccessURL(Data)			-> maybe_tag('SuccessURL', fun format_string/1, Data).
+build_TargetFileName(Data)		-> maybe_tag('TargetFileName', fun format_string/1, Data).
+build_TransferURL(Data)			-> maybe_tag('TransferURL', fun format_string/1, Data).
+build_URL(Data)				-> maybe_tag('URL', fun format_string/1, Data).
+build_UserMessage(Data)			-> maybe_tag('UserMessage', fun format_string/1, Data).
+build_Username(Data)			-> maybe_tag('Username', fun format_string/1, Data).
+build_Value(Data)			-> maybe_tag('Value', fun format_string/1, Data).
+build_Version(Data)			-> maybe_tag('Version', fun format_string/1, Data).
 
 %% end
 
