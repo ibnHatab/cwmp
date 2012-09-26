@@ -124,6 +124,7 @@ groups() ->
 				     ,parse_FaultCode_tc
 				     ,parse_Notification_tc
 				     ,parse_WindowMode_tc
+				     ,build_anyURI_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -153,6 +154,7 @@ all() ->
      ,parse_FaultCode_tc
      ,parse_Notification_tc
      ,parse_WindowMode_tc
+     ,build_anyURI_tc
     ].
 %% 	,
     %% [{group, soap_parse_types},
@@ -204,6 +206,9 @@ parse_Notification_tc() ->
     [].
 
 parse_WindowMode_tc() ->
+    [].
+
+build_anyURI_tc() ->
     [].
 
 %%--------------------------------------------------------------------
@@ -302,7 +307,7 @@ parse_int_tc(_Config) ->
     [
      begin
 	 parse_int_check(Expect, String)
-	 %% ct:print("--> ~p ~p ~n",[Expect, parse_int_check(Expect, String)])
+
      end
       ||
 	{Expect, String} <- [
@@ -584,6 +589,43 @@ parse_WindowMode_check(Expect, String) ->
 
 
 
+
+%%-------------------------------------------
+%%% Build AnyURI Test
+%%-------------------------------------------
+
+build_anyURI_tc(_Config)->
+    [
+     begin
+	 build_anyURI_check(Expect, String) 
+     end
+     ||
+	{Expect, String} <-lists:zip([ "http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
+				       ,"http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
+				       ,"http://cpe-host-name.com:41/kick.html?command=cmd&arg=1&next=home"
+				       ,"ftp://user:pass@cpe-host-name.com/kick.pcap"
+				       ,"ftp://user:pass@cpe-host-name.com/kick.pcap"
+				       ,"ftp://user:pass@cpe-host-name.com:35/kick.pcap"
+				     ],
+				     [ "http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
+				       ,"http://cpe-host-name.com:80/kick.html?command=cmd&arg=1&next=home"
+				       ,"http://cpe-host-name.com:41/kick.html?command=cmd&arg=1&next=home"
+				       ,"ftp://user:pass@cpe-host-name.com/kick.pcap"
+				       ,"ftp://user:pass@cpe-host-name.com:21/kick.pcap"
+				       ,"ftp://user:pass@cpe-host-name.com:35/kick.pcap"
+				     ])
+    ],
+    ok. 
+
+build_anyURI_check(Expect, String) ->
+    %setup
+    E = make_Element('URL' , String),
+    Data = tr_soap_types:parse_anyURI(E),
+    %execute
+    Res = tr_soap_types:build_anyURI(Data),
+    %assert
+    Expect = Res.
+    
 
 %%--------------------------------------------------------------------
 %%% Local API
