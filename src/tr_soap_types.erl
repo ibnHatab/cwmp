@@ -473,9 +473,9 @@ build_anyURI(Data) ->
     case Data of
 	{http, Host,Port,Path,Query} ->
 	    "http://" ++ build_HosPort(Host, Port, ?HTTP_DEFAULT_PORT) ++	       
-		"/" ++ Path ++ "?" ++ Query;	%FIXME: normalize URI / build_host_port ?HTTP_DEFAULT_PORT
+		Path ++ Query;	%FIXME: normalize URI / build_host_port ?HTTP_DEFAULT_PORT
 	{ftp, Creds,Host,Port,Path} -> 
-	    "ftp://" ++	build_Credentials(Creds) ++ build_HosPort(Host, Port, ?FTP_DEFAULT_PORT) ++ "/" ++ Path;
+	    "ftp://" ++	build_Credentials(Creds)  ++ build_HosPort(Host, Port, ?FTP_DEFAULT_PORT)  ++ Path;
 	_ ->
 	    return_error(Data, "Unknown schema")
 	end.
@@ -485,11 +485,11 @@ build_HosPort(Host, Port, DefaultPort) ->
 	Port =:= DefaultPort ->
 	    Host;
 	true ->
-	    Host ++ ":" ++ integer_to_list(Port)
+	    Host ++ ":" ++ integer_to_list(Port) 
     end.    
 
 build_Credentials(Creds) -> %% FIXME: none case
-    element(1, Creds) ++ "@" ++ element(2, Creds).
+    element(1, Creds) ++ ":" ++ element(2, Creds) ++ "@" .
 
 build_AccessListChange(Data)		-> maybe_tag('AccessListChange', fun format_boolean/1, Data).
 build_CompleteTime(Data)		-> maybe_tag('CompleteTime', fun format_dateTime/1, Data).
@@ -618,7 +618,7 @@ parse_anyURI_test() ->
 -define(TEST_URI_BUILDER,
 	[
 	 "http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home",
-	 "ftp://user:pass@cpe-host-name.com:21/kick.pcap"
+	 "ftp://user:pass@cpe-host-name.com/kick.pcap"
 	]
        ).
 
@@ -629,6 +629,7 @@ build_anyURI_test() ->
 	 Data = parse_anyURI(make_Element('URL', URI)),
 	 ?DBG({URI, Data}),
 	 NewURI = build_anyURI(Data),
+	 ?DBG({URI, NewURI}),
 	 ?assertEqual(URI, NewURI)
      end ||  URI <- ?TEST_URI_BUILDER
     ].
