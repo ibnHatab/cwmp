@@ -512,7 +512,7 @@ build_DefaultDeploymentUnitOperationType(Data)		-> maybe_tag('DefaultDeploymentU
 
 
 %% Missed types
-build_FaultCode(Data)			-> maybe_tag('FaultCode', fun format_string/1, Data).
+build_FaultCode(Data)			-> maybe_tag('FaultCode', fun format_int/1, Data).
 build_base64(Data) ->    Data.
 
 %% end

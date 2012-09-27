@@ -213,6 +213,7 @@ build_Fault(Data, State) ->
 		], P /= null]}.
 
 -spec build_SetParameterValuesFault(#set_parameter_values_fault{}, #builder{}) -> export_element().
+build_SetParameterValuesFault(Data, _State) when Data =:= undefined -> null;
 build_SetParameterValuesFault(Data, _State) ->
     {'SetParameterValuesFault', [],
      [P || P <- [
@@ -843,7 +844,7 @@ main() ->
     ?DBG(Nss),
     Builder = builder([{namespaces, Nss}]),
     Export = Builder(?RPC_FAULT),
-						%    ?DBG(Export),
+    ?DBG(Export),
     XML = xmerl:export_simple(Export, xmerl_xml, [{prolog,[]}]),
 						%    ?DBG(unicode:characters_to_list(XML)),
     ?DBG(XML),

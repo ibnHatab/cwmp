@@ -5,7 +5,7 @@ REBAR='./rebar'
 
 .PHONY: deps clean test
 
-dir-local: dialyzer
+dir-local: compile
 
 all: compile
 
@@ -48,7 +48,7 @@ dialyzer-build:
 	    mnesia eunit et compiler			\
 	    ./deps/*/ebin
 
-dialyzer: all
+dialyzer: compile
 	dialyzer --plt .dialyzer-R15B.plt \
 	  -Wunmatched_returns 	\
 	  -Werror_handling 	\
