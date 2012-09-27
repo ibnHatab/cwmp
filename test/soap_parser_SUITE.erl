@@ -603,16 +603,32 @@ build_anyURI_tc(_Config)->
 	{Expect, String} <-lists:zip([ "http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
 				       ,"http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
 				       ,"http://cpe-host-name.com:41/kick.html?command=cmd&arg=1&next=home"
+				       ,"http://cpe-host-name.com:41/kick.html"
+				       ,"http://cpe-host-name.com:41/"
+				       ,"http://cpe-host-name.com/"
+				       
 				       ,"ftp://user:pass@cpe-host-name.com/kick.pcap"
 				       ,"ftp://user:pass@cpe-host-name.com/kick.pcap"
 				       ,"ftp://user:pass@cpe-host-name.com:35/kick.pcap"
+				       ,"ftp://cpe-host-name.com:35/kick.pcap"
+				       ,"ftp://cpe-host-name.com/kick.pcap"
+				       ,"ftp://cpe-host-name.com/kick.pcap"
+				       
 				     ],
 				     [ "http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
 				       ,"http://cpe-host-name.com:80/kick.html?command=cmd&arg=1&next=home"
 				       ,"http://cpe-host-name.com:41/kick.html?command=cmd&arg=1&next=home"
+				       ,"http://cpe-host-name.com:41/kick.html"
+				       ,"http://cpe-host-name.com:41"
+				       ,"http://cpe-host-name.com"
+				       
 				       ,"ftp://user:pass@cpe-host-name.com/kick.pcap"
 				       ,"ftp://user:pass@cpe-host-name.com:21/kick.pcap"
 				       ,"ftp://user:pass@cpe-host-name.com:35/kick.pcap"
+				       ,"ftp://cpe-host-name.com:35/kick.pcap"
+				       ,"ftp://cpe-host-name.com/kick.pcap"
+				       ,"ftp://cpe-host-name.com:21/kick.pcap"
+
 				     ])
     ],
     ok. 
@@ -621,6 +637,7 @@ build_anyURI_check(Expect, String) ->
     %setup
     E = make_Element('URL' , String),
     Data = tr_soap_types:parse_anyURI(E),
+    ct:print(">>>~p ~n",[Data]),
     %execute
     Res = tr_soap_types:build_anyURI(Data),
     %assert

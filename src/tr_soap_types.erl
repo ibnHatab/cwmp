@@ -521,7 +521,6 @@ build_Arg(Data)				-> maybe_tag('Arg', fun format_string/1, Data).
 build_Command(Data)			-> maybe_tag('Command', fun format_string/1, Data).
 build_ExecutionEnvRef(Data)		-> maybe_tag('ExecutionEnvRef', fun format_string/1, Data).
 build_FailureURL(Data)			-> maybe_tag('FailureURL', fun format_string/1, Data).
-build_FaultString(Data)			-> maybe_tag('FaultString', fun format_string/1, Data).
 build_InstanceNumber(Data)		-> maybe_tag('InstanceNumber', fun format_unsignedInt/1, Data).
 build_IsTransferable(Data)		-> maybe_tag('IsTransferable', fun format_int/1, Data).
 build_Manufacturer(Data)		-> maybe_tag('Manufacturer', fun format_string/1, Data).
