@@ -52,8 +52,30 @@ parse_<xsl:value-of select="@name"/>(E,_S) -> parse_<xsl:value-of select="@type"
 
 -->
 
+<!--
+    EX:      <xs:element name="AccessListChange" type="xs:boolean"/>
 <xsl:template match="*[name()='xs:element'][@name and (@type='xs:boolean' or @type='xs:unsignedInt' or @type='xs:int' or @type='xs:string' or @type='xs:dateTime')]">build_<xsl:value-of select="@name"/>(Data) -> maybe_tag('<xsl:value-of select="@name"/>', fun format_<xsl:value-of select="@type"/>/1, Data).
 </xsl:template>
+-->
+
+<!--
+    EX:  
+          <xs:element name="string" maxOccurs="unbounded">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                 <xs:maxLength value="64"/>
+<xsl:template match="*[name()='xs:element' and ./*[name()='xs:simpleType']/*[name()='xs:restriction' and (@base='xs:boolean' or @base='xs:unsignedInt' or @base='xs:int' or @base='xs:string' or @base='xs:dateTime')]]">
+build_<xsl:value-of select="@name"/>(Data) -> maybe_tag('<xsl:value-of select="@name"/>', fun format_<xsl:value-of select=".//*[name()='xs:restriction']/@base"/>/1, Data).</xsl:template>
+-->
+
+<!--
+    EX:  
+  <xs:simpleType name="ParameterKeyType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="32"/>
+-->
+<xsl:template match="*[name(..)='xs:schema' and name()='xs:simpleType' and ./*[name()='xs:restriction' and (@base='xs:boolean' or @base='xs:unsignedInt' or @base='xs:int' or @base='xs:string' or @base='xs:dateTime')]]">
+build_<xsl:value-of select="@name"/>(Data) -> maybe_tag('<xsl:value-of select="@name"/>', fun format_<xsl:value-of select=".//*[name()='xs:restriction']/@base"/>/1, Data).</xsl:template>
 
 
 </xsl:stylesheet>

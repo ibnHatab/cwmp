@@ -10,70 +10,6 @@
 -include("tr69.hrl").
 -include("proto.hrl").
 
--export([ parse_AccessListChange/1,
-	  parse_AnnounceURL/1,
-	  parse_Arg/1,
-	  parse_Command/1,
-	  parse_CommandKeyType/1,
-	  parse_CompleteTime/1,
-	  parse_CurrentTime/1,
-	  parse_DelaySeconds/1,
-	  parse_DeploymentUnitOperationType/1,
-	  parse_DeploymentUnitRef/1,
-	  parse_DeploymentUnitState/1,
-	  parse_EventCodeType/2,
-	  parse_ExecutionEnvRef/1,
-	  parse_ExecutionUnitRefList/1,
-	  parse_ExpirationDate/1,
-	  parse_FailureURL/1,
-	  parse_FaultCode/1,
-	  parse_FaultString/1,
-	  parse_FileSize/1,
-	  parse_FileType/2,
-	  parse_InstanceNumber/1,
-	  parse_IsDownload/1,
-	  parse_IsTransferable/1,
-	  parse_Manufacturer/1,
-	  parse_MaxEnvelopes/1,
-	  parse_MaxRetries/1,
-	  parse_Mode/1,
-	  parse_Name/1,
-	  parse_Next/1,
-	  parse_NextLevel/1,
-	  parse_NextURL/1,
-	  parse_Notification/1,
-	  parse_NotificationChange/1,
-	  parse_ObjectNameType/1,
-	  parse_OptionName/1,
-	  parse_OUI/1,
-	  parse_ParameterKeyType/1,
-	  parse_ParameterPath/1,
-	  parse_Password/1,
-	  parse_ProductClass/1,
-	  parse_Referer/1,
-	  parse_Resolved/1,
-	  parse_RetryCount/1,
-	  parse_SerialNumber/1,
-	  parse_StartDate/1,
-	  parse_StartTime/1,
-	  parse_State/1,
-	  parse_Status/1,
-	  parse_SuccessURL/1,
-	  parse_TargetFileName/1,
-	  parse_TransferURL/1,
-	  parse_URL/1,
-	  parse_UserMessage/1,
-	  parse_Username/1,
-	  parse_UUID/1,
-	  parse_Value/1,
-	  parse_Version/1,
-	  parse_VoucherSN/1,
-	  parse_WindowEnd/1,
-	  parse_WindowMode/1,
-	  parse_WindowStart/1,
-	  parse_Writable/1
-	]).
-
 -export([ parse_string/1,
 	  parse_boolean/1,
 	  parse_int/1,
@@ -90,7 +26,9 @@
 
 -import(tr_soap_lib, [return_error/2, parse_error/2, parse_error/3,
 		      get_QName/2, local_ns/2, normalize_to_local_ns/2,
-		      maybe_tag/3, maybe_tag/4
+		      maybe_tag/3
+		      
+						%, maybe_tag/4
 		     ]).
 
 
@@ -488,8 +426,13 @@ build_HosPort(Host, Port, DefaultPort) ->
 	    Host ++ ":" ++ integer_to_list(Port) 
     end.    
 
-build_Credentials(Creds) -> %% FIXME: none case
-    element(1, Creds) ++ ":" ++ element(2, Creds) ++ "@" .
+build_Credentials(Creds) ->
+    case Creds of
+	{[],[]} -> "";
+	{User,[]} -> User ++ "@";
+	{User,Password} -> User ++ ":" ++ Password ++ "@"	
+    end.
+				 
 
 build_AccessListChange(Data)		-> maybe_tag('AccessListChange', fun format_boolean/1, Data).
 build_CompleteTime(Data)		-> maybe_tag('CompleteTime', fun format_dateTime/1, Data).
@@ -521,7 +464,6 @@ build_Arg(Data)				-> maybe_tag('Arg', fun format_string/1, Data).
 build_Command(Data)			-> maybe_tag('Command', fun format_string/1, Data).
 build_ExecutionEnvRef(Data)		-> maybe_tag('ExecutionEnvRef', fun format_string/1, Data).
 build_FailureURL(Data)			-> maybe_tag('FailureURL', fun format_string/1, Data).
-build_FaultString(Data)			-> maybe_tag('FaultString', fun format_string/1, Data).
 build_InstanceNumber(Data)		-> maybe_tag('InstanceNumber', fun format_unsignedInt/1, Data).
 build_IsTransferable(Data)		-> maybe_tag('IsTransferable', fun format_int/1, Data).
 build_Manufacturer(Data)		-> maybe_tag('Manufacturer', fun format_string/1, Data).
@@ -547,6 +489,31 @@ build_UserMessage(Data)			-> maybe_tag('UserMessage', fun format_string/1, Data)
 build_Username(Data)			-> maybe_tag('Username', fun format_string/1, Data).
 build_Value(Data)			-> maybe_tag('Value', fun format_string/1, Data).
 build_Version(Data)			-> maybe_tag('Version', fun format_string/1, Data).
+
+build_CPEFaultCodeType(Data)				-> maybe_tag('CPEFaultCodeType', fun format_unsignedInt/1, Data).
+build_CPEExtensionFaultCodeType(Data)			-> maybe_tag('CPEExtensionFaultCodeType', fun format_unsignedInt/1, Data).
+build_CPEVendorFaultCodeType(Data)			-> maybe_tag('CPEVendorFaultCodeType', fun format_unsignedInt/1, Data).
+build_ACSFaultCodeType(Data)				-> maybe_tag('ACSFaultCodeType', fun format_unsignedInt/1, Data).
+build_ACSVendorFaultCodeType(Data)			-> maybe_tag('ACSVendorFaultCodeType', fun format_unsignedInt/1, Data).
+build_TransferFileType(Data)				-> maybe_tag('TransferFileType', fun format_string/1, Data).
+build_DownloadFileType(Data)				-> maybe_tag('DownloadFileType', fun format_string/1, Data).
+build_UploadFileType(Data)				-> maybe_tag('UploadFileType', fun format_string/1, Data).
+build_EventCodeType(Data)				-> maybe_tag('EventCodeType', fun format_string/1, Data).
+build_TimeWindowModeValueType(Data)			-> maybe_tag('TimeWindowModeValueType', fun format_string/1, Data).
+build_CommandKeyType(Data)				-> maybe_tag('CommandKeyType', fun format_string/1, Data).
+build_ObjectNameType(Data)				-> maybe_tag('ObjectNameType', fun format_string/1, Data).
+build_ParameterKeyType(Data)				-> maybe_tag('ParameterKeyType', fun format_string/1, Data).
+build_AccessListValueType(Data)				-> maybe_tag('AccessListValueType', fun format_string/1, Data).
+build_ParameterAttributeNotificationValueType(Data)	-> maybe_tag('ParameterAttributeNotificationValueType', fun format_int/1, Data).
+build_TransferStateType(Data)				-> maybe_tag('TransferStateType', fun format_int/1, Data).
+build_DeploymentUnitUUID(Data)				-> maybe_tag('DeploymentUnitUUID', fun format_string/1, Data).
+build_DeploymentUnitState(Data)				-> maybe_tag('DeploymentUnitState', fun format_string/1, Data).
+build_DefaultDeploymentUnitOperationType(Data)		-> maybe_tag('DefaultDeploymentUnitOperationType', fun format_string/1, Data).
+
+
+%% Missed types
+build_FaultCode(Data)			-> maybe_tag('FaultCode', fun format_string/1, Data).
+build_base64(Data) ->    Data.
 
 %% end
 
