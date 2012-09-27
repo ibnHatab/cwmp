@@ -443,8 +443,8 @@
 
 
 %% -record(file_type_arg, {
-%% 	  arg_struct :: [#arg_struct{}]
-%% 	 }).
+%%  	  arg_struct :: [#arg_struct{}]
+%%  	 }).
 
 
 
