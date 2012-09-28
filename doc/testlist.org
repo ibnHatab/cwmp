@@ -72,8 +72,8 @@
    - [X] parse_WindowMode 
    FEX: http://www.broadband-forum.org/technical/download/TR-069_Amendment-3.pdf
 
-** SOAP encoding [0/1]
-   - [ ] build anyURI 
+** SOAP encoding [1/1]
+   - [X] build anyURI 
    %%%  ftp_URL = "ftp:" "//" [ ftp_userinfo "@"] host [ ":" port ] ftp_abs_path
    %%%  http_URL = "http:" "//" host [ ":" port ] [ abs_path [ "?" query ]]
    %%%  http_URL = "https:" "//" host [ ":" port ] [ abs_path [ "?" query ]]
