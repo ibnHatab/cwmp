@@ -406,12 +406,16 @@ format_base64(Data) -> Data. %FIXME: match parse
 
 -define(HTTP_DEFAULT_PORT, 80).
 -define(FTP_DEFAULT_PORT, 21).
+-define(HTTPS_DEFAULT_PORT, 443).
 
 build_anyURI(Data) ->
     case Data of
 	{http, Host,Port,Path,Query} ->
 	    "http://" ++ build_HosPort(Host, Port, ?HTTP_DEFAULT_PORT) ++	       
 		Path ++ Query;	%FIXME: normalize URI / build_host_port ?HTTP_DEFAULT_PORT
+	{https, Host,Port,Path,Query} ->
+	    "https://" ++ build_HosPort(Host, Port, ?HTTPS_DEFAULT_PORT) ++	       
+		Path ++ Query;	
 	{ftp, Creds,Host,Port,Path} -> 
 	    "ftp://" ++	build_Credentials(Creds)  ++ build_HosPort(Host, Port, ?FTP_DEFAULT_PORT)  ++ Path;
 	_ ->

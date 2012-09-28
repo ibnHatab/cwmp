@@ -11,7 +11,7 @@
 -compile(export_all).
 
 -include_lib("common_test/include/ct.hrl").
--include_lib("xmerl/include/xmerl.hrl").
+-include_lib("xmerl/include/xmerl.hrl"). 
 
 -include("proto.hrl").
 -include("tr69.hrl").
@@ -598,6 +598,7 @@ build_anyURI_tc(_Config)->
     [
      begin
 	 build_anyURI_check(Expect, String) 
+	 %% ct:print(">>>~p ~n>>>~p ~n",[Expect, String])
      end
      ||
 	{Expect, String} <-lists:zip([ "http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
@@ -613,6 +614,14 @@ build_anyURI_tc(_Config)->
 				       ,"ftp://cpe-host-name.com:35/kick.pcap"
 				       ,"ftp://cpe-host-name.com/kick.pcap"
 				       ,"ftp://cpe-host-name.com/kick.pcap"
+				       ,"ftp://user@cpe-host-name.com/kick.pcap"
+
+				       ,"https://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
+				       ,"https://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
+				       ,"https://cpe-host-name.com:210/kick.html?command=cmd&arg=1&next=home"
+				       ,"https://cpe-host-name.com:210/kick.html"
+				       ,"https://cpe-host-name.com:210/"
+				       ,"https://cpe-host-name.com/"
 				       
 				     ],
 				     [ "http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
@@ -628,6 +637,14 @@ build_anyURI_tc(_Config)->
 				       ,"ftp://cpe-host-name.com:35/kick.pcap"
 				       ,"ftp://cpe-host-name.com/kick.pcap"
 				       ,"ftp://cpe-host-name.com:21/kick.pcap"
+				       ,"ftp://user@cpe-host-name.com:21/kick.pcap"
+
+				       ,"https://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
+				       ,"https://cpe-host-name.com:443/kick.html?command=cmd&arg=1&next=home"
+				       ,"https://cpe-host-name.com:210/kick.html?command=cmd&arg=1&next=home"
+				       ,"https://cpe-host-name.com:210/kick.html"
+				       ,"https://cpe-host-name.com:210"
+				       ,"https://cpe-host-name.com"
 
 				     ])
     ],
@@ -637,10 +654,9 @@ build_anyURI_check(Expect, String) ->
     %setup
     E = make_Element('URL' , String),
     Data = tr_soap_types:parse_anyURI(E),
-    ct:print(">>>~p ~n",[Data]),
     %execute
     Res = tr_soap_types:build_anyURI(Data),
-    %assert
+    %assert 
     Expect = Res.
     
 
