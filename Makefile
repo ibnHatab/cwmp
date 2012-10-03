@@ -5,7 +5,7 @@ REBAR='./rebar'
 
 .PHONY: deps clean test
 
-dir-local: compile
+dir-local: test
 
 all: compile
 
@@ -37,7 +37,7 @@ ctest:  test.spec compile
 	run_test -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
 
 test: 
-	$(REBAR) -v ct skip_deps=true
+	$(REBAR) -v ct skip_deps=true suites=hdm_trace case=hdm_trace_test_case
 
 dialyzer-build:
 	dialyzer --build_plt --verbose			\

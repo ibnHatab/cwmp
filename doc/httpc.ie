@@ -1,0 +1,47 @@
+%%% Welcome to the Distel Interactive Erlang Shell.
+%%
+%% C-j evaluates an expression and prints the result in-line.
+%% C-M-x evaluates a whole function definition.
+
+inets:start().
+% -:-> ok
+
+httpc:set_options([{proxy, {{"cache.tm.alcatel.ro", 8080},  ["localhost"]}}]).
+% -:-> ok
+
+
+{ok, {{Version, 200, ReasonPhrase}, Headers, Body}} = httpc:request(get, {"http://www.erlang.org", []}, [], []).
+% -:-> {ok,{{"HTTP/1.1",200,"OK"},
+	  [{"connection","Keep-Alive"},
+	   {"date","Thu, 27 Sep 2012 15:13:08 GMT"},
+	   {"server","inets/5.7.1"},
+	   {"content-length","8376"},
+	   {"content-type","text/html; charset=utf-8"},
+	   {"set-cookie",
+	    "eptic_cookie=erlangorg@hades-6601648984671338497; path=/"}],
+"</html>\n"}}
+
+{Version, 200, ReasonPhrase}.
+% -:-> {"HTTP/1.1",200,"OK"}
+
+Headers.
+% -:-> [{"connection","Keep-Alive"},
+      {"date","Thu, 27 Sep 2012 15:13:08 GMT"},
+      {"server","inets/5.7.1"},
+      {"content-length","8376"},
+      {"content-type","text/html; charset=utf-8"},
+      {"set-cookie","eptic_cookie=erlangorg@hades-6601648984671338497; path=/"}]
+
+{ok, RequestId} =   httpc:request(get, {"http://www.erlang.org", []}, [], [{sync, false}]).distel_ie: unknown message recvd '{http,
+
+% -:-> {ok,#Ref<0.0.0.65569>}
+
+receive {http, {RequestId, Result}} -> ok after 500 -> error end.
+% -:-> error
+
+appmon:start().
+% -:-> {ok,<0.2115.0>}
+
+
+
+

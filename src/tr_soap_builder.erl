@@ -204,6 +204,7 @@ build_OperationPerformed(Data, _State) -> build_string(Data).
 %% generated elements
 
 -spec build_Fault(#fault{}, #builder{}) -> export_element().
+build_Fault(Data, _S) when Data =:= undefined -> null;
 build_Fault(Data, State) ->
     {'cwmp:Fault', [],
      [P || P <- [
@@ -224,6 +225,7 @@ build_SetParameterValuesFault(Data, _State) ->
 
 
 -spec build_GetRPCMethodsResponse(#get_rpc_methods_response{}, #builder{}) -> export_element().
+build_GetRPCMethodsResponse(Data, _S) when Data =:= undefined -> null;
 build_GetRPCMethodsResponse(Data, State) ->
     {'cwmp:GetRPCMethodsResponse', [],
      [P || P <- [
@@ -231,6 +233,7 @@ build_GetRPCMethodsResponse(Data, State) ->
 		], P /= null]}.
 
 -spec build_SetParameterValues(#set_parameter_values{}, #builder{}) -> export_element().
+build_SetParameterValues(Data, _S) when Data =:= undefined -> null;
 build_SetParameterValues(Data, State) ->
     {'cwmp:SetParameterValues', [],
      [P || P <- [
@@ -239,6 +242,7 @@ build_SetParameterValues(Data, State) ->
 		], P /= null]}.
 
 -spec build_SetParameterValuesResponse(#set_parameter_values_response{}, #builder{}) -> export_element().
+build_SetParameterValuesResponse(Data, _S) when Data =:= undefined -> null;
 build_SetParameterValuesResponse(Data, _State) ->
     {'cwmp:SetParameterValuesResponse', [],
      [P || P <- [
@@ -246,6 +250,7 @@ build_SetParameterValuesResponse(Data, _State) ->
 		], P /= null]}.
 
 -spec build_GetParameterValues(#get_parameter_values{}, #builder{}) -> export_element().
+build_GetParameterValues(Data, _S) when Data =:= undefined -> null;
 build_GetParameterValues(Data, State) ->
     {'cwmp:GetParameterValues', [],
      [P || P <- [
@@ -253,6 +258,7 @@ build_GetParameterValues(Data, State) ->
 		], P /= null]}.
 
 -spec build_GetParameterValuesResponse(#get_parameter_values_response{}, #builder{}) -> export_element().
+build_GetParameterValuesResponse(Data, _S) when Data =:= undefined -> null;
 build_GetParameterValuesResponse(Data, State) ->
     {'cwmp:GetParameterValuesResponse', [],
      [P || P <- [
@@ -260,6 +266,7 @@ build_GetParameterValuesResponse(Data, State) ->
 		], P /= null]}.
 
 -spec build_GetParameterNames(#get_parameter_names{}, #builder{}) -> export_element().
+build_GetParameterNames(Data, _S) when Data =:= undefined -> null;
 build_GetParameterNames(Data, _State) ->
     {'cwmp:GetParameterNames', [],
      [P || P <- [
@@ -268,6 +275,7 @@ build_GetParameterNames(Data, _State) ->
 		], P /= null]}.
 
 -spec build_GetParameterNamesResponse(#get_parameter_names_response{}, #builder{}) -> export_element().
+build_GetParameterNamesResponse(Data, _S) when Data =:= undefined -> null;
 build_GetParameterNamesResponse(Data, State) ->
     {'cwmp:GetParameterNamesResponse', [],
      [P || P <- [
@@ -275,6 +283,7 @@ build_GetParameterNamesResponse(Data, State) ->
 		], P /= null]}.
 
 -spec build_SetParameterAttributes(#set_parameter_attributes{}, #builder{}) -> export_element().
+build_SetParameterAttributes(Data, _S) when Data =:= undefined -> null;
 build_SetParameterAttributes(Data, State) ->
     {'cwmp:SetParameterAttributes', [],
      [P || P <- [
@@ -282,6 +291,7 @@ build_SetParameterAttributes(Data, State) ->
 		], P /= null]}.
 
 -spec build_GetParameterAttributes(#get_parameter_attributes{}, #builder{}) -> export_element().
+build_GetParameterAttributes(Data, _S) when Data =:= undefined -> null;
 build_GetParameterAttributes(Data, State) ->
     {'cwmp:GetParameterAttributes', [],
      [P || P <- [
@@ -289,6 +299,7 @@ build_GetParameterAttributes(Data, State) ->
 		], P /= null]}.
 
 -spec build_GetParameterAttributesResponse(#get_parameter_attributes_response{}, #builder{}) -> export_element().
+build_GetParameterAttributesResponse(Data, _S) when Data =:= undefined -> null;
 build_GetParameterAttributesResponse(Data, State) ->
     {'cwmp:GetParameterAttributesResponse', [],
      [P || P <- [
@@ -296,6 +307,7 @@ build_GetParameterAttributesResponse(Data, State) ->
 		], P /= null]}.
 
 -spec build_AddObject(#add_object{}, #builder{}) -> export_element().
+build_AddObject(Data, _S) when Data =:= undefined -> null;
 build_AddObject(Data, State) ->
     {'cwmp:AddObject', [],
      [P || P <- [
@@ -304,6 +316,7 @@ build_AddObject(Data, State) ->
 		], P /= null]}.
 
 -spec build_AddObjectResponse(#add_object_response{}, #builder{}) -> export_element().
+build_AddObjectResponse(Data, _S) when Data =:= undefined -> null;
 build_AddObjectResponse(Data, _State) ->
     {'cwmp:AddObjectResponse', [],
      [P || P <- [
@@ -312,6 +325,7 @@ build_AddObjectResponse(Data, _State) ->
 		], P /= null]}.
 
 -spec build_DeleteObject(#delete_object{}, #builder{}) -> export_element().
+build_DeleteObject(Data, _S) when Data =:= undefined -> null;
 build_DeleteObject(Data, State) ->
     {'cwmp:DeleteObject', [],
      [P || P <- [
@@ -320,6 +334,7 @@ build_DeleteObject(Data, State) ->
 		], P /= null]}.
 
 -spec build_DeleteObjectResponse(#delete_object_response{}, #builder{}) -> export_element().
+build_DeleteObjectResponse(Data, _S) when Data =:= undefined -> null;
 build_DeleteObjectResponse(Data, _State) ->
     {'cwmp:DeleteObjectResponse', [],
      [P || P <- [
@@ -327,6 +342,7 @@ build_DeleteObjectResponse(Data, _State) ->
 		], P /= null]}.
 
 -spec build_Download(#download{}, #builder{}) -> export_element().
+build_Download(Data, _S) when Data =:= undefined -> null;
 build_Download(Data, State) ->
     {'cwmp:Download', [],
      [P || P <- [
@@ -343,6 +359,7 @@ build_Download(Data, State) ->
 		], P /= null]}.
 
 -spec build_DownloadResponse(#download_response{}, #builder{}) -> export_element().
+build_DownloadResponse(Data, _S) when Data =:= undefined -> null;
 build_DownloadResponse(Data, _State) ->
     {'cwmp:DownloadResponse', [],
      [P || P <- [
@@ -352,6 +369,7 @@ build_DownloadResponse(Data, _State) ->
 		], P /= null]}.
 
 -spec build_Reboot(#reboot{}, #builder{}) -> export_element().
+build_Reboot(Data, _S) when Data =:= undefined -> null;
 build_Reboot(Data, State) ->
     {'cwmp:Reboot', [],
      [P || P <- [
@@ -359,6 +377,7 @@ build_Reboot(Data, State) ->
 		], P /= null]}.
 
 -spec build_GetQueuedTransfersResponse(#get_queued_transfers_response{}, #builder{}) -> export_element().
+build_GetQueuedTransfersResponse(Data, _S) when Data =:= undefined -> null;
 build_GetQueuedTransfersResponse(Data, State) ->
     {'cwmp:GetQueuedTransfersResponse', [],
      [P || P <- [
@@ -366,6 +385,7 @@ build_GetQueuedTransfersResponse(Data, State) ->
 		], P /= null]}.
 
 -spec build_ScheduleInform(#schedule_inform{}, #builder{}) -> export_element().
+build_ScheduleInform(Data, _S) when Data =:= undefined -> null;
 build_ScheduleInform(Data, State) ->
     {'cwmp:ScheduleInform', [],
      [P || P <- [
@@ -374,6 +394,7 @@ build_ScheduleInform(Data, State) ->
 		], P /= null]}.
 
 -spec build_SetVouchers(#set_vouchers{}, #builder{}) -> export_element().
+build_SetVouchers(Data, _S) when Data =:= undefined -> null;
 build_SetVouchers(Data, State) ->
     {'cwmp:SetVouchers', [],
      [P || P <- [
@@ -381,6 +402,7 @@ build_SetVouchers(Data, State) ->
 		], P /= null]}.
 
 -spec build_GetOptions(#get_options{}, #builder{}) -> export_element().
+build_GetOptions(Data, _S) when Data =:= undefined -> null;
 build_GetOptions(Data, _State) ->
     {'cwmp:GetOptions', [],
      [P || P <- [
@@ -388,6 +410,7 @@ build_GetOptions(Data, _State) ->
 		], P /= null]}.
 
 -spec build_GetOptionsResponse(#get_options_response{}, #builder{}) -> export_element().
+build_GetOptionsResponse(Data, _S) when Data =:= undefined -> null;
 build_GetOptionsResponse(Data, State) ->
     {'cwmp:GetOptionsResponse', [],
      [P || P <- [
@@ -395,6 +418,7 @@ build_GetOptionsResponse(Data, State) ->
 		], P /= null]}.
 
 -spec build_Upload(#upload{}, #builder{}) -> export_element().
+build_Upload(Data, _S) when Data =:= undefined -> null;
 build_Upload(Data, State) ->
     {'cwmp:Upload', [],
      [P || P <- [
@@ -407,6 +431,7 @@ build_Upload(Data, State) ->
 		], P /= null]}.
 
 -spec build_UploadResponse(#upload_response{}, #builder{}) -> export_element().
+build_UploadResponse(Data, _S) when Data =:= undefined -> null;
 build_UploadResponse(Data, _State) ->
     {'cwmp:UploadResponse', [],
      [P || P <- [
@@ -416,6 +441,7 @@ build_UploadResponse(Data, _State) ->
 		], P /= null]}.
 
 -spec build_GetAllQueuedTransfersResponse(#get_all_queued_transfers_response{}, #builder{}) -> export_element().
+build_GetAllQueuedTransfersResponse(Data, _S) when Data =:= undefined -> null;
 build_GetAllQueuedTransfersResponse(Data, State) ->
     {'cwmp:GetAllQueuedTransfersResponse', [],
      [P || P <- [
@@ -423,6 +449,7 @@ build_GetAllQueuedTransfersResponse(Data, State) ->
 		], P /= null]}.
 
 -spec build_ScheduleDownload(#schedule_download{}, #builder{}) -> export_element().
+build_ScheduleDownload(Data, _S) when Data =:= undefined -> null;
 build_ScheduleDownload(Data, State) ->
     {'cwmp:ScheduleDownload', [],
      [P || P <- [
@@ -437,6 +464,7 @@ build_ScheduleDownload(Data, State) ->
 		], P /= null]}.
 
 -spec build_CancelTransfer(#cancel_transfer{}, #builder{}) -> export_element().
+build_CancelTransfer(Data, _S) when Data =:= undefined -> null;
 build_CancelTransfer(Data, State) ->
     {'cwmp:CancelTransfer', [],
      [P || P <- [
@@ -444,6 +472,7 @@ build_CancelTransfer(Data, State) ->
 		], P /= null]}.
 
 -spec build_ChangeDUState(#change_du_state{}, #builder{}) -> export_element().
+build_ChangeDUState(Data, _S) when Data =:= undefined -> null;
 build_ChangeDUState(Data, State) ->
     {'cwmp:ChangeDUState', [],
      [P || P <- [
@@ -452,6 +481,7 @@ build_ChangeDUState(Data, State) ->
 		], P /= null]}.
 
 -spec build_Inform(#inform{}, #builder{}) -> export_element().
+build_Inform(Data, _S) when Data =:= undefined -> null;
 build_Inform(Data, State) ->
     {'cwmp:Inform', [],
      [P || P <- [
@@ -464,6 +494,7 @@ build_Inform(Data, State) ->
 		], P /= null]}.
 
 -spec build_InformResponse(#inform_response{}, #builder{}) -> export_element().
+build_InformResponse(Data, _S) when Data =:= undefined -> null;
 build_InformResponse(Data, _State) ->
     {'cwmp:InformResponse', [],
      [P || P <- [
@@ -471,6 +502,7 @@ build_InformResponse(Data, _State) ->
 		], P /= null]}.
 
 -spec build_TransferComplete(#transfer_complete{}, #builder{}) -> export_element().
+build_TransferComplete(Data, _S) when Data =:= undefined -> null;
 build_TransferComplete(Data, State) ->
     {'cwmp:TransferComplete', [],
      [P || P <- [
@@ -481,6 +513,7 @@ build_TransferComplete(Data, State) ->
 		], P /= null]}.
 
 -spec build_AutonomousTransferComplete(#autonomous_transfer_complete{}, #builder{}) -> export_element().
+build_AutonomousTransferComplete(Data, _S) when Data =:= undefined -> null;
 build_AutonomousTransferComplete(Data, State) ->
     {'cwmp:AutonomousTransferComplete', [],
      [P || P <- [
@@ -496,6 +529,7 @@ build_AutonomousTransferComplete(Data, State) ->
 		], P /= null]}.
 
 -spec build_Kicked(#kicked{}, #builder{}) -> export_element().
+build_Kicked(Data, _S) when Data =:= undefined -> null;
 build_Kicked(Data, _State) ->
     {'cwmp:Kicked', [],
      [P || P <- [
@@ -506,6 +540,7 @@ build_Kicked(Data, _State) ->
 		], P /= null]}.
 
 -spec build_KickedResponse(#kicked_response{}, #builder{}) -> export_element().
+build_KickedResponse(Data, _S) when Data =:= undefined -> null;
 build_KickedResponse(Data, _State) ->
     {'cwmp:KickedResponse', [],
      [P || P <- [
@@ -513,6 +548,7 @@ build_KickedResponse(Data, _State) ->
 		], P /= null]}.
 
 -spec build_RequestDownload(#request_download{}, #builder{}) -> export_element().
+build_RequestDownload(Data, _S) when Data =:= undefined -> null;
 build_RequestDownload(Data, State) ->
     {'cwmp:RequestDownload', [],
      [P || P <- [
@@ -521,6 +557,7 @@ build_RequestDownload(Data, State) ->
 		], P /= null]}.
 
 -spec build_DUStateChangeComplete(#du_state_change_complete{}, #builder{}) -> export_element().
+build_DUStateChangeComplete(Data, _S) when Data =:= undefined -> null;
 build_DUStateChangeComplete(Data, State) ->
     {'cwmp:DUStateChangeComplete', [],
      [P || P <- [
@@ -529,6 +566,7 @@ build_DUStateChangeComplete(Data, State) ->
 		], P /= null]}.
 
 -spec build_AutonomousDUStateChangeComplete(#autonomous_du_state_change_complete{}, #builder{}) -> export_element().
+build_AutonomousDUStateChangeComplete(Data, _S) when Data =:= undefined -> null;
 build_AutonomousDUStateChangeComplete(Data, State) ->
     {'cwmp:AutonomousDUStateChangeComplete', [],
      [P || P <- [
@@ -538,6 +576,7 @@ build_AutonomousDUStateChangeComplete(Data, State) ->
 %% complexType/sequence
 
 -spec build_TransferCompleteFaultStruct(#transfer_complete_fault_struct{}, #builder{}) -> export_element().
+build_TransferCompleteFaultStruct(Data, _S) when Data =:= undefined -> null;
 build_TransferCompleteFaultStruct(Data, _State) ->
     {'cwmp:TransferCompleteFaultStruct', [],
      [P || P <- [
@@ -546,6 +585,7 @@ build_TransferCompleteFaultStruct(Data, _State) ->
 		], P /= null]}.
 
 -spec build_DeploymentUnitFaultStruct(#deployment_unit_fault_struct{}, #builder{}) -> export_element().
+build_DeploymentUnitFaultStruct(Data, _S) when Data =:= undefined -> null;
 build_DeploymentUnitFaultStruct(Data, _State) ->
     {'cwmp:DeploymentUnitFaultStruct', [],
      [P || P <- [
@@ -555,6 +595,7 @@ build_DeploymentUnitFaultStruct(Data, _State) ->
 
 
 -spec build_ParameterValueStruct(#parameter_value_struct{}, #builder{}) -> export_element().
+build_ParameterValueStruct(Data, _S) when Data =:= undefined -> null;
 build_ParameterValueStruct(Data, _State) ->
     {'cwmp:ParameterValueStruct', [],
      [P || P <- [
@@ -563,6 +604,7 @@ build_ParameterValueStruct(Data, _State) ->
 		], P /= null]}.
 
 -spec build_DeviceIdStruct(#device_id_struct{}, #builder{}) -> export_element().
+build_DeviceIdStruct(Data, _S) when Data =:= undefined -> null;
 build_DeviceIdStruct(Data, _State) ->
     {'cwmp:DeviceIdStruct', [],
      [P || P <- [
@@ -573,6 +615,7 @@ build_DeviceIdStruct(Data, _State) ->
 		], P /= null]}.
 
 -spec build_EventStruct(#event_struct{}, #builder{}) -> export_element().
+build_EventStruct(Data, _S) when Data =:= undefined -> null;
 build_EventStruct(Data, State) ->
     {'cwmp:EventStruct', [],
      [P || P <- [
@@ -581,6 +624,7 @@ build_EventStruct(Data, State) ->
 		], P /= null]}.
 
 -spec build_ParameterInfoStruct(#parameter_info_struct{}, #builder{}) -> export_element().
+build_ParameterInfoStruct(Data, _S) when Data =:= undefined -> null;
 build_ParameterInfoStruct(Data, _State) ->
     {'cwmp:ParameterInfoStruct', [],
      [P || P <- [
@@ -589,6 +633,7 @@ build_ParameterInfoStruct(Data, _State) ->
 		], P /= null]}.
 
 -spec build_SetParameterAttributesStruct(#set_parameter_attributes_struct{}, #builder{}) -> export_element().
+build_SetParameterAttributesStruct(Data, _S) when Data =:= undefined -> null;
 build_SetParameterAttributesStruct(Data, State) ->
     {'cwmp:SetParameterAttributesStruct', [],
      [P || P <- [
@@ -600,6 +645,7 @@ build_SetParameterAttributesStruct(Data, State) ->
 		], P /= null]}.
 
 -spec build_ParameterAttributeStruct(#parameter_attribute_struct{}, #builder{}) -> export_element().
+build_ParameterAttributeStruct(Data, _S) when Data =:= undefined -> null;
 build_ParameterAttributeStruct(Data, State) ->
     {'cwmp:ParameterAttributeStruct', [],
      [P || P <- [
@@ -609,6 +655,7 @@ build_ParameterAttributeStruct(Data, State) ->
 		], P /= null]}.
 
 -spec build_TimeWindowStruct(#time_window_struct{}, #builder{}) -> export_element().
+build_TimeWindowStruct(Data, _S) when Data =:= undefined -> null;
 build_TimeWindowStruct(Data, State) ->
     {'cwmp:TimeWindowStruct', [],
      [P || P <- [
@@ -620,6 +667,7 @@ build_TimeWindowStruct(Data, State) ->
 		], P /= null]}.
 
 -spec build_QueuedTransferStruct(#queued_transfer_struct{}, #builder{}) -> export_element().
+build_QueuedTransferStruct(Data, _S) when Data =:= undefined -> null;
 build_QueuedTransferStruct(Data, State) ->
     {'cwmp:QueuedTransferStruct', [],
      [P || P <- [
@@ -628,6 +676,7 @@ build_QueuedTransferStruct(Data, State) ->
 		], P /= null]}.
 
 -spec build_AllQueuedTransferStruct(#all_queued_transfer_struct{}, #builder{}) -> export_element().
+build_AllQueuedTransferStruct(Data, _S) when Data =:= undefined -> null;
 build_AllQueuedTransferStruct(Data, State) ->
     {'cwmp:AllQueuedTransferStruct', [],
      [P || P <- [
@@ -640,6 +689,7 @@ build_AllQueuedTransferStruct(Data, State) ->
 		], P /= null]}.
 
 -spec build_InstallOpStruct(#install_op_struct{}, #builder{}) -> export_element().
+build_InstallOpStruct(Data, _S) when Data =:= undefined -> null;
 build_InstallOpStruct(Data, _State) ->
     {'cwmp:InstallOpStruct', [],
      [P || P <- [
@@ -651,6 +701,7 @@ build_InstallOpStruct(Data, _State) ->
 		], P /= null]}.
 
 -spec build_UpdateOpStruct(#update_op_struct{}, #builder{}) -> export_element().
+build_UpdateOpStruct(Data, _S) when Data =:= undefined -> null;
 build_UpdateOpStruct(Data, _State) ->
     {'cwmp:UpdateOpStruct', [],
      [P || P <- [
@@ -662,6 +713,7 @@ build_UpdateOpStruct(Data, _State) ->
 		], P /= null]}.
 
 -spec build_UninstallOpStruct(#uninstall_op_struct{}, #builder{}) -> export_element().
+build_UninstallOpStruct(Data, _S) when Data =:= undefined -> null;
 build_UninstallOpStruct(Data, _State) ->
     {'cwmp:UninstallOpStruct', [],
      [P || P <- [
@@ -671,6 +723,7 @@ build_UninstallOpStruct(Data, _State) ->
 		], P /= null]}.
 
 -spec build_OpResultStruct(#op_result_struct{}, #builder{}) -> export_element().
+build_OpResultStruct(Data, _S) when Data =:= undefined -> null;
 build_OpResultStruct(Data, State) ->
     {'cwmp:OpResultStruct', [],
      [P || P <- [
@@ -686,6 +739,7 @@ build_OpResultStruct(Data, State) ->
 		], P /= null]}.
 
 -spec build_AutonOpResultStruct(#auton_op_result_struct{}, #builder{}) -> export_element().
+build_AutonOpResultStruct(Data, _S) when Data =:= undefined -> null;
 build_AutonOpResultStruct(Data, State) ->
     {'cwmp:AutonOpResultStruct', [],
      [P || P <- [
@@ -693,6 +747,7 @@ build_AutonOpResultStruct(Data, State) ->
 		], P /= null]}.
 
 -spec build_OptionStruct(#option_struct{}, #builder{}) -> export_element().
+build_OptionStruct(Data, _S) when Data =:= undefined -> null;
 build_OptionStruct(Data, _State) ->
     {'cwmp:OptionStruct', [],
      [P || P <- [
@@ -706,6 +761,7 @@ build_OptionStruct(Data, _State) ->
 		], P /= null]}.
 
 -spec build_ArgStruct(#arg_struct{}, #builder{}) -> export_element().
+build_ArgStruct(Data, _S) when Data =:= undefined -> null;
 build_ArgStruct(Data, _State) ->
     {'cwmp:ArgStruct', [],
      [P || P <- [
@@ -723,72 +779,86 @@ attr_arrayType(Lenght) ->
     {'soap-enc:arrayType', io_lib:format("string[~02i]", [Lenght]) }.
 
 -spec build_MethodList([string()], #builder{}) -> export_element().
+build_MethodList(Data, _S) when Data =:= undefined -> null;
 build_MethodList(Data,  _State) ->
     TagArray =  [build_string(E) || E <- Data],
     {'MethodList', [attr_arrayType(length(TagArray))], TagArray}.
 
 -spec build_ParameterNames([string()], #builder{}) -> export_element().
+build_ParameterNames(Data, _S) when Data =:= undefined -> null;
 build_ParameterNames(Data,  _State) ->
     TagArray =  [build_string(E) || E <- Data],
     {'ParameterNames', [attr_arrayType(length(TagArray))], TagArray}.
 
 -spec build_ParameterValueList([#parameter_value_struct{}], #builder{}) -> export_element().
+build_ParameterValueList(Data, _S) when Data =:= undefined -> null;
 build_ParameterValueList(Data,  State) ->
     TagArray =  [build_ParameterValueStruct(E, State) || E <- Data],
     {'ParameterValueList', [attr_arrayType(length(TagArray))], TagArray}.
 
 
 -spec build_EventList([#event_struct{}], #builder{}) -> export_element().
+build_EventList(Data, _S) when Data =:= undefined -> null;
 build_EventList(Data,  State) ->
     TagArray =  [build_EventStruct(E, State) || E <- Data],
     {'EventList', [attr_arrayType(length(TagArray))], TagArray}.
 
 -spec build_ParameterInfoList([#parameter_info_struct{}], #builder{}) -> export_element().
+build_ParameterInfoList(Data, _S) when Data =:= undefined -> null;
 build_ParameterInfoList(Data,  State) ->
     TagArray =  [build_ParameterInfoStruct(E, State) || E <- Data],
     {'ParameterInfoList', [attr_arrayType(length(TagArray))], TagArray}.
 
 -spec build_AccessList([string()], #builder{}) -> export_element().
+build_AccessList(Data, _S) when Data =:= undefined -> null;
 build_AccessList(Data,  _State) ->
     TagArray =  [build_string(E) || E <- Data],
     {'AccessList', [attr_arrayType(length(TagArray))], TagArray}.
 
 -spec build_SetParameterAttributesList([#set_parameter_attributes_struct{}], #builder{}) -> export_element().
+build_SetParameterAttributesList(Data, _S) when Data =:= undefined -> null;
 build_SetParameterAttributesList(Data, State) ->
     TagArray =  [build_SetParameterAttributesStruct(E, State) || E <- Data],
     {'SetParameterAttributesList', [attr_arrayType(length(TagArray))], TagArray}.
 
 -spec build_ParameterAttributeList([#parameter_attribute_struct{}], #builder{}) -> export_element().
+build_ParameterAttributeList(Data, _S) when Data =:= undefined -> null;
 build_ParameterAttributeList(Data,  State) ->
     TagArray =  [build_ParameterAttributeStruct(E, State) || E <- Data],
     {'ParameterAttributeList', [attr_arrayType(length(TagArray))], TagArray}.
 
 -spec build_TimeWindowList([#time_window_struct{}], #builder{}) -> export_element().
+build_TimeWindowList(Data, _S) when Data =:= undefined -> null;
 build_TimeWindowList(Data,  State) ->
     TagArray =  [build_TimeWindowStruct(E, State) || E <- Data],
     {'TimeWindowList', [attr_arrayType(length(TagArray))], TagArray}.
 
 -spec build_TransferList([#queued_transfer_struct{}], #builder{}) -> export_element().
+build_TransferList(Data, _S) when Data =:= undefined -> null;
 build_TransferList(Data,  State) ->
     TagArray =  [build_QueuedTransferStruct(E, State) || E <- Data],
     {'TransferList', [attr_arrayType(length(TagArray))], TagArray}.
 
 -spec build_AllTransferList([#all_queued_transfer_struct{}], #builder{}) -> export_element().
+build_AllTransferList(Data, _S) when Data =:= undefined -> null;
 build_AllTransferList(Data,  State) ->
     TagArray =  [build_AllQueuedTransferStruct(E, State) || E <- Data],
     {'AllTransferList', [attr_arrayType(length(TagArray))], TagArray}.
 
 %-spec build_VoucherList([#base64{}], #builder{}) -> export_element().
+build_VoucherList(Data, _S) when Data =:= undefined -> null;
 build_VoucherList(Data,  _State) ->
     TagArray =  [build_base64(E) || E <- Data],
     {'VoucherList', [attr_arrayType(length(TagArray))], TagArray}.
 
 -spec build_OptionList([#option_struct{}], #builder{}) -> export_element().
+build_OptionList(Data, _S) when Data =:= undefined -> null;
 build_OptionList(Data,  State) ->
     TagArray =  [build_OptionStruct(E, State) || E <- Data],
     {'OptionList', [attr_arrayType(length(TagArray))], TagArray}.
 
 -spec build_FileTypeArg([#arg_struct{}], #builder{}) -> export_element().
+build_FileTypeArg(Data, _S) when Data =:= undefined -> null;
 build_FileTypeArg(Data,  State) ->
     TagArray =  [build_ArgStruct(E, State) || E <- Data],
     {'FileTypeArg', [attr_arrayType(length(TagArray))], TagArray}.
