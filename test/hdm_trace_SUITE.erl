@@ -12,6 +12,14 @@
 
 -include_lib("common_test/include/ct.hrl").
 
+-include_lib("xmerl/include/xmerl.hrl").
+
+-include("tr69.hrl").
+-include("proto.hrl").
+
+-import(tr_soap_parser, [parse/2]).
+
+
 %%--------------------------------------------------------------------
 %% @spec suite() -> Info
 %% Info = [tuple()]
@@ -27,8 +35,20 @@ suite() ->
 %% Reason = term()
 %% @end
 %%--------------------------------------------------------------------
+isXmlFile(File) ->
+    case lists:dropwhile(fun (C) when C =:= $.
+				      -> false;
+			     (_) -> true end, File) of
+	".xml" -> true;
+	_ -> false
+    end.
+
 init_per_suite(Config) ->
-    Config.
+    TraceDir = ?config(data_dir, Config),
+    {ok, FileList} = file:list_dir(TraceDir),
+    PathList = [TraceDir ++  File
+		|| File <- FileList, isXmlFile(File)],
+    [{xml_files, PathList} | Config].
 
 %%--------------------------------------------------------------------
 %% @spec end_per_suite(Config0) -> void() | {save_config,Config1}
@@ -125,8 +145,13 @@ hdm_trace_test_case() ->
 %% Comment = term() 
 %% @end
 %%--------------------------------------------------------------------
-hdm_trace_test_case(Config) ->
-    io:format(user, ">> ~p ~n", [Config]),
-    TraceDir = ?config(data_dir, Config),
+hdm_trace_test_case(Config) ->    
     %% filename:join([?config(priv_dir, Config)
+    Files = ?config(xml_files, Config),
+    io:format(user, "1>> ~p ~n", [Files]),
+    lists:foreach(fun (File) ->
+			  {Doc, _Rest} = xmerl_scan:file(File),
+			  _Rpc = parse(Doc, #parser{})
+		  end,
+		  Files),
     ok.
