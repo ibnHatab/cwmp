@@ -1,0 +1,22 @@
+<soapenv:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:cwmp="urn:dslforum-org:cwmp-1-0" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <soapenv:Header>
+        <cwmp:ID soapenv:mustUnderstand="1">1</cwmp:ID>
+    </soapenv:Header>
+    <soapenv:Body>
+        <cwmp:AutonomousTransferComplete>
+            <AnnounceURL>http://announceURL_FwUpgr</AnnounceURL>
+            <TransferURL>http://transferURL_FwUpgr</TransferURL>
+            <IsDownload>true</IsDownload>
+            <FileType>1 Firmware Upgrade Image</FileType>
+            <FileSize>12345</FileSize>
+            <TargetFileName>http://targetFileName_FwUpgr</TargetFileName>
+            <cwmp:FaultStruct>
+                <FaultCode>0</FaultCode>
+                <FaultString></FaultString>
+            </cwmp:FaultStruct>
+            <StartTime>2012-10-03T18:53:34.225Z</StartTime>
+            <CompleteTime>2012-10-03T18:53:44.225Z</CompleteTime>
+        </cwmp:AutonomousTransferComplete>
+    </soapenv:Body>
+</soapenv:Envelope>
+
