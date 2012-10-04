@@ -453,8 +453,10 @@ parse_EventCodeType_tc(_Config) ->
 			     , {'ScheduleInform', "M ScheduleInform"}
 			     , {'Download',       "M Download"}
 			     , {'Reboot',	  "M Reboot"}
-			   %%  , {   9,             "9 REQUEST, DOWNLOAD"}
-			     ]],
+			     , {    9,             "9 REQUEST, DOWNLOAD"}
+			     , {    7,             "7 TRANSFER COMPLETE"}
+			     , {   12,             "12 AUTONOMOUS DU STATE CHANGE COMPLETE"}
+			    ]],
     ok.
 parse_EventCodeType_check(Expect, String) ->
     %setup
