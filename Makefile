@@ -19,6 +19,8 @@ deps:
 clean:
 	$(REBAR) clean 
 	@rm -rf logs/*
+	@rm -rf test/*.beam
+	@rm -rf .eunit/*.beam
 
 dist-clean:
 	$(REBAR) clean delete-deps
@@ -62,7 +64,7 @@ dialyzer: compile
 
 .PHONY: check-data
 
-DATA_XML=$(wildcard test/data/*.xml)
+DATA_XML=$(wildcard test/data/*.xml) $(wildcard test/hdm_trace_SUITE_data/*.xml)
 
 check-data: $(DATA_XML)
 	@for file in $(DATA_XML) ; do 	\

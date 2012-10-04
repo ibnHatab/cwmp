@@ -435,8 +435,6 @@ check_namespace_tc(_Config) ->
 %%-------------------------------------------
 %%% Parse EventCodeType Test
 %%-------------------------------------------
-
-%% FIXME
 parse_EventCodeType_tc(_Config) ->
     Elem = make_Element('ParseEventCodeType',"9 REQUEST, DOWNLOAD"),
     State = #parser{},
@@ -453,7 +451,7 @@ parse_EventCodeType_tc(_Config) ->
 			     , {'ScheduleInform', "M ScheduleInform"}
 			     , {'Download',       "M Download"}
 			     , {'Reboot',	  "M Reboot"}
-			   %%  , {   9,             "9 REQUEST, DOWNLOAD"}
+			     , { 9,               "9  REQUEST, DOWNLOAD"}
 			     ]],
     ok.
 parse_EventCodeType_check(Expect, String) ->
@@ -472,10 +470,18 @@ parse_EventCodeType_check(Expect, String) ->
 
 %% FIXME
 parse_ArraySize_tc(_Config) ->
-    %% Nss = #parser{},
-    %% ct:print(">>> ~p ~n",[tr_soap_types:parse_ArraySize("10", "abc", Nss)]),
+    [
+     begin
+	 ct:print(">>> ~p ~n",[{Expect, Value, Tag, Nss}]),
+	 Nss = #parser{},
+	 tr_soap_types:parse_ArraySize(Value, Tag, Nss)
+     end
+     ||
+	{Expect, Value, Tag, Nss} <- 
+	    [{8, "cwmp:ParameterValueStruct[0008]", 'ParameterValueStruct', 'cwmp'}
+	    ]
+    ],
     ok.
-
 
 
 %%-------------------------------------------

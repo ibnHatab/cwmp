@@ -16,7 +16,9 @@ follow_name = False
 
 def get_name(line):
     line = line.strip()
-    return line[1:-1].replace(':', '_')
+    line = line[1:-1].replace(':', '_')
+    line = line[1:-1].replace('/', '_')
+    return line
 
 def write_in_file(count, fname, content):
     fname = str(count) + "_" + fname + ".xml"    

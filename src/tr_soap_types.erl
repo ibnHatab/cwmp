@@ -27,7 +27,7 @@
 -import(tr_soap_lib, [return_error/2, parse_error/2, parse_error/3,
 		      get_QName/2, local_ns/2, normalize_to_local_ns/2,
 		      maybe_tag/3
-		      
+
 						%, maybe_tag/4
 		     ]).
 
@@ -117,7 +117,7 @@ convert_iso8601_date({Syear,Smonth,Sday} = _DT,
 
 -spec parse_boolean(#xmlElement{content::[any()]}) -> boolean().
 parse_boolean(#xmlElement{name=Name, content = Content}) ->
-    String = string:strip(get_xmlText(Content)),    
+    String = string:strip(get_xmlText(Content)),
     list_to_boolean(check_Value(Name, String, boolean)).
 
 list_to_boolean("1") -> true;
@@ -158,7 +158,7 @@ parse_dateTime(#xmlElement{name=Name, content = Content} = _E) when is_tuple(_E)
     parse_dateTime(ValueString);
 parse_dateTime(String) when is_list(String) ->
     convert_iso8601_date(String).
- 
+
 parse_base64(_E) -> %% FIXME: implement
     <<"aa">>.
 
@@ -273,7 +273,7 @@ parse_Writable(E)             -> parse_boolean(E).
 match_event_code(Code, Description) ->
     case Code of
 	"M" ->
-	    Key = Code ++ " " ++ Description, 
+	    Key = Code ++ " " ++ Description,
 	    case lists:keyfind(Key, 2, ?SUPPORTED_EVENT_CODE_TYPE) of
 		{OpCode, _Key} ->
 		    OpCode;
@@ -302,7 +302,7 @@ parse_EventCodeType(Elem, State) ->
 		{error,Reason} ->
 		    parse_error(Elem, Reason);
 		Event ->
-		    Event	       			
+		    Event
 	    end
     end.
 
@@ -310,7 +310,7 @@ parse_ArraySize(Value, ContentTag, Nss) ->
     case re:run(Value, "\(.*\)\\[\(.*\)\\]") of
 	{match,[_All, {TagStart,TagLength},{DigitStart,DigitLength}]} ->
 	    ValueStr = string:substr(Value, TagStart+1, TagLength),
-
+	    
 	    {ValueName, ValueNs} = normalize_to_local_ns(list_to_atom(ValueStr), Nss),
 	    {ContentName, ContentNs} = normalize_to_local_ns(ContentTag, Nss),
 	    
@@ -321,11 +321,11 @@ parse_ArraySize(Value, ContentTag, Nss) ->
 			    parse_error(Value, DigitStr, Reason);
 			{Int, _Rest} ->
 			    Int
-		    end;    
+		    end;
 	       true ->
 		    parse_error(Value, ContentTag, "Bad Tag")
 	    end;
-	_ ->								
+	_ ->
 	    parse_error(Value, ContentTag, "Parse array size")
     end.
 
@@ -349,7 +349,7 @@ parse_FileType('DownloadFileType', E) ->
     parse_withSuportedValues(E, ?SUPPORTED_DOWNLOAD_FILE_TYPE);
 parse_FileType('UploadFileType', E) ->
     parse_withSuportedValues(E, ?SUPPORTED_UPLOAD_FILE_TYPE).
-					      
+
 parse_withSuportedValues(E, SuportedValues) ->
     String = parse_string(E),
     [Type | _Descr] = string:tokens(String, " "),
@@ -358,7 +358,7 @@ parse_withSuportedValues(E, SuportedValues) ->
 		  list_to_atom(Type);
 	      {Int, _Rest} ->
 		  Int
-	  end,    
+	  end,
     case lists:keyfind(Key, 1, SuportedValues) of
 	{K, _S} ->
 	    K;
@@ -380,7 +380,7 @@ parse_Notification(E) ->
     if
 	0 =< Value, Value =< 6	->
 	    Value;
-	true -> 
+	true ->
 	    parse_error(E, Value, "Notification Value")
     end.
 
@@ -402,7 +402,7 @@ format_unsignedInt(Data) ->
 format_dateTime(Data) ->
     Data. %FIXME: match parse
 format_base64(Data) -> Data. %FIXME: match parse
-     
+
 
 -define(HTTP_DEFAULT_PORT, 80).
 -define(FTP_DEFAULT_PORT, 21).
@@ -410,9 +410,9 @@ format_base64(Data) -> Data. %FIXME: match parse
 build_anyURI(Data) ->
     case Data of
 	{http, Host,Port,Path,Query} ->
-	    "http://" ++ build_HosPort(Host, Port, ?HTTP_DEFAULT_PORT) ++	       
+	    "http://" ++ build_HosPort(Host, Port, ?HTTP_DEFAULT_PORT) ++
 		Path ++ Query;	%FIXME: normalize URI / build_host_port ?HTTP_DEFAULT_PORT
-	{ftp, Creds,Host,Port,Path} -> 
+	{ftp, Creds,Host,Port,Path} ->
 	    "ftp://" ++	build_Credentials(Creds)  ++ build_HosPort(Host, Port, ?FTP_DEFAULT_PORT)  ++ Path;
 	_ ->
 	    return_error(Data, "Unknown schema")
@@ -423,16 +423,16 @@ build_HosPort(Host, Port, DefaultPort) ->
 	Port =:= DefaultPort ->
 	    Host;
 	true ->
-	    Host ++ ":" ++ integer_to_list(Port) 
-    end.    
+	    Host ++ ":" ++ integer_to_list(Port)
+    end.
 
 build_Credentials(Creds) ->
     case Creds of
 	{[],[]} -> "";
 	{User,[]} -> User ++ "@";
-	{User,Password} -> User ++ ":" ++ Password ++ "@"	
+	{User,Password} -> User ++ ":" ++ Password ++ "@"
     end.
-				 
+
 
 build_AccessListChange(Data)		-> maybe_tag('AccessListChange', fun format_boolean/1, Data).
 build_CompleteTime(Data)		-> maybe_tag('CompleteTime', fun format_dateTime/1, Data).
@@ -553,13 +553,12 @@ parse_int_test() ->
     ?assertEqual(42, parse_int(E)),
     ok.
 
-
 parse_iso8601_test() ->
     [
      begin
 %	 ?DBG({DT, Str, convert_iso8601_date(Str)}),
 	 DT = convert_iso8601_date(Str)
-	     
+
      end
       ||
 	{DT, Str} <- lists:zip([{{2004, 11, 01}, {04, 40, 35}},
@@ -594,14 +593,60 @@ build_anyURI_test() ->
     [
      begin
 	 Data = parse_anyURI(make_Element('URL', URI)),
-	 ?DBG({URI, Data}),
+	 %?DBG({URI, Data}),
 	 NewURI = build_anyURI(Data),
-	 ?DBG({URI, NewURI}),
+	 %?DBG({URI, NewURI}),
 	 ?assertEqual(URI, NewURI)
      end ||  URI <- ?TEST_URI_BUILDER
     ].
 
 
--endif.
+-define(EVENT_CODE,
+	{xmlElement,'EventCode','EventCode',[],
+	 {xmlNamespace,[],
+	  [{"SOAP-ENV",
+	    'http://schemas.xmlsoap.org/soap/envelope/'},
+	   {"SOAP-ENC",
+	    'http://schemas.xmlsoap.org/soap/encoding/'},
+	   {"xsd",'http://www.w3.org/2001/XMLSchema'},
+	   {"xsi",
+	    'http://www.w3.org/2001/XMLSchema-instance'},
+	   {"cwmp",'urn:dslforum-org:cwmp-1-0'}]},
+	 [{'SOAP-ENV:Envelope',1}],
+	 2,[],
+	 [{xmlText,
+	   [{'EventCode',2},{'SOAP-ENV:Envelope',1}],
+	   1,[],"0 BOOTSTRAP",text}],
+	 [],"/local/aghergu/repos/otp/tr69/test/data",
+	 undeclared}
+       ).
 
+parse_EventCodeType_test() ->
+    [
+     begin
+	 Code = parse_EventCodeType(?EVENT_CODE, #parser{}),
+	 ?assertEqual(0, Code)
+     end
+    ].
+
+
+-define(XML_NAMESPACE,
+	{xmlNamespace,[],
+	 [{"soapenc",'http://schemas.xmlsoap.org/soap/encoding/'},
+	  {"soapenv",'http://schemas.xmlsoap.org/soap/envelope/'},
+	  {"cwmp",'urn:dslforum-org:cwmp-1-0'}]}
+       ).
+
+parse_ArraySize_test() ->
+    [
+     begin
+	 XmlNss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
+	 Nss = XmlNss#rpc_ns{inherited='cwmp'},
+	 {Value, Tag} = {"cwmp:ParameterValueStruct[0008]", 'ParameterValueStruct'},
+	 Num = tr_soap_types:parse_ArraySize(Value, Tag, Nss),
+	 ?assertEqual(8, Num)
+     end
+    ].
+
+-endif.
 
