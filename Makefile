@@ -1,6 +1,6 @@
 
 #TR_VSN = $(shell sed -n 's/.*{vsn,.*"\(.*\)"}.*/\1/p' src/tr.app.src)
-REBAR='./rebar' 
+REBAR='./rebar'
 # || which rebar`
 
 .PHONY: deps clean test
@@ -10,14 +10,14 @@ dir-local: test
 all: compile
 
 compile:
-	$(REBAR) -v compile 
+	$(REBAR) -v compile
 #skip_deps=true
 
 deps:
 	$(REBAR) check-deps || $(REBAR) get-deps
 
 clean:
-	$(REBAR) clean 
+	$(REBAR) clean
 	@rm -rf logs/*
 	@rm -rf test/*.beam
 	@rm -rf .eunit/*.beam
@@ -36,9 +36,13 @@ test.spec: test.spec.in
 	cat test.spec.in | sed -e "s,@PATH@,$(PWD)," > $(PWD)/test.spec
 
 ctest:  test.spec compile
-	run_test -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
+	ct_run -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
 
-test: 
+ct-shell:
+	ct_run -shell -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
+
+
+test:
 	$(REBAR) -v ct skip_deps=true suites=hdm_trace case=hdm_trace_test_case
 
 dialyzer-build:

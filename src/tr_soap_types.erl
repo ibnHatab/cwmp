@@ -143,10 +143,14 @@ parse_unsignedInt(#xmlElement{name=Name, content = Content}) ->
     {UInt,_Rest} = string:to_integer(ValueString),
     UInt.
 
+fix_undescore(S) -> % Fixup for underscore in URi
+    re:replace(S, "_", "-", [{return,list}]).
+	
 -spec parse_anyURI(#xmlElement{content::[any()]}) -> tuple().
 parse_anyURI(#xmlElement{name=Name, content = Content}) ->
     String = get_xmlText(Content),
-    case xmerl_uri:parse(String) of
+    Fixup = fix_undescore(String),
+    case xmerl_uri:parse(Fixup) of
 	{error,Error} ->
 	    return_error(Name, {String, Error});
         URI -> URI
@@ -368,7 +372,7 @@ parse_withSuportedValues(E, SuportedValues) ->
 
 parse_FaultCode(E) ->
     Code = parse_unsignedInt(E),
-    case lists:keyfind(Code, 1, ?SUPPORTED_CPE_FAULT_CODES) of
+    case lists:keyfind(Code, 1, ?SUPPORTED_CPE_FAULT_CODES) of	
 	{K, _S} ->
 	    K;
 	false ->

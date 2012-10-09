@@ -91,7 +91,8 @@
 -define(SUPPORTED_CPE_FAULT_CODES,
 	[
 	 %%        CPE Fault Codes from 9000 to 9799
-	   {9000, "9000 - Method not supported"}
+	   {0,    "No fault"}
+	 , {9000, "9000 - Method not supported"}
 	 , {9001, "9001 - Request denied (no reason specified)"}
 	 , {9002, "9002 - Internal error"}
 	 , {9003, "9003 - Invalid arguments"}

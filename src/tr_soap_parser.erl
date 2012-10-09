@@ -121,16 +121,16 @@ parse(S) ->
 
 -spec parse(#xmlElement{}, #parser{}) -> #rpc_data{}.
 parse(Doc, S) ->
-    try
-        parse_Document(Doc, S)
-    catch
-        error:Error ->
-	    Stacktrace = erlang:get_stacktrace(),
-	    erlang:raise(error, Error, Stacktrace);
-        %%FIXME: Probably thrown from return_error/2:
-        throw:{error, {_Line, _Cause}} = Error->
-	    Error
-    end.
+    %% try
+        parse_Document(Doc, S).
+    %% catch
+    %%     error:Error ->
+    %% 	    Stacktrace = erlang:get_stacktrace(),
+    %% 	    erlang:raise(error, Error, Stacktrace);
+    %%     %%FIXME: Probably thrown from return_error/2:
+    %%     throw:{error, {_Line, _Cause}} = Error->
+    %% 	    Error
+    %% end.
 
 -spec parse_Document(#xmlElement{}, #parser{}) -> #rpc_data{}.
 parse_Document(#xmlElement{name=QName, namespace = Namespace} = Doc, State) when is_tuple(Doc) ->
@@ -362,7 +362,7 @@ parse_MethodList(E, S) ->
 				   parse_error(Elem, State)
 			   end
 		   end,
-		   E, 'cwmp:string', NewState).
+		   E, 'xsd:string', NewState).
 
 -spec parse_DeviceIdStruct(#xmlElement{},#parser{}) -> #device_id_struct{}.
 parse_DeviceIdStruct(#xmlElement{content = Content} = E, S) ->

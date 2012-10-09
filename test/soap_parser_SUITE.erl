@@ -474,13 +474,14 @@ parse_EventCodeType_check(Expect, String) ->
 parse_ArraySize_tc(_Config) ->
     [
      begin
-	 ct:print(">>> ~p ~n",[{Expect, Value, Tag, Nss}]),
-	 Nss = #parser{},
-	 tr_soap_types:parse_ArraySize(Value, Tag, Nss)
+	 XmlNss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
+	 Nss = XmlNss#rpc_ns{inherited='cwmp'},
+	 {Value, Tag} = {"cwmp:ParameterValueStruct[0008]", 'ParameterValueStruct'},
+	 Expect = tr_soap_types:parse_ArraySize(Value, Tag, Nss)
      end
      ||
 	{Expect, Value, Tag, Nss} <- 
-	    [{8, "cwmp:ParameterValueStruct[0008]", 'ParameterValueStruct', 'cwmp'}
+	    [{8, "cwmp:ParameterValueStruct[0008]", 'ParameterValueStruct',{rpc_ns,undefined,soapenv,soapenc,cwmp,1,cwmp} }
 	    ]
     ],
     ok.

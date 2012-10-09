@@ -17,7 +17,7 @@
 -include("tr69.hrl").
 -include("proto.hrl").
 
--import(tr_soap_parser, [parse/2]).
+-import(tr_soap_parser, [parse/1]).
 
 
 %%--------------------------------------------------------------------
@@ -148,10 +148,10 @@ hdm_trace_test_case() ->
 hdm_trace_test_case(Config) ->    
     %% filename:join([?config(priv_dir, Config)
     Files = ?config(xml_files, Config),
-    io:format(user, "1>> ~p ~n", [Files]),
     lists:foreach(fun (File) ->
+			  io:format(user, "1>> ~p ~n", [File]),
 			  {Doc, _Rest} = xmerl_scan:file(File),
-			  _Rpc = parse(Doc, #parser{})
+			  _Rpc = parse(Doc)
 		  end,
 		  Files),
     ok.
