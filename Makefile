@@ -3,15 +3,17 @@
 REBAR='./rebar'
 # || which rebar`
 
-.PHONY: deps clean test
+.PHONY: test
 
-dir-local: test
+#dir-local: test
 
 all: compile
 
-compile:
+compile: deps
 	$(REBAR) -v compile
-#skip_deps=true
+
+app:
+	$(REBAR) -v compile skip_deps=true
 
 deps:
 	$(REBAR) check-deps || $(REBAR) get-deps
@@ -30,19 +32,19 @@ install: all
 	cp -r ebin $(DESTDIR)/lib/tr-$(IBROWSE_VSN)/
 
 utest:
-	$(REBAR) -v eunit skip_deps=true
+	$(REBAR) -v eunit skip_deps=true suite=tr_soap_types
 
 test.spec: test.spec.in
 	cat test.spec.in | sed -e "s,@PATH@,$(PWD)," > $(PWD)/test.spec
 
-ctest:  test.spec compile
+ctest:  test.spec app
 	ct_run -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
 
 ct-shell:
 	ct_run -shell -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
 
 
-test:
+test: app
 	$(REBAR) -v ct skip_deps=true suites=hdm_trace case=hdm_trace_test_case
 
 dialyzer-build:

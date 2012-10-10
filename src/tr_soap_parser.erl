@@ -86,7 +86,7 @@
 						%			 parse_dateTime/1,
 			parse_base64/1,
 			parse_anyURI/1,
-			parse_attribete/3,
+			parse_attribute/3,
 			parse_anySimpleType/1,
 			parse_XS_Array/4
 		       ]).
@@ -261,14 +261,14 @@ parse_Body(#xmlElement{content = Content} = E, S) ->
 parse_ID(Elem, #parser{ns=Nss} = _State) ->
     Value = parse_string(Elem),
     QName = get_QName('mustUnderstand', Nss#rpc_ns.ns_envelop),
-    MustuNderstand = parse_attribete(Elem, QName, boolean),
+    MustuNderstand = parse_attribute(Elem, QName, boolean),
     #id{mustUnderstand = MustuNderstand, value = Value}.
 
 -spec parse_HoldRequests(#xmlElement{},#parser{}) -> #hold_requests{}.
 parse_HoldRequests(Elem, #parser{ns=Nss} = _State) ->
     Value = parse_boolean(Elem),
     QName = get_QName('mustUnderstand', Nss#rpc_ns.ns_envelop),
-    MustuNderstand = parse_attribete(Elem, QName, boolean),
+    MustuNderstand = parse_attribute(Elem, QName, boolean),
     #hold_requests{mustUnderstand = MustuNderstand, value = Value}.
 
 -spec parse_TransferCompleteFaultStruct(#xmlElement{},#parser{}) -> #transfer_complete_fault_struct{}.
@@ -362,7 +362,7 @@ parse_MethodList(E, S) ->
 				   parse_error(Elem, State)
 			   end
 		   end,
-		   E, 'xsd:string', NewState).
+		   E, 'string', NewState).
 
 -spec parse_DeviceIdStruct(#xmlElement{},#parser{}) -> #device_id_struct{}.
 parse_DeviceIdStruct(#xmlElement{content = Content} = E, S) ->

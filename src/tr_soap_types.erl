@@ -16,7 +16,7 @@
 	  parse_dateTime/1,
 	  parse_base64/1,
 	  parse_anyURI/1,
-	  parse_attribete/3, % FIXME: attribete speling
+	  parse_attribute/3,
 	  parse_anySimpleType/1
 	]).
 
@@ -24,11 +24,8 @@
 	]).
 
 
--import(tr_soap_lib, [return_error/2, parse_error/2, parse_error/3,
-		      get_QName/2, local_ns/2, normalize_to_local_ns/2,
-		      maybe_tag/3
-
-						%, maybe_tag/4
+-import(tr_soap_lib, [return_error/2, parse_error/2, parse_error/3, parse_warning/3,
+		      get_QName/2, local_ns/2, normalize_to_local_ns/2, maybe_tag/3
 		     ]).
 
 
@@ -145,7 +142,7 @@ parse_unsignedInt(#xmlElement{name=Name, content = Content}) ->
 
 fix_undescore(S) -> % Fixup for underscore in URi
     re:replace(S, "_", "-", [{return,list}]).
-	
+
 -spec parse_anyURI(#xmlElement{content::[any()]}) -> tuple().
 parse_anyURI(#xmlElement{name=Name, content = Content}) ->
     String = get_xmlText(Content),
@@ -163,25 +160,29 @@ parse_dateTime(#xmlElement{name=Name, content = Content} = _E) when is_tuple(_E)
 parse_dateTime(String) when is_list(String) ->
     convert_iso8601_date(String).
 
-parse_base64(_E) -> %% FIXME: implement
-    <<"aa">>.
+parse_base64(Msg) ->
+    DecMsg = base64:decode(Msg),
+    if
+	is_binary(DecMsg) -> binary_to_list(DecMsg);
+	true -> DecMsg
+    end.
 
--spec parse_attribete(#xmlElement{}, atom(), atom()) -> any() | undefined.
-parse_attribete(Elem, AttrName, boolean) ->
+-spec parse_attribute(#xmlElement{}, atom(), atom()) -> any() | undefined.
+parse_attribute(Elem, AttrName, boolean) ->
     case  get_AttributeByName(Elem, AttrName) of
 	undefined ->
 	    undefined;
 	Value ->
 	    list_to_boolean(check_Value(AttrName, Value, boolean))
     end;
-parse_attribete(Elem, AttrName, string) ->
+parse_attribute(Elem, AttrName, string) ->
     case  get_AttributeByName(Elem, AttrName) of
 	undefined ->
 	    undefined;
 	Value ->
 	    check_Value(AttrName, Value, string)
     end;
-parse_attribete(Elem, AttrName, int) ->
+parse_attribute(Elem, AttrName, int) ->
     case  get_AttributeByName(Elem, AttrName) of
 	undefined ->
 	    undefined;
@@ -189,7 +190,7 @@ parse_attribete(Elem, AttrName, int) ->
 	    IntS = check_Value(AttrName, Value, int),
 	    string:to_integer(IntS)
     end;
-parse_attribete(Elem, AttrName, Type) ->
+parse_attribute(Elem, AttrName, Type) ->
     case  get_AttributeByName(Elem, AttrName) of
 	undefined ->
 	    undefined;
@@ -314,11 +315,26 @@ parse_ArraySize(Value, ContentTag, Nss) ->
     case re:run(Value, "\(.*\)\\[\(.*\)\\]") of
 	{match,[_All, {TagStart,TagLength},{DigitStart,DigitLength}]} ->
 	    ValueStr = string:substr(Value, TagStart+1, TagLength),
-	    
+
 	    {ValueName, ValueNs} = normalize_to_local_ns(list_to_atom(ValueStr), Nss),
 	    {ContentName, ContentNs} = normalize_to_local_ns(ContentTag, Nss),
-	    
-	    if {ContentName, ContentNs} == {ValueName, ValueNs} ->
+
+	    ?DBG({ContentName, ContentNs}),
+	    ?DBG({ValueName, ValueNs}),
+
+	    if
+		ValueNs =:= undefined ->
+		    parse_warning(ValueName, ValueNs, "Namespace missmatch");
+		true ->
+		    pass
+	    end,
+
+	    if
+		ContentName =:= ValueName andalso (
+					    ContentNs =:= ValueNs
+					    orelse
+					    ValueNs =:= undefined
+					   ) ->
 		    DigitStr = string:substr(Value, DigitStart+1, DigitLength),
 		    case string:to_integer(DigitStr) of
 			{error, Reason} ->
@@ -337,7 +353,7 @@ parse_XS_Array(Mapper, #xmlElement{content = Content} = E,
 	       ContentTag, #parser{ns = Nss} = State) when is_function(Mapper) ->
     NsSoapEnc = local_ns('soap-enc', Nss),
     AttrName = get_QName('arrayType', NsSoapEnc),
-    Value = parse_attribete(E, AttrName, string),
+    Value = parse_attribute(E, AttrName, string),
     Size = parse_ArraySize(Value, ContentTag, Nss),
     List = [Mapper(Elem, State) || Elem <- Content, tr_soap_lib:xmlElement(Elem)],
     if
@@ -372,7 +388,7 @@ parse_withSuportedValues(E, SuportedValues) ->
 
 parse_FaultCode(E) ->
     Code = parse_unsignedInt(E),
-    case lists:keyfind(Code, 1, ?SUPPORTED_CPE_FAULT_CODES) of	
+    case lists:keyfind(Code, 1, ?SUPPORTED_CPE_FAULT_CODES) of
 	{K, _S} ->
 	    K;
 	false ->
@@ -405,7 +421,9 @@ format_unsignedInt(Data) ->
     integer_to_list(Data).
 format_dateTime(Data) ->
     Data. %FIXME: match parse
-format_base64(Data) -> Data. %FIXME: match parse
+format_base64(Data) ->
+    Msg = base64:encode(Data),
+    binary_to_list(Msg).
 
 
 -define(HTTP_DEFAULT_PORT, 80).
@@ -418,9 +436,9 @@ build_anyURI(Data) ->
 	    "http://" ++ build_HosPort(Host, Port, ?HTTP_DEFAULT_PORT) ++
 		Path ++ Query;	%FIXME: normalize URI / build_host_port ?HTTP_DEFAULT_PORT
 	{https, Host,Port,Path,Query} ->
-	    "https://" ++ build_HosPort(Host, Port, ?HTTPS_DEFAULT_PORT) ++	       
-		Path ++ Query;	
-	{ftp, Creds,Host,Port,Path} -> 
+	    "https://" ++ build_HosPort(Host, Port, ?HTTPS_DEFAULT_PORT) ++
+		Path ++ Query;
+	{ftp, Creds,Host,Port,Path} ->
 	    "ftp://" ++	build_Credentials(Creds)  ++ build_HosPort(Host, Port, ?FTP_DEFAULT_PORT)  ++ Path;
 	_ ->
 	    return_error(Data, "Unknown schema")
@@ -521,7 +539,7 @@ build_DefaultDeploymentUnitOperationType(Data)		-> maybe_tag('DefaultDeploymentU
 
 %% Missed types
 build_FaultCode(Data)			-> maybe_tag('FaultCode', fun format_int/1, Data).
-build_base64(Data) ->    Data.
+build_base64(Data)			-> maybe_tag('FaultCode', fun format_base64/1, Data).
 
 %% end
 
@@ -650,10 +668,26 @@ parse_ArraySize_test() ->
      begin
 	 XmlNss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
 	 Nss = XmlNss#rpc_ns{inherited='cwmp'},
-	 {Value, Tag} = {"cwmp:ParameterValueStruct[0008]", 'ParameterValueStruct'},
 	 Num = tr_soap_types:parse_ArraySize(Value, Tag, Nss),
-	 ?assertEqual(8, Num)
-     end
+	 ?assertEqual(Expect, Num)
+     end ||
+     {Value, Tag, Expect} <- [
+			      {"cwmp:ParameterValueStruct[0008]", 'ParameterValueStruct', 8},
+			      {"xsd:string[6]", 'string', 6} % have to raise warning on XSD but expect CWMP
+			     ]
+    ].
+
+
+base64_loop_test_no() ->
+    [
+     begin
+	 EncMsg = parse_base64(Msg),
+	 EncDecMsg = format_base64(EncMsg),
+	 ?assertEqual(Msg, EncDecMsg)
+     end || Msg <- [
+		    "mama mila ramu",
+		    term_to_binary({test, "Text"})
+		   ]
     ].
 
 -endif.

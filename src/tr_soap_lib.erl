@@ -75,11 +75,15 @@ parse_error(Elem, State) ->
     parse_error(Elem, State, "Unknown element").
 
 
--spec parse_warning(#xmlElement{}, #parser{}) -> no_return().
+-spec parse_warning(#xmlElement{} | string() | atom(), #parser{}) -> no_return().
+parse_warning(Name, Cause, Msg) when is_atom(Name) or is_list(Name) ->
+    ?DBG({Name, Cause, Msg}),
+    io:format(user, "Warning: ~p in <~p> caused by '~p'.~n", [Msg, Name, Cause]);
 parse_warning(Elem, State, Msg) ->
     Path = [Elem#xmlElement.name | [N || {N, _Id} <- Elem#xmlElement.parents]],
     XPath = "/" ++ join(map(fun atom_to_list/1, reverse(Path)), "/"),
-    io:format(user, ":~p ~n Expect: ~p, ~p ~n", [XPath, State, Msg]).
+    io:format(user, "Warning: ~p at ~p, caused by '~p'.~n", [Msg, XPath, State]).
+
 
 parse_warning(Elem, State) ->
     parse_warning(Elem, State, "Unknown element").
