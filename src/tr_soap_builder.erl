@@ -909,6 +909,9 @@ build_FileTypeArg(Data,  State) ->
 get_rpc_methods_response() ->
     build_GetRPCMethodsResponse(?GET_RPC_METHODS_RESPONSE, #builder{}).
 
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
 main() ->
     Nss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
     ?DBG(Nss),
@@ -920,10 +923,6 @@ main() ->
     ?DBG(XML),
     ok.
 
-
--ifdef(TEST).
-
--include_lib("eunit/include/eunit.hrl").
 
 build_rpc_data_test_no() ->
     Builder =  #builder{},
@@ -962,13 +961,9 @@ export_test_no() ->
 		  },
 
 	      XML = xmerl:export_simple([Data3], xmerl_xml, [{prolog,[]}]),
-	      ?DBG(unicode:characters_to_list(XML)).
+%	      ?DBG(unicode:characters_to_list(XML)),
+	ok.
 
-tuple_test_no()->
-    RootEl = #autonomous_transfer_complete{
-      fault_struct = #transfer_complete_fault_struct{}
-     },
-    ?DBG(tuple_to_list(RootEl)).
 
 main_test() ->
     main(),

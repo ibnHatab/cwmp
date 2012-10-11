@@ -1738,10 +1738,10 @@ parse_root_test() ->
 	],
     A = array:from_list(T),
     F = array:get(7,  A),
-    ?DBG(F),
+%    ?DBG(F),
     {Doc, _Rest} = xmerl_scan:file(F),
     Rpc = parse(Doc, #parser{}),
-    ?DBG(Rpc),
+%    ?DBG(Rpc),
     ok.
 
 -endif.

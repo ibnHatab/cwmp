@@ -151,7 +151,7 @@ hdm_trace_test_case(Config) ->
     lists:foreach(fun (File) ->
 			  io:format(user, "1>> ~p ~n", [File]),
 			  {Doc, _Rest} = xmerl_scan:file(File),
-			  _Rpc = parse(Doc)
+			  _Rpc = parse(Doc)			 
 		  end,
 		  Files),
     ok.

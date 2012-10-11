@@ -160,12 +160,8 @@ parse_dateTime(#xmlElement{name=Name, content = Content} = _E) when is_tuple(_E)
 parse_dateTime(String) when is_list(String) ->
     convert_iso8601_date(String).
 
-parse_base64(Msg) ->
-    DecMsg = base64:decode(Msg),
-    if
-	is_binary(DecMsg) -> binary_to_list(DecMsg);
-	true -> DecMsg
-    end.
+parse_base64(Msg) when is_list(Msg) ->
+    base64:decode(Msg).
 
 -spec parse_attribute(#xmlElement{}, atom(), atom()) -> any() | undefined.
 parse_attribute(Elem, AttrName, boolean) ->
@@ -315,13 +311,10 @@ parse_ArraySize(Value, ContentTag, Nss) ->
     case re:run(Value, "\(.*\)\\[\(.*\)\\]") of
 	{match,[_All, {TagStart,TagLength},{DigitStart,DigitLength}]} ->
 	    ValueStr = string:substr(Value, TagStart+1, TagLength),
-
+	    
 	    {ValueName, ValueNs} = normalize_to_local_ns(list_to_atom(ValueStr), Nss),
 	    {ContentName, ContentNs} = normalize_to_local_ns(ContentTag, Nss),
-
-	    ?DBG({ContentName, ContentNs}),
-	    ?DBG({ValueName, ValueNs}),
-
+	    
 	    if
 		ValueNs =:= undefined ->
 		    parse_warning(ValueName, ValueNs, "Namespace missmatch");
@@ -421,7 +414,7 @@ format_unsignedInt(Data) ->
     integer_to_list(Data).
 format_dateTime(Data) ->
     Data. %FIXME: match parse
-format_base64(Data) ->
+format_base64(Data) when is_binary(Data)->
     Msg = base64:encode(Data),
     binary_to_list(Msg).
 
@@ -434,7 +427,7 @@ build_anyURI(Data) ->
     case Data of
 	{http, Host,Port,Path,Query} ->
 	    "http://" ++ build_HosPort(Host, Port, ?HTTP_DEFAULT_PORT) ++
-		Path ++ Query;	%FIXME: normalize URI / build_host_port ?HTTP_DEFAULT_PORT
+		Path ++ Query;
 	{https, Host,Port,Path,Query} ->
 	    "https://" ++ build_HosPort(Host, Port, ?HTTPS_DEFAULT_PORT) ++
 		Path ++ Query;
@@ -678,14 +671,17 @@ parse_ArraySize_test() ->
     ].
 
 
-base64_loop_test_no() ->
+base64_loop_test() ->
     [
      begin
-	 EncMsg = parse_base64(Msg),
-	 EncDecMsg = format_base64(EncMsg),
+%	 ?DBG(Msg),
+	 EncMsg = format_base64(Msg),
+%	 ?DBG(EncMsg),
+	 EncDecMsg = parse_base64(EncMsg),
+%	 ?DBG(EncDecMsg),
 	 ?assertEqual(Msg, EncDecMsg)
      end || Msg <- [
-		    "mama mila ramu",
+		    <<"mama mila ramu">>,
 		    term_to_binary({test, "Text"})
 		   ]
     ].

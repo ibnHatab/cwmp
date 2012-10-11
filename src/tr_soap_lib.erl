@@ -14,7 +14,7 @@
 -export([return_error/2,
 	 parse_error/2, parse_error/3, parse_warning/2, parse_warning/3,
 	 build_error/2, build_error/3, build_warning/2, build_warning/3,
-	 
+
 	 get_QName/2, get_local_name/1,
 	 local_name/1, local_ns/2,
 	 xmlText/1,
@@ -62,7 +62,6 @@ return_error(Tag, Message) ->
 
 -spec parse_error(tuple() | string(), #parser{},string()) -> no_return().
 parse_error(Elem, State, Msg) when is_record(Elem, xmlElement)->
-%    ?DBG(erlang:get_stacktrace()),
     Path = [Elem#xmlElement.name | [N || {N, _Id} <- Elem#xmlElement.parents]],
     XPath = "/" ++ join(map(fun atom_to_list/1, reverse(Path)), "/"),
     return_error(XPath, {State, Msg});
@@ -76,10 +75,11 @@ parse_error(Elem, State) ->
 
 
 -spec parse_warning(#xmlElement{} | string() | atom(), #parser{}) -> no_return().
-parse_warning(Name, Cause, Msg) when is_atom(Name) or is_list(Name) ->
-    ?DBG({Name, Cause, Msg}),
+parse_warning(Name, Cause, Msg) when is_atom(Name) ->
+    parse_warning(atom_to_list(Name), Cause, Msg);
+parse_warning(Name, Cause, Msg) when is_list(Name) ->
     io:format(user, "Warning: ~p in <~p> caused by '~p'.~n", [Msg, Name, Cause]);
-parse_warning(Elem, State, Msg) ->
+parse_warning(Elem, State, Msg) when is_record(Elem, xmlElement) ->
     Path = [Elem#xmlElement.name | [N || {N, _Id} <- Elem#xmlElement.parents]],
     XPath = "/" ++ join(map(fun atom_to_list/1, reverse(Path)), "/"),
     io:format(user, "Warning: ~p at ~p, caused by '~p'.~n", [Msg, XPath, State]).
@@ -95,8 +95,8 @@ build_error(Data, State, Msg) when is_tuple(Data) ->
     Method = element(1, Data),
     return_error(Method, {State, Msg});
 build_error(Tag, State, Msg) ->
-    return_error(Tag, {State, Msg}).  
-    
+    return_error(Tag, {State, Msg}).
+
 -spec build_error(body_type(), #builder{}) -> no_return().
 build_error(Data, State) ->
     build_error(Data, State, "Unknown method").
@@ -144,7 +144,7 @@ get_local_name(QName) ->
 -spec check_namespace(atom(), #xmlElement{}, #parser{}) -> #parser{}.
 check_namespace(RefQName, #xmlElement{name = QName} = Elem, #parser{ns=Nss} = State) ->
     {RefNsC, RefName} = local_name(RefQName),
-    
+
     RefNs = local_ns(RefNsC, Nss),
     {Ns, Name} = local_name(QName),
 
@@ -153,7 +153,7 @@ check_namespace(RefQName, #xmlElement{name = QName} = Elem, #parser{ns=Nss} = St
 	    State;
 	{RefName, '', RefNs}->
 	    State;
-	{RefName, RefNs, _InhNs} -> 
+	{RefName, RefNs, _InhNs} ->
 	    State#parser{ ns = Nss#rpc_ns{ inherited = Ns }};
 	_ ->
 	    parse_warning(Elem, RefNs, "Namespace missmatch"),
@@ -273,7 +273,7 @@ check_rw_id(DocRef) ->
 
 get_ns_orts_test() ->
     Nss = match_cwmp_ns_and_version(?XML_NAMESPACE),
-    ?DBG(Nss),
+%    ?DBG(Nss),
     ?assertEqual(undefined, Nss#rpc_ns.ns_xsd),
     ?assertEqual('soapenv', Nss#rpc_ns.ns_envelop),
     ?assertEqual('cwmp', Nss#rpc_ns.ns_cwmp),
@@ -288,7 +288,7 @@ qname_test() ->
 name_namespace_test() ->
     ?assertEqual({'','name'}, local_name('name')),
     ?assertEqual('name', get_local_name('ns:name')),
-    
+
     {Name, Ns} = {'ns:name', 'ns'},
     ?assertEqual(Name, get_QName(get_local_name(Name), Ns)),
     ok.
@@ -298,7 +298,7 @@ check_namespace_test() ->
     Nss = match_cwmp_ns_and_version(?XML_NAMESPACE),
     State = check_namespace('soap-env:Envelope',
 			    #xmlElement {name='soapenv:Envelope'}, #parser{ns=Nss}),
-    
+
     ?assertEqual(Nss#rpc_ns{inherited='soapenv'}, State#parser.ns),
 
     ?assertEqual(State, check_namespace('soap-env:Body',
@@ -306,12 +306,12 @@ check_namespace_test() ->
 
     ?assertEqual(State, check_namespace('soap-env:Header',
 					#xmlElement {name='Header'}, State)),
-    
-    ok.
-    
 
-    
-    
+    ok.
+
+
+
+
 -define(WHENEVER, "Hello meck").
 meck_test()->
     meck:new(tr_soap),
@@ -323,4 +323,4 @@ meck_test()->
 -endif.
 
 
-    
+
