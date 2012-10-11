@@ -105,7 +105,7 @@ build_error(Data, State) ->
 -spec build_warning(body_type(), #builder{}) -> no_return().
 build_warning(Data, State, Msg) ->
     Method = element(1, Data),
-    io:format(user, ":~p ~n Expect: ~p, ~p ~n", [Method, State, Msg]).
+    io:format(user, ":~p ~n Expect: ~p, ~p ~n", [Method, State, Msg]). %FIXME: make as in parse_warning
 
 build_warning(Elem, State) ->
     build_warning(Elem, State, "Unknown element").

@@ -314,20 +314,16 @@ parse_ArraySize(Value, ContentTag, Nss) ->
 	    
 	    {ValueName, ValueNs} = normalize_to_local_ns(list_to_atom(ValueStr), Nss),
 	    {ContentName, ContentNs} = normalize_to_local_ns(ContentTag, Nss),
-	    
+
 	    if
-		ValueNs =:= undefined ->
-		    parse_warning(ValueName, ValueNs, "Namespace missmatch");
+		ValueNs /= ContentNs ->
+		    parse_warning(ValueName, {ValueNs, ContentNs}, "Namespace missmatch");
 		true ->
 		    pass
 	    end,
 
 	    if
-		ContentName =:= ValueName andalso (
-					    ContentNs =:= ValueNs
-					    orelse
-					    ValueNs =:= undefined
-					   ) ->
+		ContentName =:= ValueName ->
 		    DigitStr = string:substr(Value, DigitStart+1, DigitLength),
 		    case string:to_integer(DigitStr) of
 			{error, Reason} ->
@@ -336,10 +332,10 @@ parse_ArraySize(Value, ContentTag, Nss) ->
 			    Int
 		    end;
 	       true ->
-		    parse_error(Value, ContentTag, "Bad Tag")
+		    parse_error(Value, ContentTag, "Tags not same")
 	    end;
 	_ ->
-	    parse_error(Value, ContentTag, "Parse array size")
+	    parse_error(Value, ContentTag, "Array size format")
     end.
 
 parse_XS_Array(Mapper, #xmlElement{content = Content} = E,
@@ -381,11 +377,8 @@ parse_withSuportedValues(E, SuportedValues) ->
 
 parse_FaultCode(E) ->
     String = parse_string(E),
-    case string:chr(String, $\s) of
-	0 ->
-	    parse_error(E, String);
-	Space ->
-	    Code = string:substr(String, 1, Space -1),
+    case string:tokens(String, " ") of
+	[Code | _] ->
 	    {Value, _ } = string:to_integer(Code),
       	    case lists:keyfind(Value, 1, ?SUPPORTED_CPE_FAULT_CODES) of
 		{K, _S} ->

@@ -125,7 +125,7 @@ groups() ->
 %% Reason = term()
 %% @end
 %%--------------------------------------------------------------------
-all() -> 
+all() ->
     [hdm_trace_test_case].
 
 %%--------------------------------------------------------------------
@@ -133,7 +133,7 @@ all() ->
 %% Info = [tuple()]
 %% @end
 %%--------------------------------------------------------------------
-hdm_trace_test_case() -> 
+hdm_trace_test_case() ->
     [].
 
 %%--------------------------------------------------------------------
@@ -142,16 +142,16 @@ hdm_trace_test_case() ->
 %%               {save_config,Config1} | {skip_and_save,Reason,Config1}
 %% Config0 = Config1 = [tuple()]
 %% Reason = term()
-%% Comment = term() 
+%% Comment = term()
 %% @end
 %%--------------------------------------------------------------------
-hdm_trace_test_case(Config) ->    
+hdm_trace_test_case(Config) ->
     %% filename:join([?config(priv_dir, Config)
     Files = ?config(xml_files, Config),
     lists:foreach(fun (File) ->
-			  io:format(user, "1>> ~p ~n", [File]),
+			  ct:print("CT parse trace: ~p ~n", [File]),
 			  {Doc, _Rest} = xmerl_scan:file(File),
-			  _Rpc = parse(Doc)			 
+			  _Rpc = parse(Doc)
 		  end,
 		  Files),
     ok.

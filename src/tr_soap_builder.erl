@@ -914,13 +914,13 @@ get_rpc_methods_response() ->
 
 main() ->
     Nss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
-    ?DBG(Nss),
+%    ?DBG(Nss),
     Builder = builder([{namespaces, Nss}]),
     Export = Builder(?RPC_FAULT),
-    ?DBG(Export),
+%    ?DBG(Export),
     XML = xmerl:export_simple(Export, xmerl_xml, [{prolog,[]}]),
 						%    ?DBG(unicode:characters_to_list(XML)),
-    ?DBG(XML),
+%    ?DBG(XML),
     ok.
 
 

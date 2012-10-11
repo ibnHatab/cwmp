@@ -11,7 +11,7 @@
 -compile(export_all).
 
 -include_lib("common_test/include/ct.hrl").
--include_lib("xmerl/include/xmerl.hrl"). 
+-include_lib("xmerl/include/xmerl.hrl").
 
 -include("proto.hrl").
 -include("tr69.hrl").
@@ -138,7 +138,7 @@ groups() ->
 %% Reason = term()
 %% @end
 %%--------------------------------------------------------------------
-all() ->    
+all() ->
     [
      parse_boolean_tc
      ,parse_iso8601_tc
@@ -166,7 +166,7 @@ all() ->
 %% Info = [tuple()]
 %% @end
 %%--------------------------------------------------------------------
-parse_boolean_tc() -> 
+parse_boolean_tc() ->
     [].
 
 parse_iso8601_tc() ->
@@ -289,7 +289,7 @@ parse_string_tc(_Config) ->
 			     , {               "1", "1"}
 			     , {            "true", "true"}
 			    ]],
-    ok.		   
+    ok.
 parse_string_check(Expect, String) ->
     %setup
     E = make_Element('ParseString', String),
@@ -319,7 +319,7 @@ parse_int_tc(_Config) ->
 			     , { 11, "  11  "}
 			     , {  0, "   -0  "}
 			    ]],
-    ok.  
+    ok.
 parse_int_check(Expect, String) ->
     %setup
     E = make_Element('ParseInt', String),
@@ -395,13 +395,13 @@ name_namespace_tc(_Config) ->
     {'','name'} = tr_soap_lib:local_name('name'),
 
     'name' = tr_soap_lib:get_local_name('ns:name'),
-    
+
     {Name, Ns} = {'ns:name', 'ns'},
     Name = tr_soap_lib:get_QName(tr_soap_lib:get_local_name(Name), Ns),
-    
+
     ok.
 
-%% name_namespace_check(_Expect, _String) ->  
+%% name_namespace_check(_Expect, _String) ->
 %%     ok.
 
 -define(XML_NAMESPACE,
@@ -416,19 +416,12 @@ check_namespace_tc(_Config) ->
     Nss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
     State = tr_soap_lib:check_namespace('soap-env:Envelope',
      			    #xmlElement {name='soapenv:Envelope'}, #parser{ns=Nss}),
-    
-    ct:print(">>> ~p ~n>>> ~p ~n",[Nss#rpc_ns{inherited='soapenv'},State#parser.ns]),
-    %% illegal pattern 
-    %%Nss#rpc_ns{inherited='soapenv'} =  State#parser.ns,
-    
+
     Body = tr_soap_lib:check_namespace('soap-env:Body',#xmlElement {name='soapenv:Body'}, State),
     State = Body,
-    ct:print(">>> ~p ~n>>> ~p ~n",[State, Body]),
 
     Header = tr_soap_lib:check_namespace('soap-env:Header',#xmlElement {name='soapenv:Header'}, State),
     State = Header,
-    ct:print(">>> ~p ~n>>> ~p ~n",[State, Header]),
-
     ok.
 
 
@@ -439,7 +432,7 @@ parse_EventCodeType_tc(_Config) ->
     [
      begin
 	 parse_EventCodeType_check(Expect, String)
-	 
+
      end
       ||
 	{Expect, String} <- [
@@ -476,7 +469,7 @@ parse_ArraySize_tc(_Config) ->
 	 Expect = tr_soap_types:parse_ArraySize(Value, Tag, Nss)
      end
      ||
-	{Expect, Value, Tag, Nss} <- 
+	{Expect, Value, Tag, Nss} <-
 	    [{8, "cwmp:ParameterValueStruct[0008]", 'ParameterValueStruct',{rpc_ns,undefined,soapenv,soapenc,cwmp,1,cwmp} }
 	    ]
     ],
@@ -499,7 +492,7 @@ parse_FileType_tc(_Config) ->
 				   ,{ 3, "3 Vendor Configuration File, [1-9]\d*", 'UploadFileType'}
 				   ,{ 4, "4 Vendor Log, File"                   , 'TransferFileType'}
 				   ,{ 6, "6 Ringer, File"                       , 'TransferFileType'}
-				  ]],			    	    
+				  ]],
     ok.
 parse_FileType_check(Expect, String, Type) ->
     %setup
@@ -602,8 +595,8 @@ parse_WindowMode_check(Expect, String) ->
 build_anyURI_tc(_Config)->
     [
      begin
-	 build_anyURI_check(Expect, String) 
-	 
+	 build_anyURI_check(Expect, String)
+
      end
      ||
 	{Expect, String} <-lists:zip([ "http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
@@ -612,7 +605,7 @@ build_anyURI_tc(_Config)->
 				       ,"http://cpe-host-name.com:41/kick.html"
 				       ,"http://cpe-host-name.com:41/"
 				       ,"http://cpe-host-name.com/"
-				       
+
 				       ,"ftp://user:pass@cpe-host-name.com/kick.pcap"
 				       ,"ftp://user:pass@cpe-host-name.com/kick.pcap"
 				       ,"ftp://user:pass@cpe-host-name.com:35/kick.pcap"
@@ -627,7 +620,7 @@ build_anyURI_tc(_Config)->
 				       ,"https://cpe-host-name.com:210/kick.html"
 				       ,"https://cpe-host-name.com:210/"
 				       ,"https://cpe-host-name.com/"
-				       
+
 				     ],
 				     [ "http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"
 				       ,"http://cpe-host-name.com:80/kick.html?command=cmd&arg=1&next=home"
@@ -635,7 +628,7 @@ build_anyURI_tc(_Config)->
 				       ,"http://cpe-host-name.com:41/kick.html"
 				       ,"http://cpe-host-name.com:41"
 				       ,"http://cpe-host-name.com"
-				       
+
 				       ,"ftp://user:pass@cpe-host-name.com/kick.pcap"
 				       ,"ftp://user:pass@cpe-host-name.com:21/kick.pcap"
 				       ,"ftp://user:pass@cpe-host-name.com:35/kick.pcap"
@@ -653,7 +646,7 @@ build_anyURI_tc(_Config)->
 
 				     ])
     ],
-    ok. 
+    ok.
 
 build_anyURI_check(Expect, String) ->
     %setup
@@ -661,9 +654,9 @@ build_anyURI_check(Expect, String) ->
     Data = tr_soap_types:parse_anyURI(E),
     %execute
     Res = tr_soap_types:build_anyURI(Data),
-    %assert 
+    %assert
     Expect = Res.
-    
+
 
 %%--------------------------------------------------------------------
 %%% Local API
@@ -671,7 +664,7 @@ build_anyURI_check(Expect, String) ->
 
 make_Element(Name, Text) when is_atom(Name) ->
     QName = tr_soap_lib:get_QName(Name, 'cwmp'),
- %   ?DBG(QName),    
+ %   ?DBG(QName),
     {xmlElement, QName, QName,
      {"cwmp", Name},
          {xmlNamespace,[],
