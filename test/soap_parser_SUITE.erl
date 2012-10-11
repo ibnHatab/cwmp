@@ -436,14 +436,10 @@ check_namespace_tc(_Config) ->
 %%% Parse EventCodeType Test
 %%-------------------------------------------
 parse_EventCodeType_tc(_Config) ->
-    Elem = make_Element('ParseEventCodeType',"9 REQUEST, DOWNLOAD"),
-    State = #parser{},
-    ct:print(">>>  ~p ~n",[tr_soap_types:parse_EventCodeType(Elem, State)]),
-    
     [
      begin
 	 parse_EventCodeType_check(Expect, String)
-	 ,ct:print("--> ~p  ~p ~n",[Expect, parse_EventCodeType_check(Expect, String)])
+	 
      end
       ||
 	{Expect, String} <- [
@@ -524,13 +520,13 @@ parse_FaultCode_tc(_Config) ->
 	 parse_FaultCode_check(Expect, String)
      end
       ||
-	{Expect, String} <- [
-			     { 9000,  "9000"}
-			     ,{ 9021, "9021"}
-			     ,{ 9027, "9027"}
-			     ,{ 9007, "9007"}
-			     ,{ 9011, "9011"}
-			     ,{ 9032, "9032"}
+	{Expect, String} <- [%%FIXME {0,    "No fault"}
+			     { 9000,  "9000 - Method not supported"}
+			     ,{ 9021, "9021 - Cancelation of file transfer not permitted in current transfer state"}
+			     ,{ 9027, "9027 - System Resources Exceeded"}
+			     ,{ 9007, "9007 - Invalid parameter value"}
+			     ,{ 9011, "9011 - Upload failure"}
+			     ,{ 9032, "9032 - Invalid Deployment Unit Update – Version already exists"}
 			    ]],
     ok.
 parse_FaultCode_check(Expect, String) ->
@@ -607,7 +603,7 @@ build_anyURI_tc(_Config)->
     [
      begin
 	 build_anyURI_check(Expect, String) 
-	 %% ct:print(">>>~p ~n>>>~p ~n",[Expect, String])
+	 
      end
      ||
 	{Expect, String} <-lists:zip([ "http://cpe-host-name.com/kick.html?command=cmd&arg=1&next=home"

@@ -380,12 +380,19 @@ parse_withSuportedValues(E, SuportedValues) ->
     end.
 
 parse_FaultCode(E) ->
-    Code = parse_unsignedInt(E),
-    case lists:keyfind(Code, 1, ?SUPPORTED_CPE_FAULT_CODES) of
-	{K, _S} ->
-	    K;
-	false ->
-	    parse_error(E, Code, "Fault Code")
+    String = parse_string(E),
+    case string:chr(String, $\s) of
+	0 ->
+	    parse_error(E, String);
+	Space ->
+	    Code = string:substr(String, 1, Space -1),
+	    {Value, _ } = string:to_integer(Code),
+      	    case lists:keyfind(Value, 1, ?SUPPORTED_CPE_FAULT_CODES) of
+		{K, _S} ->
+		    K;
+		false ->
+		    parse_error(E, Value, "Fault Code")
+	    end
     end.
 
 parse_Notification(E) ->
@@ -670,6 +677,12 @@ parse_ArraySize_test() ->
 			     ]
     ].
 
+parse_FaultCode_test() ->
+    F = make_Element('FaultCode',"9000 - Method not supported"),
+    E = parse_FaultCode(F),
+    ?DBG(E)
+	,?assertEqual(E,9000)
+    .
 
 base64_loop_test() ->
     [
