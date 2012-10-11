@@ -1,0 +1,231 @@
+POST /cwmpWeb/CPEMgt HTTP/1.1
+Content-type: text/xml; charset=UTF-8
+Content-Length: 4113
+Host: 135.243.24.162:7003
+Connection: Keep-Alive
+
+<soapenv:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:cwmp="urn:dslforum-org:cwmp-1-0" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <soapenv:Header>
+        <cwmp:ID soapenv:mustUnderstand="1">1</cwmp:ID>
+        <cwmp:NoMoreRequests>1</cwmp:NoMoreRequests>
+    </soapenv:Header>
+    <soapenv:Body>
+        <cwmp:Inform>
+            <DeviceId xmlns="urn:dslforum-org:cwmp-1-0">
+                <Manufacturer xmlns="">Alcatel</Manufacturer>
+                <OUI>001D4C</OUI>
+                <ProductClass>9365 BSR Femto</ProductClass>
+                <SerialNumber>4321</SerialNumber>
+            </DeviceId>
+            <cwmp:Event soap:arrayType="cwmp:EventStruct[1]">
+                <cwmp:EventStruct>
+                    <EventCode>1 BOOT</EventCode>
+                    <CommandKey></CommandKey>
+                </cwmp:EventStruct>
+            </cwmp:Event>
+            <MaxEnvelopes>1</MaxEnvelopes>
+            <CurrentTime>2012-10-04T18:56:22.345Z</CurrentTime>
+            <RetryCount>0</RetryCount>
+            <ParameterList soap:arrayType="cwmp:ParameterValueStruct[13]">
+                <ParameterValueStruct>
+                    <Name>Device.DeviceSummary</Name>
+                    <Value xsi:type="xsd:string">DeviceSummary</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.DeviceInfo.HardwareVersion</Name>
+                    <Value xsi:type="xsd:string">p1</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.DeviceInfo.SoftwareVersion</Name>
+                    <Value xsi:type="xsd:string">BCR-04-00-BSR-XMIM-06.01</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.ManagementServer.ConnectionRequestURL</Name>
+                    <Value xsi:type="xsd:string">http://127.0.0.1:8095/ConnectionRequest?command=cr&amp;sn=4321</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.ManagementServer.ParameterKey</Name>
+                    <Value xsi:type="xsd:string">ParameterKey</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.LAN.IPAddress</Name>
+                    <Value xsi:type="xsd:string">172.0.0.1</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.LAN.MACAddress</Name>
+                    <Value xsi:type="xsd:string">00-0E-35-D6-24-F7</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.Services.BSR.1.SDM.1.mimVersion</Name>
+                    <Value xsi:type="xsd:string">BCR-04-00-BSR-XMIM-02.00</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.DeviceInfo.AdditionalHardwareVersion</Name>
+                    <Value xsi:type="xsd:string">250mW</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.Services.BSR.1.RFTrace.1.iMSI</Name>
+                    <Value xsi:type="xsd:string">iMSI</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.GatewayInfo.ManufacturerOUI</Name>
+                    <Value xsi:type="xsd:string"/>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.GatewayInfo.ProductClass</Name>
+                    <Value xsi:type="xsd:string"/>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.GatewayInfo.SerialNumber</Name>
+                    <Value xsi:type="xsd:string"/>
+                </ParameterValueStruct>
+            </ParameterList>
+        </cwmp:Inform>
+    </soapenv:Body>
+</soapenv:Envelope>
+
+HTTP/1.1 401 Unauthorized
+Date: Thu, 04 Oct 2012 11:50:02 GMT
+Content-Length: 1518
+Content-Type: text/html; charset=UTF-8
+WWW-Authenticate: Basic realm="default"
+X-Powered-By: Servlet/2.5 JSP/2.1
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Draft//EN">
+<HTML>
+<HEAD>
+<TITLE>Error 401--Unauthorized</TITLE>
+<META NAME="GENERATOR" CONTENT="WebLogic Server">
+</HEAD>
+<BODY bgcolor="white">
+<FONT FACE=Helvetica><BR CLEAR=all>
+<TABLE border=0 cellspacing=5><TR><TD><BR CLEAR=all>
+<FONT FACE="Helvetica" COLOR="black" SIZE="3"><H2>Error 401--Unauthorized</H2>
+</FONT></TD></TR>
+</TABLE>
+<TABLE border=0 width=100% cellpadding=10><TR><TD VALIGN=top WIDTH=100% BGCOLOR=white><FONT FACE="Courier New"><FONT FACE="Helvetica" SIZE="3"><H3>From RFC 2068 <i>Hypertext Transfer Protocol -- HTTP/1.1</i>:</H3>
+</FONT><FONT FACE="Helvetica" SIZE="3"><H4>10.4.2 401 Unauthorized</H4>
+</FONT><P><FONT FACE="Courier New">The request requires user authentication. The response MUST include a WWW-Authenticate header field (section 14.46) containing a challenge applicable to the requested resource. The client MAY repeat the request with a suitable Authorization header field (section 14.8). If the request already included Authorization credentials, then the 401 response indicates that authorization has been refused for those credentials. If the 401 response contains the same challenge as the prior response, and the user agent has already attempted authentication at least once, then the user SHOULD be presented the entity that was given in the response, since that entity MAY include relevant diagnostic information. HTTP access authentication is explained in section 11.</FONT></P>
+</FONT></TD></TR>
+</TABLE>
+
+</BODY>
+</HTML>
+POST /cwmpWeb/CPEMgt HTTP/1.1
+Content-type: text/xml; charset=UTF-8
+Content-Length: 4113
+Host: 135.243.24.162:7003
+Connection: Keep-Alive
+Authorization: Basic bWlyZTptaXJl
+
+<soapenv:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:cwmp="urn:dslforum-org:cwmp-1-0" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <soapenv:Header>
+        <cwmp:ID soapenv:mustUnderstand="1">1</cwmp:ID>
+        <cwmp:NoMoreRequests>1</cwmp:NoMoreRequests>
+    </soapenv:Header>
+    <soapenv:Body>
+        <cwmp:Inform>
+            <DeviceId xmlns="urn:dslforum-org:cwmp-1-0">
+                <Manufacturer xmlns="">Alcatel</Manufacturer>
+                <OUI>001D4C</OUI>
+                <ProductClass>9365 BSR Femto</ProductClass>
+                <SerialNumber>4321</SerialNumber>
+            </DeviceId>
+            <cwmp:Event soap:arrayType="cwmp:EventStruct[1]">
+                <cwmp:EventStruct>
+                    <EventCode>1 BOOT</EventCode>
+                    <CommandKey></CommandKey>
+                </cwmp:EventStruct>
+            </cwmp:Event>
+            <MaxEnvelopes>1</MaxEnvelopes>
+            <CurrentTime>2012-10-04T18:56:22.345Z</CurrentTime>
+            <RetryCount>0</RetryCount>
+            <ParameterList soap:arrayType="cwmp:ParameterValueStruct[13]">
+                <ParameterValueStruct>
+                    <Name>Device.DeviceSummary</Name>
+                    <Value xsi:type="xsd:string">DeviceSummary</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.DeviceInfo.HardwareVersion</Name>
+                    <Value xsi:type="xsd:string">p1</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.DeviceInfo.SoftwareVersion</Name>
+                    <Value xsi:type="xsd:string">BCR-04-00-BSR-XMIM-06.01</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.ManagementServer.ConnectionRequestURL</Name>
+                    <Value xsi:type="xsd:string">http://127.0.0.1:8095/ConnectionRequest?command=cr&amp;sn=4321</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.ManagementServer.ParameterKey</Name>
+                    <Value xsi:type="xsd:string">ParameterKey</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.LAN.IPAddress</Name>
+                    <Value xsi:type="xsd:string">172.0.0.1</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.LAN.MACAddress</Name>
+                    <Value xsi:type="xsd:string">00-0E-35-D6-24-F7</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.Services.BSR.1.SDM.1.mimVersion</Name>
+                    <Value xsi:type="xsd:string">BCR-04-00-BSR-XMIM-02.00</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.DeviceInfo.AdditionalHardwareVersion</Name>
+                    <Value xsi:type="xsd:string">250mW</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.Services.BSR.1.RFTrace.1.iMSI</Name>
+                    <Value xsi:type="xsd:string">iMSI</Value>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.GatewayInfo.ManufacturerOUI</Name>
+                    <Value xsi:type="xsd:string"/>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.GatewayInfo.ProductClass</Name>
+                    <Value xsi:type="xsd:string"/>
+                </ParameterValueStruct>
+                <ParameterValueStruct>
+                    <Name>Device.GatewayInfo.SerialNumber</Name>
+                    <Value xsi:type="xsd:string"/>
+                </ParameterValueStruct>
+            </ParameterList>
+        </cwmp:Inform>
+    </soapenv:Body>
+</soapenv:Envelope>
+
+HTTP/1.1 200 OK
+Date: Thu, 04 Oct 2012 11:50:02 GMT
+Content-Length: 532
+Content-Type: text/xml; charset=UTF-8
+Set-Cookie: JSESSIONID=yYJ6Qt3K4pjNdKR9NnhT636bmthgqNpbJTwBp66hBJJrbRwydmfS!-1211358649; path=/; HttpOnly
+X-Powered-By: Servlet/2.5 JSP/2.1
+
+<soapenv:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:cwmp="urn:dslforum-org:cwmp-1-0" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <soapenv:Header>
+        <cwmp:ID soapenv:mustUnderstand="1">1</cwmp:ID>
+    </soapenv:Header>
+    <soapenv:Body>
+        <cwmp:InformResponse>
+            <MaxEnvelopes>1</MaxEnvelopes>
+        </cwmp:InformResponse>
+    </soapenv:Body>
+</soapenv:Envelope>
+POST /cwmpWeb/CPEMgt HTTP/1.1
+Content-type: text/xml; charset=UTF-8
+Content-Length: 0
+Host: 135.243.24.162:7003
+Connection: Keep-Alive
+Cookie: JSESSIONID=yYJ6Qt3K4pjNdKR9NnhT636bmthgqNpbJTwBp66hBJJrbRwydmfS!-1211358649
+Cookie2: $Version=1
+
+HTTP/1.1 204 No Content
+Date: Thu, 04 Oct 2012 11:50:02 GMT
+Content-Length: 0
+Content-Type: text/xml; charset=UTF-8
+X-Powered-By: Servlet/2.5 JSP/2.1
+
