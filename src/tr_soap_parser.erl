@@ -149,7 +149,7 @@ parse_Namespace(Nss) ->
 
 -spec parse_Envelope(#xmlElement{}, #parser{}) -> #envelope{}.
 parse_Envelope(#xmlElement{content = Content} = Doc, S) ->
-    State = check_namespace('soap-env:Envelope', Doc, S),
+    State = check_namespace('soapenv:Envelope', Doc, S),
     lists:foldl(fun(Elem, Envelop) ->
                         case get_local_name(Elem#xmlElement.name) of
                             'Header' ->
@@ -165,7 +165,7 @@ parse_Envelope(#xmlElement{content = Content} = Doc, S) ->
 
 -spec parse_Header(#xmlElement{},#parser{}) -> #header{}.
 parse_Header(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('soap-env:Header', E, S),
+    State = check_namespace('soapenv:Header', E, S),
     lists:foldl(fun(Elem, Header) ->
                         case get_local_name(Elem#xmlElement.name) of
                             'ID' ->
@@ -187,7 +187,7 @@ parse_Header(#xmlElement{content = Content} = E, S) ->
 %%%-----------------------------------------------------------------------------
 -spec parse_Body(#xmlElement{}, #parser{}) -> [body_type()].
 parse_Body(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('soap-env:Body', E, S),
+    State = check_namespace('soapenv:Body', E, S),
     lists:map(fun(Elem) ->
 		      case get_local_name(Elem#xmlElement.name) of
 			  'Fault'                                       -> parse_SoapFault(Elem, State);
@@ -880,7 +880,7 @@ parse_FileTypeArg(E, S) ->
 
 -spec parse_SoapFaultDetail(#xmlElement{},#parser{}) -> #fault{}.
 parse_SoapFaultDetail(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('soap-env:detail', E, S),
+    State = check_namespace('soapenv:detail', E, S),
     case lists:filter(fun tr_soap_lib:xmlElement/1, Content) of
 	[] ->
 	    undefined;
@@ -896,7 +896,7 @@ parse_SoapFaultDetail(#xmlElement{content = Content} = E, S) ->
 
 -spec parse_SoapFault(#xmlElement{},#parser{}) -> #soap_fault{}.
 parse_SoapFault(#xmlElement{content = Content} = E, S) ->
-    State = check_namespace('soap-env:Fault', E, S),
+    State = check_namespace('soapenv:Fault', E, S),
     lists:foldl(fun(Elem, Fault) ->
                         case get_local_name(Elem#xmlElement.name) of
                             'faultcode' ->

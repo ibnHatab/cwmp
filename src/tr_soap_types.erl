@@ -349,7 +349,7 @@ parse_ArraySize(Value, ContentTag, Nss) ->
 
 parse_XS_Array(Mapper, #xmlElement{content = Content} = E,
 	       ContentTag, #parser{ns = Nss} = State) when is_function(Mapper) ->
-    NsSoapEnc = local_ns('soap-enc', Nss),
+    NsSoapEnc = local_ns('soapenc', Nss),
     AttrName = get_QName('arrayType', NsSoapEnc),
     Value = parse_attribute(E, AttrName, string),
     Size = parse_ArraySize(Value, ContentTag, Nss),
@@ -562,13 +562,13 @@ make_Element(Name, Text) when is_atom(Name) ->
     {xmlElement, QName, QName,
      {"cwmp", Name},
          {xmlNamespace,[],
-          [{"soap-enc",'http://schemas.xmlsoap.org/soap/encoding/'},
-           {"soap-env",'http://schemas.xmlsoap.org/soap/envelope/'},
+          [{"soapenc",'http://schemas.xmlsoap.org/soap/encoding/'},
+           {"soapenv",'http://schemas.xmlsoap.org/soap/envelope/'},
            {"cwmp",'urn:dslforum-org:cwmp-1-0'}]},
-     [{'soap-env:Header',2},{'soap-env:Envelope',1}], 4,[],
+     [{'soapenv:Header',2},{'soapenv:Envelope',1}], 4,[],
      [
       {xmlText,
-       [{QName,4},{'soap-env:Header',2},{'soap-env:Envelope',1}],1,[],
+       [{QName,4},{'soapenv:Header',2},{'soapenv:Envelope',1}],1,[],
        Text
        ,text}
      ], [],"/local/vlad/repos/otp/tr69/src",undeclared}.

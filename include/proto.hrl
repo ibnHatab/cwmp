@@ -2,11 +2,6 @@
 %%%-----------------------------------------------------------------------------
 %%%-----------------------------------------------------------------------------
 
--define(CWMP_VERSION_1_URL,'urn:dslforum-org:cwmp-1-0').
--define(CWMP_VERSION_2_URL,'urn:dslforum-org:cwmp-1-2').
--define(SOAPENV_URL,'http://schemas.xmlsoap.org/soap/envelope/').
--define(XSD_URL,'http://www.w3.org/2001/XMLSchema-instance').
-
 -type cwmp_version() :: 1 | 2.
 
 -type rpc_data_type() :: string | int | unsignedInt | boolean | dateTime | base64 | anySimpleType.

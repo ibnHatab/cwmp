@@ -138,21 +138,21 @@ build_rpc_data(#rpc_data{data=Data} = _D, State) ->
 build_Envelope(#envelope{header=Header, body=Body} = _D, State) ->
     ElHeader = build_Header(Header, State),
     ElBody = build_Body(Body, State),
-    Attribs = [{'xmlns:soap-env', 'http://schemas.xmlsoap.org/soap/envelope/'},
-	       {'xmlns:soap-enc', 'http://schemas.xmlsoap.org/soap/encoding/'},
+    Attribs = [{'xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope/'},	       
+	       {'xmlns:soapenc', 'http://schemas.xmlsoap.org/soap/encoding/'},
 	       {'xmlns:xsd', 'http://www.w3.org/2001/XMLSchema'},
 	       {'xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance'},
 	       {'xmlns:cwmp', 'urn:dslforum-org:cwmp-1-0'}],
-    {'soap-env:Envelope', Attribs, [ElHeader, ElBody]}.
+    {'soapenv:Envelope', Attribs, [ElHeader, ElBody]}.
 
 
 -spec build_Header(#header{}, #builder{}) ->  export_element().
 build_Header(_D, _State) ->
-    'soap-env:Header'.
+    'soapenv:Header'.
 
 -spec build_Body(body_type(), #builder{}) ->  export_element().
 build_Body(Body, State) ->
-    {'soap-env:Body', [],
+    {'soapenv:Body', [],
      [case Method of
 	  #soap_fault{} = Data -> build_SoapFault(Data, State);
 	  #get_rpc_methods_response{} = Data -> build_GetRPCMethodsResponse(Data, State);
@@ -168,7 +168,7 @@ build_Body(Body, State) ->
 
 -spec build_SoapFault(#soap_fault{}, #builder{}) -> export_element().
 build_SoapFault(Data, State) ->
-    {'soap-env:Fault', [],
+    {'soapenv:Fault', [],
      [P || P <- [
 		 maybe_tag('faultcode', fun tr_soap_types:format_string/1, Data#soap_fault.faultcode),
 		 maybe_tag('faultstring', fun tr_soap_types:format_string/1, Data#soap_fault.faultstring),
@@ -777,7 +777,7 @@ build_ArgStruct(Data, _State) ->
 %%% Generate list of sequence/element
 %%%-----------------------------------------------------------------------------
 attr_arrayType(Lenght) ->
-    {'soap-enc:arrayType', io_lib:format("string[~02i]", [Lenght]) }.
+    {'soapenc:arrayType', io_lib:format("string[~02i]", [Lenght]) }.
 
 -spec build_MethodList([string()], #builder{}) -> export_element().
 build_MethodList(Data, _S) when Data =:= undefined -> null;
@@ -947,9 +947,9 @@ export_test_no() ->
  <!DOCTYPE motorcycles SYSTEM \"motorcycles.dtd\">\
 "],
     RootEl = #xmlElement{content=[Data]},
-	      Data1 = [{'soap-env:Envelop'}],
+	      Data1 = [{'soapenv:Envelop'}],
 	      Data2 =
-		  {'soap-env:Envelop',
+		  {'soapenv:Envelop',
 		   [],
 		   []},
 	      Data3 =
@@ -967,14 +967,14 @@ export_test_no() ->
 
 
 -define(EXML,
-	{'soap-env:Envelop',
-	 [{'xmlns:soap-env','http://schemas.xmlsoap.org/soap/envelope/'},
-	  {'xmlns:soap-enc','http://schemas.xmlsoap.org/soap/encoding/'},
+	{'soapenv:Envelop',
+	 [{'xmlns:soapenv','http://schemas.xmlsoap.org/soap/envelope/'},
+	  {'xmlns:soapenc','http://schemas.xmlsoap.org/soap/encoding/'},
 	  {'xmlns:xsd','http://www.w3.org/2001/XMLSchema'},
 	  {'xmlns:xsi','http://www.w3.org/2001/XMLSchema-instance'},
 	  {'xmlns:cwmp','urn:dslforum-org:cwmp-1-0'}],
-	 ['soap-env:Header',
-	  {'soap-env:Body',[],
+	 ['soapenv:Header',
+	  {'soapenv:Body',[],
 	   [{'cwmp:AutonomousTransferComplete',[],
 	     [{'AnnounceURL',[],[{http,"announceURL-FwUpgr",80,"/",[]}]},
 	      {'TransferURL',[],[{http,"transferURL-FwUpgr",80,"/",[]}]},

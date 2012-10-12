@@ -165,23 +165,23 @@ normalize_to_local_ns(Tag, Nss) ->
     Ns = local_ns(NsL, Nss),
     {Name, Ns}.
 
-local_ns('soap-env', Nss) ->  Nss#rpc_ns.ns_envelop;
-local_ns('soap-enc', Nss) ->  Nss#rpc_ns.ns_encoding;
+local_ns('soapenv', Nss) ->  Nss#rpc_ns.ns_envelop;
+local_ns('soapenc', Nss) ->  Nss#rpc_ns.ns_encoding;
 local_ns('cwmp', Nss)     ->  Nss#rpc_ns.ns_cwmp;
 local_ns('xsd', Nss)      ->  Nss#rpc_ns.ns_xsd;
 local_ns('', Nss)         ->  Nss#rpc_ns.inherited.
 
 -spec set_local_ns(atom(), #rpc_ns{}, atom()) -> #rpc_ns{}.
-set_local_ns('soap-env', Nss, LocalNs) -> Nss#rpc_ns{ns_envelop = LocalNs};
-set_local_ns('soap-enc', Nss, LocalNs) -> Nss#rpc_ns{ns_encoding = LocalNs};
+set_local_ns('soapenv', Nss, LocalNs) -> Nss#rpc_ns{ns_envelop = LocalNs};
+set_local_ns('soapenc', Nss, LocalNs) -> Nss#rpc_ns{ns_encoding = LocalNs};
 set_local_ns('cwmp', Nss, LocalNs)     -> Nss#rpc_ns{ns_cwmp = LocalNs, cwmp_version = 1};
 set_local_ns('cwmp_v2', Nss, LocalNs)  -> Nss#rpc_ns{ns_cwmp = LocalNs, cwmp_version = 2};
 set_local_ns('xsd',  Nss, LocalNs)     -> Nss#rpc_ns{ns_xsd = LocalNs}.
 
 -spec match_cwmp_ns_and_version(#xmlNamespace{}) -> #rpc_ns{}.
 match_cwmp_ns_and_version(#xmlNamespace{default = _Default, nodes = Nodes}) ->
-    NsMap = [{'soap-enc', 'http://schemas.xmlsoap.org/soap/encoding/'},
-	     {'soap-env', 'http://schemas.xmlsoap.org/soap/envelope/'},
+    NsMap = [{'soapenc', 'http://schemas.xmlsoap.org/soap/encoding/'},
+	     {'soapenv', 'http://schemas.xmlsoap.org/soap/envelope/'},
 	     {'cwmp',     'urn:dslforum-org:cwmp-1-0'},
 	     {'cwmp_v2',  'urn:dslforum-org:cwmp-1-2'},
 	     {'xsd',      'http://www.w3.org/2001/XMLSchema-instance'},
@@ -230,17 +230,17 @@ maybe_tag(_Tag, _Format, _Data, _State) ->
 -include_lib("eunit/include/eunit.hrl").
 
 -define(XML,
-	"<soap-env:Envelope " ++
-	    "    xmlns:soap-enc=\"http://schemas.xmlsoap.org/soap/encoding/\" " ++
-	    "    xmlns:soap-env=\"http://schemas.xmlsoap.org/soap/envelope/\"" ++
+	"<soapenv:Envelope " ++
+	    "    xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\" " ++
+	    "    xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"" ++
 	    "    xmlns:cwmp=\"urn:dslforum-org:cwmp-1-0\">" ++
 	    "   " ++
-	    "  <soap-env:Header>" ++
+	    "  <soapenv:Header>" ++
 	    "    <cwmp:ID mustUnderstand=\"1\">42</cwmp:ID>" ++
 	    "    <cwmp:NoMoreRequests>0</cwmp:NoMoreRequests>" ++
-	    "  </soap-env:Header>" ++
-	    "  <soap-env:Body>" ++
-	    "    <soap-env:Fault>" ++
+	    "  </soapenv:Header>" ++
+	    "  <soapenv:Body>" ++
+	    "    <soapenv:Fault>" ++
 	    "      <faultcode>Client</faultcode>" ++
 	    "      <faultstring>CWMP fault</faultstring>" ++
 	    "      <detail>" ++
@@ -249,9 +249,9 @@ maybe_tag(_Tag, _Format, _Data, _State) ->
 	    "	  <FaultString>Request Denied</FaultString>" ++
 	    "	</cwmp:Fault>" ++
 	    "      </detail>" ++
-	    "    </soap-env:Fault>" ++
-	    "  </soap-env:Body>" ++
-	    "</soap-env:Envelope>"
+	    "    </soapenv:Fault>" ++
+	    "  </soapenv:Body>" ++
+	    "</soapenv:Envelope>"
        ).
 
 gen_ref_doc() ->
@@ -306,15 +306,15 @@ name_namespace_test() ->
 
 check_namespace_test() ->
     Nss = match_cwmp_ns_and_version(?XML_NAMESPACE),
-    State = check_namespace('soap-env:Envelope',
+    State = check_namespace('soapenv:Envelope',
 			    #xmlElement {name='soapenv:Envelope'}, #parser{ns=Nss}),
 
     ?assertEqual(Nss#rpc_ns{inherited='soapenv'}, State#parser.ns),
 
-    ?assertEqual(State, check_namespace('soap-env:Body',
+    ?assertEqual(State, check_namespace('soapenv:Body',
 					 #xmlElement {name='soapenv:Body'}, State)),
 
-    ?assertEqual(State, check_namespace('soap-env:Header',
+    ?assertEqual(State, check_namespace('soapenv:Header',
 					#xmlElement {name='Header'}, State)),
 
     ok.
