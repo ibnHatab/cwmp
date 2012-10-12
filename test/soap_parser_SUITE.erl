@@ -125,6 +125,7 @@ groups() ->
 				     ,parse_Notification_tc
 				     ,parse_WindowMode_tc
 				     ,build_anyURI_tc
+				     ,base64_loop_tc
 				    ]},
      {soap_parse_doc, [sequence], [
 				  ]}
@@ -155,6 +156,7 @@ all() ->
      ,parse_Notification_tc
      ,parse_WindowMode_tc
      ,build_anyURI_tc
+     ,base64_loop_tc
     ].
 %% 	,
     %% [{group, soap_parse_types},
@@ -209,6 +211,9 @@ parse_WindowMode_tc() ->
     [].
 
 build_anyURI_tc() ->
+    [].
+
+base64_loop_tc() ->
     [].
 
 %%--------------------------------------------------------------------
@@ -413,16 +418,26 @@ name_namespace_tc(_Config) ->
 
 
 check_namespace_tc(_Config) ->
+    [
+     begin
+	 check_namespace_check(String, Name)
+     end
+     ||
+	{String, Name} <- [
+			   {   'soap-env:Body', 'soapenv:Body'  }
+			   ,{'soap-env:Header', 'soapenv:Header'}
+			  ]
+    ],  	        
+    ok.
+check_namespace_check(String, Name)->
+    %setup
     Nss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
     State = tr_soap_lib:check_namespace('soap-env:Envelope',
      			    #xmlElement {name='soapenv:Envelope'}, #parser{ns=Nss}),
-
-    Body = tr_soap_lib:check_namespace('soap-env:Body',#xmlElement {name='soapenv:Body'}, State),
-    State = Body,
-
-    Header = tr_soap_lib:check_namespace('soap-env:Header',#xmlElement {name='soapenv:Header'}, State),
-    State = Header,
-    ok.
+    %execute
+    Res = tr_soap_lib:check_namespace(String,#xmlElement {name=Name}, State),
+    %assert
+    State = Res.
 
 
 %%-------------------------------------------
@@ -463,17 +478,22 @@ parse_EventCodeType_check(Expect, String) ->
 parse_ArraySize_tc(_Config) ->
     [
      begin
-	 XmlNss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
-	 Nss = XmlNss#rpc_ns{inherited='cwmp'},
-	 {Value, Tag} = {"cwmp:ParameterValueStruct[0008]", 'ParameterValueStruct'},
-	 Expect = tr_soap_types:parse_ArraySize(Value, Tag, Nss)
+	 parse_ArraySize_check(Expect, Value, Tag, Nss)
      end
      ||
 	{Expect, Value, Tag, Nss} <-
 	    [{8, "cwmp:ParameterValueStruct[0008]", 'ParameterValueStruct',{rpc_ns,undefined,soapenv,soapenc,cwmp,1,cwmp} }
+	     ,{"xsd:string[6]", 'string', 6}
 	    ]
     ],
     ok.
+parse_ArraySize_check(Expect, Value, Tag, Nss) ->
+    %setup
+    XmlNss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
+    Nss = XmlNss#rpc_ns{inherited='cwmp'},
+    %execute
+    Res = tr_soap_types:parse_ArraySize(Value, Tag, Nss),
+    Expect = Res.
 
 
 %%-------------------------------------------
@@ -513,8 +533,11 @@ parse_FaultCode_tc(_Config) ->
 	 parse_FaultCode_check(Expect, String)
      end
       ||
-	{Expect, String} <- [%%FIXME {0,    "No fault"}
-			     { 9000,  "9000 - Method not supported"}
+	{Expect, String} <- [
+			     {0,    "0"}
+			     ,{ 0,    "  0"}
+			     ,{ 0,    "  0    "}
+			     ,{ 9000, "9000 - Method not supported"}
 			     ,{ 9021, "9021 - Cancelation of file transfer not permitted in current transfer state"}
 			     ,{ 9027, "9027 - System Resources Exceeded"}
 			     ,{ 9007, "9007 - Invalid parameter value"}
@@ -656,6 +679,28 @@ build_anyURI_check(Expect, String) ->
     Res = tr_soap_types:build_anyURI(Data),
     %assert
     Expect = Res.
+
+%%--------------------------------------------------------------------
+%%% Base64
+%%--------------------------------------------------------------------
+
+base64_loop_tc(_Config) ->
+     [
+     begin
+	 base64_loop_check(Msg)
+     end || Msg <- [
+		    <<"mama mila ramu">>
+		     ,term_to_binary({test, "Text"})
+		   ]
+    ],
+    ok.
+base64_loop_check(String) ->
+    %setup
+    EncMsg = tr_soap_types:format_base64(String),
+    %execute
+    EncDecMsg = tr_soap_types:parse_base64(EncMsg),
+    %assert
+    String = EncDecMsg.
 
 
 %%--------------------------------------------------------------------
