@@ -132,10 +132,10 @@ parse_builder_options([{namespaces, Nss} | Rest], State) ->
 -spec build_rpc_data(#rpc_data{}, #builder{}) ->  [export_element()].
 build_rpc_data(#rpc_data{data=Data} = _D, State) ->
 						%    ?DBG(Data),
-    [build_Envelop(Data, State)].
+    [build_Envelope(Data, State)].
 
--spec build_Envelop(#envelope{}, #builder{}) ->  export_element().
-build_Envelop(#envelope{header=Header, body=Body} = _D, State) ->
+-spec build_Envelope(#envelope{}, #builder{}) ->  export_element().
+build_Envelope(#envelope{header=Header, body=Body} = _D, State) ->
     ElHeader = build_Header(Header, State),
     ElBody = build_Body(Body, State),
     Attribs = [{'xmlns:soap-env', 'http://schemas.xmlsoap.org/soap/envelope/'},
@@ -143,7 +143,7 @@ build_Envelop(#envelope{header=Header, body=Body} = _D, State) ->
 	       {'xmlns:xsd', 'http://www.w3.org/2001/XMLSchema'},
 	       {'xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance'},
 	       {'xmlns:cwmp', 'urn:dslforum-org:cwmp-1-0'}],
-    {'soap-env:Envelop', Attribs, [ElHeader, ElBody]}.
+    {'soap-env:Envelope', Attribs, [ElHeader, ElBody]}.
 
 
 -spec build_Header(#header{}, #builder{}) ->  export_element().
@@ -156,6 +156,7 @@ build_Body(Body, State) ->
      [case Method of
 	  #soap_fault{} = Data -> build_SoapFault(Data, State);
 	  #get_rpc_methods_response{} = Data -> build_GetRPCMethodsResponse(Data, State);
+	  #autonomous_transfer_complete{} = Data -> build_AutonomousTransferComplete(Data, State);	  
 	  _ ->
 	      build_error(Method, State)
       end || Method <- Body]}.
@@ -965,8 +966,30 @@ export_test_no() ->
 	ok.
 
 
+-define(EXML,
+	{'soap-env:Envelop',
+	 [{'xmlns:soap-env','http://schemas.xmlsoap.org/soap/envelope/'},
+	  {'xmlns:soap-enc','http://schemas.xmlsoap.org/soap/encoding/'},
+	  {'xmlns:xsd','http://www.w3.org/2001/XMLSchema'},
+	  {'xmlns:xsi','http://www.w3.org/2001/XMLSchema-instance'},
+	  {'xmlns:cwmp','urn:dslforum-org:cwmp-1-0'}],
+	 ['soap-env:Header',
+	  {'soap-env:Body',[],
+	   [{'cwmp:AutonomousTransferComplete',[],
+	     [{'AnnounceURL',[],[{http,"announceURL-FwUpgr",80,"/",[]}]},
+	      {'TransferURL',[],[{http,"transferURL-FwUpgr",80,"/",[]}]},
+	      {'IsDownload',[],["true"]},
+               {'DownloadFileType',[],[1]},
+	      {'FileSize',[],["12345"]},
+	      {'TargetFileName',[],["http://targetFileName_FwUpgr"]},
+	      {'cwmp:TransferCompleteFaultStruct',[],
+	       [{'FaultCode',[],["0"]},{'FaultString',[],[[]]}]},
+	      {'StartTime',[],[{{2012,10,3},{18,53,34}}]},
+	      {'CompleteTime',[],[{{2012,10,3},{18,53,44}}]}]}]}]},[[]]).
+
 main_test() ->
-    main(),
+    xmerl:export_simple([?EXML], xmerl_xml, [{prolog,[]}]),
+%    main(),
     ok.
 
 

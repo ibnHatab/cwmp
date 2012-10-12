@@ -14,8 +14,8 @@
 -type qName()     :: string().
 -type url()       :: tuple().
 -type anyURI()    :: tuple().
--type date_time() :: {{integer(), integer(), integer()},
-		      {integer(), integer(), integer()}}.
+-type date_time() :: tuple(Date::calendar:date(),
+			   Time::calendar:time()).
 
 -type cwmp_method() ::
         'AddObject'                       | 'AddObjectResponse'

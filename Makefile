@@ -3,9 +3,6 @@
 REBAR='./rebar'
 # || which rebar`
 
-.PHONY: test
-
-#dir-local: test
 
 all: compile
 
@@ -33,6 +30,10 @@ install: all
 
 utest:
 	$(REBAR) -v eunit skip_deps=true suite=tr_soap_types
+
+ut-shell:
+	exec erl -pa $(PWD)/apps/*/ebin -pa $(PWD)/deps/*/ebin -pa $(PWD)/.eunit -boot start_sasl -s reloader 
+
 
 test.spec: test.spec.in
 	cat test.spec.in | sed -e "s,@PATH@,$(PWD)," > $(PWD)/test.spec
@@ -81,3 +82,7 @@ check-data: $(DATA_XML)
 
 cmd:
 	erl -pa ebin -s tr_soap_parser parse_root_test test/data/Fault.xml -run init stop -noshell
+
+.PHONY: ctest
+
+dir-local: app

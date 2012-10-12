@@ -55,6 +55,7 @@ check_Value(Name, String, Type) ->
 %%
 %% The time zone may be specified as Z (UTC) or (+|-)hh:mm. Time zones
 %% that aren't specified are considered undetermined.
+-spec convert_iso8601_date (string()) -> date_time().
 convert_iso8601_date(DateTime) ->
     [SDate,Time] = string:tokens(DateTime,"T"),
     {Sign, Date} = case SDate of
@@ -107,6 +108,14 @@ convert_iso8601_date({Syear,Smonth,Sday} = _DT,
 	xmerl_xsd_type:normalize_dateTime({Syear,Smonth,Sday,Shour,Sminute,Ssec,Szone}),
     {{NY,NM,ND},{NHour,NMin,Sec}}.
 
+%% @doc Convert a calendar-style `{date(), time()}'
+%% tuple to an ISO 8601 formatted string. Note that this function always
+%% returns a string with no offset (i.e., ending in "Z").
+-spec format_iso8601_date (date_time()) -> string().
+format_iso8601_date({{Y,Mo,D}, {H,Mn,S}}) ->
+    FmtStr = "~B-~2.10.0B-~2.10.0BT~2.10.0B:~2.10.0B:~2.10.0BZ",
+    IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S]),
+    lists:flatten(IsoStr).
 
 %%%-----------------------------------------------------------------------------
 %% SOAP Type parsers
@@ -256,7 +265,7 @@ parse_StartTime(E)            -> parse_dateTime(E).
 parse_State(E)                -> parse_unsignedInt(E).
 parse_Status(E)               -> parse_int(E).
 parse_SuccessURL(E)           -> parse_anyURI(E).
-parse_TargetFileName(E)       -> parse_string(E).
+parse_TargetFileName(E)       -> parse_anyURI(E). %FIXME: string or URI
 parse_TransferURL(E)          -> parse_anyURI(E).
 parse_URL(E)                  -> parse_anyURI(E).
 parse_UserMessage(E)          -> parse_string(E).
@@ -406,18 +415,21 @@ parse_WindowMode(E) ->
 %%%-----------------------------------------------------------------------------
 
 
-format_string(Data) -> Data.
+format_string(Data) ->
+    case Data of
+	[] -> "";
+	_ -> Data
+    end.
 format_boolean(Data) -> atom_to_list(Data).
 format_int(Data) ->
     integer_to_list(Data).
 format_unsignedInt(Data) ->
     integer_to_list(Data).
 format_dateTime(Data) ->
-    Data. %FIXME: match parse
+    format_iso8601_date(Data).
 format_base64(Data) when is_binary(Data)->
     Msg = base64:encode(Data),
     binary_to_list(Msg).
-
 
 -define(HTTP_DEFAULT_PORT, 80).
 -define(FTP_DEFAULT_PORT, 21).
@@ -478,7 +490,7 @@ build_WindowStart(Data)			-> maybe_tag('WindowStart', fun format_unsignedInt/1, 
 build_Writable(Data)			-> maybe_tag('Writable', fun format_boolean/1, Data).
 
 %
-build_AnnounceURL(Data)			-> maybe_tag('AnnounceURL', fun format_string/1, Data).
+build_AnnounceURL(Data)			-> maybe_tag('AnnounceURL', fun build_anyURI/1, Data).
 build_Arg(Data)				-> maybe_tag('Arg', fun format_string/1, Data).
 build_Command(Data)			-> maybe_tag('Command', fun format_string/1, Data).
 build_ExecutionEnvRef(Data)		-> maybe_tag('ExecutionEnvRef', fun format_string/1, Data).
@@ -501,9 +513,9 @@ build_State(Data)			-> maybe_tag('State', fun format_unsignedInt/1, Data).
 build_Status(Data)			-> maybe_tag('Status', fun format_int/1, Data).
 build_string(Data)			-> maybe_tag('string', fun format_string/1, Data).
 build_SuccessURL(Data)			-> maybe_tag('SuccessURL', fun format_string/1, Data).
-build_TargetFileName(Data)		-> maybe_tag('TargetFileName', fun format_string/1, Data).
-build_TransferURL(Data)			-> maybe_tag('TransferURL', fun format_string/1, Data).
-build_URL(Data)				-> maybe_tag('URL', fun format_string/1, Data).
+build_TargetFileName(Data)		-> maybe_tag('TargetFileName', fun build_anyURI/1, Data).
+build_TransferURL(Data)			-> maybe_tag('TransferURL', fun build_anyURI/1, Data).
+build_URL(Data)				-> maybe_tag('URL', fun build_anyURI/1, Data).
 build_UserMessage(Data)			-> maybe_tag('UserMessage', fun format_string/1, Data).
 build_Username(Data)			-> maybe_tag('Username', fun format_string/1, Data).
 build_Value(Data)			-> maybe_tag('Value', fun format_string/1, Data).
@@ -515,7 +527,7 @@ build_CPEVendorFaultCodeType(Data)			-> maybe_tag('CPEVendorFaultCodeType', fun 
 build_ACSFaultCodeType(Data)				-> maybe_tag('ACSFaultCodeType', fun format_unsignedInt/1, Data).
 build_ACSVendorFaultCodeType(Data)			-> maybe_tag('ACSVendorFaultCodeType', fun format_unsignedInt/1, Data).
 build_TransferFileType(Data)				-> maybe_tag('TransferFileType', fun format_string/1, Data).
-build_DownloadFileType(Data)				-> maybe_tag('DownloadFileType', fun format_string/1, Data).
+build_DownloadFileType(Data)				-> maybe_tag('DownloadFileType', fun format_int/1, Data).
 build_UploadFileType(Data)				-> maybe_tag('UploadFileType', fun format_string/1, Data).
 build_EventCodeType(Data)				-> maybe_tag('EventCodeType', fun format_string/1, Data).
 build_TimeWindowModeValueType(Data)			-> maybe_tag('TimeWindowModeValueType', fun format_string/1, Data).
@@ -575,9 +587,12 @@ parse_int_test() ->
 parse_iso8601_test() ->
     [
      begin
-%	 ?DBG({DT, Str, convert_iso8601_date(Str)}),
-	 DT = convert_iso8601_date(Str)
-
+	 DT_In = convert_iso8601_date(Str),
+	 ?assertEqual(DT, DT_In),
+	 StrOut = format_iso8601_date(DT),
+	 DT_Out = convert_iso8601_date(StrOut),
+	 ?assertEqual(DT_In, DT_Out),
+	 ok
      end
       ||
 	{DT, Str} <- lists:zip([{{2004, 11, 01}, {04, 40, 35}},
@@ -662,6 +677,7 @@ parse_ArraySize_test() ->
 	 XmlNss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
 	 Nss = XmlNss#rpc_ns{inherited='cwmp'},
 	 Num = tr_soap_types:parse_ArraySize(Value, Tag, Nss),
+	 ?DBG(Num),
 	 ?assertEqual(Expect, Num)
      end ||
      {Value, Tag, Expect} <- [

@@ -201,12 +201,22 @@ match_cwmp_ns_and_version(#xmlNamespace{default = _Default, nodes = Nodes}) ->
 %%% Builder utils
 %%%-----------------------------------------------------------------------------
 maybe_tag(Tag, Format, Data) when Data /= undefined ->
-    {Tag, [], [Format(Data)]};
+    case Format(Data) of
+	[] ->
+	    {Tag, [], []};
+	E ->
+	    {Tag, [], [E]}
+    end;
 maybe_tag(_Tag, _Format, _Data) ->
     null.
 
 maybe_tag(Tag, Format, Data, State) when Data /= undefined ->
-    {Tag, [], [Format(Data, State)]};
+    case Format(Data, State) of
+	[] ->
+	    {Tag, [], []};
+	E ->
+	    {Tag, [], [E]}
+    end;
 maybe_tag(_Tag, _Format, _Data, _State) ->
     null.
 

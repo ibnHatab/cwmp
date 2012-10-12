@@ -19,6 +19,7 @@
 
 -import(tr_soap_parser, [parse/1]).
 
+-define(CTDBG(ARG), io:format(user, "~n>> ~p: ~p~n", [??ARG, ARG])).
 
 %%--------------------------------------------------------------------
 %% @spec suite() -> Info
@@ -46,9 +47,15 @@ isXmlFile(File) ->
 init_per_suite(Config) ->
     TraceDir = ?config(data_dir, Config),
     {ok, FileList} = file:list_dir(TraceDir),
-    PathList = [TraceDir ++  File
+    TestList = [begin
+		    case string:tokens(File, "_.") of
+			[_Prefix, Name, Sufix] ->
+			    Sufix == ".xml",
+			    Name
+		    end
+		end
 		|| File <- FileList, isXmlFile(File)],
-    [{xml_files, PathList} | Config].
+    [{trace_rpc_methods, TestList} | Config].
 
 %%--------------------------------------------------------------------
 %% @spec end_per_suite(Config0) -> void() | {save_config,Config1}
@@ -145,13 +152,62 @@ hdm_trace_test_case() ->
 %% Comment = term()
 %% @end
 %%--------------------------------------------------------------------
+mktemp() ->
+    Time = calendar:local_time(),
+    Dir = make_dirname(Time),
+    filename:join(["/tmp", Dir]).
+    
+make_dirname({{YY,MM,DD},{H,M,S}}) -> 
+    io_lib:format("cwmp"++".~w-~2.2.0w-~2.2.0w_~2.2.0w.~2.2.0w.~2.2.0w",
+		  [YY,MM,DD,H,M,S]).
+
+savexml(Doc, File) ->
+    case file:open(File, [write]) of
+	{ok, Fd} ->
+	    Content = xmerl:export_simple(Doc, xmerl_xml, [{prolog,[]}]),
+	    ok = file:write(Fd, Content),
+	    file:close(Fd),
+	    {ok, saved};
+	_Error ->
+	    ct:print("ERROR storing(~p) -> ~p~n", [File, _Error]),
+	    {nok, not_saved}
+    end.
+
+
+compate_test(XqlFile, TraceFile, RpcFile) ->
+    Command = "xx",
+    case os:cmd(Command) of
+	"passed" ->
+	    ok;
+	Error ->
+	    ct:print("Error in compatator: ~p~n", [Error]),
+	    {error, Error}
+    end.
+
+    
+
 hdm_trace_test_case(Config) ->
-    %% filename:join([?config(priv_dir, Config)
-    Files = ?config(xml_files, Config),
-    lists:foreach(fun (File) ->
-			  ct:print("CT parse trace: ~p ~n", [File]),
-			  {Doc, _Rest} = xmerl_scan:file(File),
-			  _Rpc = parse(Doc)
+    Methods = ?config(trace_rpc_methods, Config),
+    TraceDir = ?config(data_dir, Config),
+    TempDir = mktemp(),
+    ok = filelib:ensure_dir(TempDir ++ "/"),
+    lists:foreach(fun (Method) ->
+			  TraceFile = filename:join([TraceDir,
+						     "cwmp_" ++ Method ++ ".xml"]),
+			  XqlFile = filename:join([TraceDir,
+						   "cwmp_" ++ Method ++ ".xql"]),
+			  RpcFile = filename:join([TempDir,
+						   "cwmp_" ++ Method ++ ".xml"]),			  
+
+			  ct:print("CT parse trace: ~p ~n", [TraceFile]),
+			  {Doc, _Rest} = xmerl_scan:file(TraceFile),
+			  Rpc = tr_soap_parser:parse(Doc),
+			  ?CTDBG(Rpc),
+			  ct:print("CT generate trace: ~p ~n", [RpcFile]),
+			  RpcDoc = tr_soap_builder:build(Rpc),
+			  ?CTDBG(RpcDoc),
+			  {ok, saved} = savexml(RpcDoc, RpcFile),
+			  ok = compate_test(XqlFile, TraceFile, RpcFile)
 		  end,
-		  Files),
+		  Methods),
     ok.
