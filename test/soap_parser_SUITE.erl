@@ -397,12 +397,12 @@ parse_anyURI_check(Expect, String) ->
 %%-------------------------------------------
 
 name_namespace_tc(_Config) ->
-    {'','name'} = tr_soap_lib:local_name('name'),
+    {'','name'} = cwmp_lib:local_name('name'),
 
-    'name' = tr_soap_lib:get_local_name('ns:name'),
+    'name' = cwmp_lib:get_local_name('ns:name'),
 
     {Name, Ns} = {'ns:name', 'ns'},
-    Name = tr_soap_lib:get_QName(tr_soap_lib:get_local_name(Name), Ns),
+    Name = cwmp_lib:get_QName(cwmp_lib:get_local_name(Name), Ns),
 
     ok.
 
@@ -431,11 +431,11 @@ check_namespace_tc(_Config) ->
     ok.
 check_namespace_check(String, Name)->
     %setup
-    Nss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
-    State = tr_soap_lib:check_namespace('soap-env:Envelope',
+    Nss = cwmp_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
+    State = cwmp_lib:check_namespace('soap-env:Envelope',
      			    #xmlElement {name='soapenv:Envelope'}, #parser{ns=Nss}),
     %execute
-    Res = tr_soap_lib:check_namespace(String,#xmlElement {name=Name}, State),
+    Res = cwmp_lib:check_namespace(String,#xmlElement {name=Name}, State),
     %assert
     State = Res.
 
@@ -489,7 +489,7 @@ parse_ArraySize_tc(_Config) ->
     ok.
 parse_ArraySize_check(Expect, Value, Tag, Nss) ->
     %setup
-    XmlNss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
+    XmlNss = cwmp_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
     Nss = XmlNss#rpc_ns{inherited='cwmp'},
     %execute
     Res = cwmp_types:parse_ArraySize(Value, Tag, Nss),
@@ -708,7 +708,7 @@ base64_loop_check(String) ->
 %%--------------------------------------------------------------------
 
 make_Element(Name, Text) when is_atom(Name) ->
-    QName = tr_soap_lib:get_QName(Name, 'cwmp'),
+    QName = cwmp_lib:get_QName(Name, 'cwmp'),
  %   ?DBG(QName),
     {xmlElement, QName, QName,
      {"cwmp", Name},

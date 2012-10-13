@@ -36,7 +36,7 @@ ut-shell:
 test.spec: test.spec.in
 	cat test.spec.in | sed -e "s,@PATH@,$(PWD)," > $(PWD)/test.spec
 
-ctest:  test.spec app
+ctest:  test.spec compile
 	-@mkdir logs
 	ct_run -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
 
@@ -82,6 +82,6 @@ check-data: $(DATA_XML)
 cmd:
 	erl -pa ebin -s tr_soap_parser parse_root_test test/data/Fault.xml -run init stop -noshell
 
-.PHONY: ctest
+.PHONY: ctest deps
 
 dir-local: app

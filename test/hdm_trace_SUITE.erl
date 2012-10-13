@@ -17,7 +17,7 @@
 -include("tr69/include/tr69.hrl").
 -include("cwmp.hrl").
 
--import(tr_soap_parser, [parse/1]).
+-import(cwmp_parser, [parse/1]).
 
 -define(CTDBG(ARG), io:format(user, "~n>> ~p: ~p~n", [??ARG, ARG])).
 
@@ -201,10 +201,10 @@ hdm_trace_test_case(Config) ->
 
 			  ct:print("CT parse trace: ~p ~n", [TraceFile]),
 			  {Doc, _Rest} = xmerl_scan:file(TraceFile),
-			  Rpc = tr_soap_parser:parse(Doc),
+			  Rpc = cwmp_parser:parse(Doc),
 			  ?CTDBG(Rpc),
 			  ct:print("CT generate trace: ~p ~n", [RpcFile]),
-			  RpcDoc = tr_soap_builder:build(Rpc),
+			  RpcDoc = cwmp_builder:build(Rpc),
 			  ?CTDBG(RpcDoc),
 			  {ok, saved} = savexml(RpcDoc, RpcFile),
 			  ok = compate_test(XqlFile, TraceFile, RpcFile)

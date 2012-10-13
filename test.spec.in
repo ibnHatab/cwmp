@@ -3,4 +3,5 @@
 %%{trace_dir, "@PATH@/test/data"}.
 {alias, tr_app, "@PATH@/."}.
 {include, "@PATH@/include"}.
+{include, "@PATH@/deps"}.
 {suites, tr_app, [soap_parser_SUITE, hdm_trace_SUITE]}.
