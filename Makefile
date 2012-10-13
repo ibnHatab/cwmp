@@ -39,6 +39,7 @@ test.spec: test.spec.in
 	cat test.spec.in | sed -e "s,@PATH@,$(PWD)," > $(PWD)/test.spec
 
 ctest:  test.spec app
+	-@mkdir logs
 	ct_run -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
 
 ct-shell:

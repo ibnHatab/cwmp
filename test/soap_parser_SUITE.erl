@@ -13,7 +13,7 @@
 -include_lib("common_test/include/ct.hrl").
 -include_lib("xmerl/include/xmerl.hrl").
 
--include("proto.hrl").
+-include("cwmp.hrl").
 -include("tr69.hrl").
 
 %%--------------------------------------------------------------------
