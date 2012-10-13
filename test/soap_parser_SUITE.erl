@@ -14,7 +14,7 @@
 -include_lib("xmerl/include/xmerl.hrl").
 
 -include("cwmp.hrl").
--include("tr69.hrl").
+-include("tr69/include/tr69.hrl").
 
 %%--------------------------------------------------------------------
 %% @spec suite() -> Info
@@ -245,7 +245,7 @@ parse_boolean_check(Expect, String) ->
     %% setup
     E = make_Element('NoMoreRequests', String),
     %% execute
-    ?line Res = tr_soap_types:parse_boolean(E),
+    ?line Res = cwmp_types:parse_boolean(E),
     %assert
     Expect = Res.
 
@@ -273,7 +273,7 @@ parse_iso8601_tc(_Config) ->
     ok.
 parse_iso8601_check(Expect, String) ->
     %execute
-    Res = tr_soap_types:convert_iso8601_date(String),
+    Res = cwmp_types:convert_iso8601_date(String),
     %assert
     Expect = Res.
 
@@ -299,7 +299,7 @@ parse_string_check(Expect, String) ->
     %setup
     E = make_Element('ParseString', String),
     %execute
-    Res = tr_soap_types:parse_string(E),
+    Res = cwmp_types:parse_string(E),
     %assert
     Expect = Res.
 
@@ -329,7 +329,7 @@ parse_int_check(Expect, String) ->
     %setup
     E = make_Element('ParseInt', String),
     %execute
-    Res = tr_soap_types:parse_int(E),
+    Res = cwmp_types:parse_int(E),
     %assert
     Expect = Res.
 
@@ -357,7 +357,7 @@ parse_unsignedInt_check(Expect, String) ->
     %setup
     E = make_Element('ParseUnsignedInt', String),
     %execute
-    Res = tr_soap_types:parse_unsignedInt(E),
+    Res = cwmp_types:parse_unsignedInt(E),
     %assert
     Expect = Res.
 
@@ -387,7 +387,7 @@ parse_anyURI_check(Expect, String) ->
     %setup
     E = make_Element('ParseAnyURI', String),
     %execute
-    Res = tr_soap_types:parse_anyURI(E),
+    Res = cwmp_types:parse_anyURI(E),
     %assert
     Expect = Res.
 
@@ -465,7 +465,7 @@ parse_EventCodeType_check(Expect, String) ->
     E = make_Element('ParseEventCodeType', String),
     State = #parser{},
     %execute
-    Res = tr_soap_types:parse_EventCodeType(E, State),
+    Res = cwmp_types:parse_EventCodeType(E, State),
     %assert
     Expect = Res.
 
@@ -492,7 +492,7 @@ parse_ArraySize_check(Expect, Value, Tag, Nss) ->
     XmlNss = tr_soap_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
     Nss = XmlNss#rpc_ns{inherited='cwmp'},
     %execute
-    Res = tr_soap_types:parse_ArraySize(Value, Tag, Nss),
+    Res = cwmp_types:parse_ArraySize(Value, Tag, Nss),
     Expect = Res.
 
 
@@ -518,7 +518,7 @@ parse_FileType_check(Expect, String, Type) ->
     %setup
     E = make_Element(Type, String),
     %execute
-    Res = tr_soap_types:parse_FileType(Type, E),
+    Res = cwmp_types:parse_FileType(Type, E),
     %assert
     Expect = Res.
 
@@ -549,7 +549,7 @@ parse_FaultCode_check(Expect, String) ->
     %setup
     E = make_Element('ParseFaultCode' , String),
     %execute
-    Res = tr_soap_types:parse_FaultCode(E),
+    Res = cwmp_types:parse_FaultCode(E),
     %assert
     Expect = Res.
 
@@ -578,7 +578,7 @@ parse_Notification_check(Expect, String) ->
     %setup
     E = make_Element('ParseNotification' , String),
     %execute
-    Res = tr_soap_types:parse_Notification(E),
+    Res = cwmp_types:parse_Notification(E),
     %assert
     Expect = Res.
 
@@ -604,7 +604,7 @@ parse_WindowMode_check(Expect, String) ->
     %setup
     E = make_Element('ParseWindowMode' , String),
     %execute
-    Res = tr_soap_types:parse_WindowMode(E),
+    Res = cwmp_types:parse_WindowMode(E),
     %assert
     Expect = Res.
 
@@ -674,9 +674,9 @@ build_anyURI_tc(_Config)->
 build_anyURI_check(Expect, String) ->
     %setup
     E = make_Element('URL' , String),
-    Data = tr_soap_types:parse_anyURI(E),
+    Data = cwmp_types:parse_anyURI(E),
     %execute
-    Res = tr_soap_types:build_anyURI(Data),
+    Res = cwmp_types:build_anyURI(Data),
     %assert
     Expect = Res.
 
@@ -696,9 +696,9 @@ base64_loop_tc(_Config) ->
     ok.
 base64_loop_check(String) ->
     %setup
-    EncMsg = tr_soap_types:format_base64(String),
+    EncMsg = cwmp_types:format_base64(String),
     %execute
-    EncDecMsg = tr_soap_types:parse_base64(EncMsg),
+    EncDecMsg = cwmp_types:parse_base64(EncMsg),
     %assert
     String = EncDecMsg.
 

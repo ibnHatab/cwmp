@@ -1,8 +1,6 @@
 
-#TR_VSN = $(shell sed -n 's/.*{vsn,.*"\(.*\)"}.*/\1/p' src/tr.app.src)
+TR_VSN = $(shell sed -n 's/.*{vsn,.*"\(.*\)"}.*/\1/p' src/tr.app.src)
 REBAR='./rebar'
-# || which rebar`
-
 
 all: compile
 
@@ -21,15 +19,15 @@ clean:
 	@rm -rf test/*.beam
 	@rm -rf .eunit/*.beam
 
-dist-clean:
+distclean:
 	$(REBAR) clean delete-deps
 
 install: all
-	mkdir -p $(DESTDIR)/lib/tr-$(IBROWSE_VSN)/
-	cp -r ebin $(DESTDIR)/lib/tr-$(IBROWSE_VSN)/
+	mkdir -p $(DESTDIR)/lib/tr-$(TR_VSN)/
+	cp -r ebin $(DESTDIR)/lib/tr-$(TR_VSN)/
 
 utest:
-	$(REBAR) -v eunit skip_deps=true suite=tr_soap_types
+	$(REBAR) -v eunit skip_deps=true #suite=tr_soap_types
 
 ut-shell:
 	exec erl -pa $(PWD)/apps/*/ebin -pa $(PWD)/deps/*/ebin -pa $(PWD)/.eunit -boot start_sasl -s reloader 
@@ -51,7 +49,7 @@ test: app
 
 dialyzer-build:
 	dialyzer --build_plt --verbose			\
-	  --output_plt .dialyzer-R15B.plt 		\
+	  --output_plt ~/.dialyzer-R15B.plt 		\
 	  --apps kernel stdlib sasl erts ssl 	 	\
 	    tools os_mon runtime_tools crypto 		\
 	    inets xmerl public_key syntax_tools 	\
@@ -59,7 +57,7 @@ dialyzer-build:
 	    ./deps/*/ebin
 
 dialyzer: compile
-	dialyzer --plt .dialyzer-R15B.plt \
+	dialyzer --plt ~/.dialyzer-R15B.plt \
 	  -Wunmatched_returns 	\
 	  -Werror_handling 	\
 	  -Wrace_conditions 	\

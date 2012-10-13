@@ -14,7 +14,7 @@
 
 -include_lib("xmerl/include/xmerl.hrl").
 
--include("tr69.hrl").
+-include("tr69/include/tr69.hrl").
 -include("cwmp.hrl").
 
 -import(tr_soap_parser, [parse/1]).
