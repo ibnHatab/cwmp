@@ -1,3 +1,10 @@
+#+STARTUP: showall hidestars
+
+#+OPTIONS: author:nil creator:nil
+#+OPTIONS: toc:nil
+
+#+TAGS: DOCS(d) CODING(c) TESTING(t) PLANING(p)
+
 #+TITLE: CWMP Protocol overview page
 
 * Overview
