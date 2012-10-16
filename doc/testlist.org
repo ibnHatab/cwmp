@@ -1,6 +1,13 @@
+#+STARTUP: showall hidestars
 
+#+OPTIONS: author:nil creator:nil
+#+OPTIONS: toc:nil
 
+#+LINK_UP: sitemap.html
+#+LINK_HOME: main.html
+#+STYLE: <link rel="stylesheet" type="text/css" href="doc-style.css" />
 
+#+TAGS: DOCS(d) CODING(c) TESTING(t) PLANING(p)
 
 * RUN
 	watchfs '*/*.erl' 'rebar eunit -v skip_deps=true suite=xmerl'
