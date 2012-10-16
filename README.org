@@ -1,0 +1,31 @@
+#+TITLE: CWMP Protocol overview page
+
+* Overview
+  This package contains protocol object and application for CWMP protocol layer
+
+* Installation
+
+* Configuration
+** app.config
+  
+   Riak and the Erlang applications it depends on are configured by
+   settings in the =app.config= file in the =etc= directory of the
+   embedded Erlang node.  The format of the file is similar to
+   Erlang's ".app" files:
+
+#+BEGIN_SRC erlang
+   [
+    {riak_kv, [
+            {storage_backend, riak_kv_dets_backend},
+            {riak_kv_dets_backend_root, "data/dets"}
+
+            %% More Riak KV settings...
+           ]}
+    %% Other application configurations...
+   ].
+#+END_SRC
+
+   That is, the file starts with =[=, and ends with =].=.  Inside the
+   square brackets are comma-separated application sections of the
+   form ={ApplictionName, [Setting1, Setting2, ...]}=.  Each setting
+   is a 2-tuple of the form ={SettingName, SettingValue}=.
