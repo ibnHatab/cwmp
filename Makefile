@@ -17,11 +17,11 @@ app:
 deps:
 	$(REBAR) check-deps || $(REBAR) get-deps
 
+# Documentation targets
+#
 $(DOCDIR):
 	-@mkdir $(DOCDIR)
 
-# Documentation targets
-#
 docs:   $(DOCDIR) 
 	@erl -noshell -run edoc_run application '$(APP)' '"."' '[{dir,"$(DOCDIR)"}, {def,{vsn,"$(VSN)"}}]'
 
