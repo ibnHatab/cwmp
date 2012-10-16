@@ -73,7 +73,7 @@ parse_error(Elem, State) ->
     parse_error(Elem, State, "Unknown element").
 
 
--spec parse_warning(#xmlElement{} | string() | atom(), #parser{}) -> no_return().
+-spec parse_warning(#xmlElement{} | string() | atom(), string(), string()) -> no_return().
 parse_warning(Name, Cause, Msg) when is_atom(Name) ->
     parse_warning(atom_to_list(Name), Cause, Msg);
 parse_warning(Name, Cause, Msg) when is_list(Name) ->
@@ -101,7 +101,7 @@ build_error(Data, State) ->
     build_error(Data, State, "Unknown method").
 
 
--spec build_warning(body_type(), #builder{}) -> no_return().
+%FIXME: -spec build_warning(body_type(), #builder{}) -> no_return().
 build_warning(Data, State, Msg) ->
     Method = element(1, Data),
     io:format(user, ":~p ~n Expect: ~p, ~p ~n", [Method, State, Msg]). %FIXME: make as in parse_warning

@@ -1,0 +1,17 @@
+
+			-*- html -*-
+
+	CWMP Protocolove rview page
+
+@author vlad
+@copyright ALU
+@version {@version}
+@title CWMP Protocol Object
+
+@doc This package contains protocol object and application for CWMP protocol layer
+
+<p>News in 0.0.1:
+<ul>
+  <li>Initial version tested. </li>
+</ul>
+</p>

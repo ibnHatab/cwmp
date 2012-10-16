@@ -1,4 +1,4 @@
-
+APP=cwmp
 TR_VSN = $(shell sed -n 's/.*{vsn,.*"\(.*\)"}.*/\1/p' src/tr.app.src)
 REBAR='./rebar'
 
@@ -12,6 +12,9 @@ app:
 
 deps:
 	$(REBAR) check-deps || $(REBAR) get-deps
+
+docs:
+	@erl -noshell -run edoc_run application '$(APP)' '"."' '[]'
 
 clean:
 	$(REBAR) clean
