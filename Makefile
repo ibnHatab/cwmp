@@ -22,7 +22,7 @@ deps:
 $(DOCDIR):
 	-@mkdir $(DOCDIR)
 
-docs:   $(DOCDIR) 
+docs:   $(DOCDIR) orgs
 	@erl -noshell -run edoc_run application '$(APP)' '"."' '[{dir,"$(DOCDIR)"}, {def,{vsn,"$(VSN)"}}]'
 
 #	@erl -noshell -run edoc_run file '"test/soap_parser_SUITE.erl"' '[{dir,"$(DOCDIR)"}, {def,{vsn,"$(VSN)"}}]'
