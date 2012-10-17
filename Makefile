@@ -1,7 +1,7 @@
 
 REBAR='./rebar'
 
-APP=cwmp
+APP = cwmp
 VSN = $(shell sed -n 's/.*{vsn,.*"\(.*\)"}.*/\1/p' src/$(APP).app.src)
 
 DOCDIR=$(APP)_info
