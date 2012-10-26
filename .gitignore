@@ -6,3 +6,5 @@ ebin/
 logs/*
 
 test.spec
+
+deps
