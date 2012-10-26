@@ -1,0 +1,25 @@
+
+			-*- html -*-
+
+	CWMP Protocolove rview page
+
+@author vlad
+@copyright ALU
+@version {@version}
+@title CWMP Protocol Object
+
+@doc This package contains protocol object and application for CWMP protocol layer
+
+<a href="modules-frame.html" target="modulesFrame" class="package">
+  Modules list  
+</a>
+
+The <a href="testlist.html">Decoder Tests</a> result can be found on CT run of 
+{@link soap_parser_SUITE. soap_parser_SUITE}.
+
+<p>News in 0.0.1:
+<ul>
+  <li>Initial version tested. </li>
+</ul>
+</p>
+

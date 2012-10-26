@@ -1,6 +1,10 @@
 
-TR_VSN = $(shell sed -n 's/.*{vsn,.*"\(.*\)"}.*/\1/p' src/tr.app.src)
 REBAR='./rebar'
+
+APP = cwmp
+VSN = $(shell sed -n 's/.*{vsn,.*"\(.*\)"}.*/\1/p' src/$(APP).app.src)
+
+DOCDIR=$(APP)_info
 
 all: compile
 
@@ -13,11 +17,33 @@ app:
 deps:
 	$(REBAR) check-deps || $(REBAR) get-deps
 
+# Documentation targets
+#
+$(DOCDIR):
+	-@mkdir $(DOCDIR)
+
+docs:   $(DOCDIR) orgs
+	@erl -noshell -run edoc_run application '$(APP)' '"."' '[{dir,"$(DOCDIR)"}, {def,{vsn,"$(VSN)"}}]'
+
+#	@erl -noshell -run edoc_run file '"test/soap_parser_SUITE.erl"' '[{dir,"$(DOCDIR)"}, {def,{vsn,"$(VSN)"}}]'
+
+orgs: orgs-doc orgs-README
+
+orgs-doc: $(DOCDIR)
+	@emacs -l orgbatch.el -batch --eval="(riak-export-doc-dir \"doc\" 'html)"
+	@cp  doc/*.html $(DOCDIR)
+
+orgs-README:
+	@emacs -l orgbatch.el -batch --eval="(riak-export-doc-file \"README.org\" 'ascii)"
+	@mv README.txt README
+
+
 clean:
 	$(REBAR) clean
-	@rm -rf logs/*
+	@rm -rf $(DOCDIR)
+	@rm -rf logs
 	@rm -rf test/*.beam
-	@rm -rf .eunit/*.beam
+	@rm -rf .eunit
 
 distclean:
 	$(REBAR) clean delete-deps

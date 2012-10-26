@@ -14,7 +14,6 @@
 -include_lib("xmerl/include/xmerl.hrl").
 
 -include("cwmp.hrl").
--include("tr69/include/tr69.hrl").
 
 %%--------------------------------------------------------------------
 %% @spec suite() -> Info
@@ -420,22 +419,22 @@ name_namespace_tc(_Config) ->
 check_namespace_tc(_Config) ->
     [
      begin
-	 check_namespace_check(String, Name)
+	 check_namespace_check(String)
      end
      ||
-	{String, Name} <- [
-			   {   'soap-env:Body', 'soapenv:Body'  }
-			   ,{'soap-env:Header', 'soapenv:Header'}
+	String <- [
+			   'soapenv:Body'  
+			   , 'soapenv:Header'
 			  ]
     ],  	        
     ok.
-check_namespace_check(String, Name)->
+check_namespace_check(String)->
     %setup
     Nss = cwmp_lib:match_cwmp_ns_and_version(?XML_NAMESPACE),
-    State = cwmp_lib:check_namespace('soap-env:Envelope',
+    State = cwmp_lib:check_namespace('soapenv:Envelope',
      			    #xmlElement {name='soapenv:Envelope'}, #parser{ns=Nss}),
     %execute
-    Res = cwmp_lib:check_namespace(String,#xmlElement {name=Name}, State),
+    Res = cwmp_lib:check_namespace(String,#xmlElement {name=String}, State),
     %assert
     State = Res.
 
