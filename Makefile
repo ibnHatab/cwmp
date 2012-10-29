@@ -53,7 +53,7 @@ install: all
 	cp -r ebin $(DESTDIR)/lib/tr-$(TR_VSN)/
 
 utest:
-	$(REBAR) -v eunit skip_deps=true #suite=tr_soap_types
+	$(REBAR) -v eunit skip_deps=true suite=cwmp_builder
 
 ut-shell:
 	exec erl -pa $(PWD)/apps/*/ebin -pa $(PWD)/deps/*/ebin -pa $(PWD)/.eunit -boot start_sasl -s reloader 
@@ -67,7 +67,7 @@ ctest:  test.spec compile
 	ct_run -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
 
 ct-shell:
-	ct_run -shell -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
+	ct_run -shell -pa $(PWD)/deps/*/ebin -pz ./ebin -pz ./test -spec test.spec
 
 
 test: app

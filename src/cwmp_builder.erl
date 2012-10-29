@@ -137,7 +137,7 @@ build_rpc_data(#rpc_data{data=Data} = _D, State) ->
 build_Envelope(#envelope{header=Header, body=Body} = _D, State) ->
     ElHeader = build_Header(Header, State),
     ElBody = build_Body(Body, State),
-    Attribs = [{'xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope/'},	       
+    Attribs = [{'xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope/'},
 	       {'xmlns:soapenc', 'http://schemas.xmlsoap.org/soap/encoding/'},
 	       {'xmlns:xsd', 'http://www.w3.org/2001/XMLSchema'},
 	       {'xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance'},
@@ -153,9 +153,61 @@ build_Header(_D, _State) ->
 build_Body(Body, State) ->
     {'soapenv:Body', [],
      [case Method of
-	  #soap_fault{} = Data -> build_SoapFault(Data, State);
+	  #fault{} = Data -> build_Fault(Data, State);
+	  #get_rpc_methods{} = Data -> build_TagName(Data, "GetRPCMethods");
 	  #get_rpc_methods_response{} = Data -> build_GetRPCMethodsResponse(Data, State);
-	  #autonomous_transfer_complete{} = Data -> build_AutonomousTransferComplete(Data, State);	  
+	  #set_parameter_values{} = Data -> build_SetParameterValues(Data, State);
+	  #set_parameter_values_response{} = Data -> build_SetParameterValuesResponse(Data, State);
+	  #get_parameter_values{} = Data -> build_GetParameterValues(Data, State);
+	  #get_parameter_values_response{} = Data -> build_GetParameterValuesResponse(Data, State);
+	  #get_parameter_names{} = Data -> build_GetParameterNames(Data, State);
+	  #get_parameter_names_response{} = Data -> build_GetParameterNamesResponse(Data, State);
+	  #set_parameter_attributes{} = Data -> build_SetParameterAttributes(Data, State);
+	  #set_parameter_attributes_response{} = Data -> build_TagName(Data, "SetParameterAttributesResponse");
+	  #get_parameter_attributes{} = Data -> build_GetParameterAttributes(Data, State);
+	  #get_parameter_attributes_response{} = Data -> build_GetParameterAttributesResponse(Data, State);
+	  #add_object{} = Data -> build_AddObject(Data, State);
+	  #add_object_response{} = Data -> build_AddObjectResponse(Data, State);
+	  #delete_object{} = Data -> build_DeleteObject(Data, State);
+	  #delete_object_response{} = Data -> build_DeleteObjectResponse(Data, State);
+	  #download{} = Data -> build_Download(Data, State);
+	  #download_response{} = Data -> build_DownloadResponse(Data, State);
+	  #reboot{} = Data -> build_Reboot(Data, State);
+	  #reboot_response{} = Data -> build_TagName(Data, "RebootResponse");
+	  #get_queued_transfers{} = Data -> build_TagName(Data, "GetQueuedTransfers");
+	  #get_queued_transfers_response{} = Data -> build_GetQueuedTransfersResponse(Data, State);
+	  #schedule_inform{} = Data -> build_ScheduleInform(Data, State);
+	  #schedule_inform_response{} = Data -> build_TagName(Data, "ScheduleInformResponse");
+	  #set_vouchers{} = Data -> build_SetVouchers(Data, State);
+	  #set_vouchers_response{} = Data -> build_TagName(Data, "SetVouchersResponse");
+	  #get_options{} = Data -> build_GetOptions(Data, State);
+	  #get_options_response{} = Data -> build_GetOptionsResponse(Data, State);
+	  #upload{} = Data -> build_Upload(Data, State);
+	  #upload_response{} = Data -> build_UploadResponse(Data, State);
+	  #factory_reset{} = Data -> build_TagName(Data, "FactoryReset");
+	  #factory_reset_response{} = Data -> build_TagName(Data, "FactoryResetResponse");
+	  #get_all_queued_transfers{} = Data -> build_TagName(Data, "GetAllQueuedTransfers");
+	  #get_all_queued_transfers_response{} = Data -> build_GetAllQueuedTransfersResponse(Data, State);
+	  #schedule_download{} = Data -> build_ScheduleDownload(Data, State);
+	  #schedule_download_response{} = Data -> build_TagName(Data, "ScheduleDownloadResponse");
+	  #cancel_transfer{} = Data -> build_CancelTransfer(Data, State);
+	  #cancel_transfer_response{} = Data -> build_TagName(Data, "CancelTransferResponse");
+	  #change_du_state{} = Data -> build_ChangeDUState(Data, State);
+	  #change_du_state_response{} = Data -> build_TagName(Data, "ChangeDUStateResponse");
+	  #inform{} = Data -> build_Inform(Data, State);
+	  #inform_response{} = Data -> build_InformResponse(Data, State);
+	  #transfer_complete{} = Data -> build_TransferComplete(Data, State);
+	  #transfer_complete_response{} = Data -> build_TagName(Data, "TransferCompleteResponse");
+	  #autonomous_transfer_complete{} = Data -> build_AutonomousTransferComplete(Data, State);
+	  #autonomous_transfer_complete_response{} = Data -> build_TagName(Data, "AutonomousTransferCompleteResponse");
+	  #kicked{} = Data -> build_Kicked(Data, State);
+	  #kicked_response{} = Data -> build_KickedResponse(Data, State);
+	  #request_download{} = Data -> build_RequestDownload(Data, State);
+	  #request_download_response{} = Data -> build_TagName(Data, "RequestDownloadResponse");
+	  #du_state_change_complete{} = Data -> build_DUStateChangeComplete(Data, State);
+	  #du_state_change_complete_response{} = Data -> build_TagName(Data, "DUStateChangeCompleteResponse");
+	  #autonomous_du_state_change_complete{} = Data -> build_AutonomousDUStateChangeComplete(Data, State);
+	  #autonomous_du_state_change_complete_response{} = Data -> build_TagName(Data, "AutonomousDUStateChangeCompleteResponse");
 	  _ ->
 	      build_error(Method, State)
       end || Method <- Body]}.
@@ -200,6 +252,11 @@ build_OperationPerformed(Data, _State) -> build_string(Data).
 %%%-----------------------------------------------------------------------------
 %%%        Build RPC Message
 %%%-----------------------------------------------------------------------------
+
+%% Build empty tags
+-spec build_TagName(record(), string()) -> export_element().
+build_TagName(Data, _TagName) when Data =:= undefined -> null;
+build_TagName(_Data, TagName) -> { list_to_atom("cwmp:" ++ TagName), [], []}.
 
 %% generated elements
 
@@ -775,93 +832,94 @@ build_ArgStruct(Data, _State) ->
 %%% Array complexType/complexContent/restriction base="soapenc:Array"
 %%% Generate list of sequence/element
 %%%-----------------------------------------------------------------------------
-attr_arrayType(Lenght) ->
-    {'soapenc:arrayType', io_lib:format("string[~02i]", [Lenght]) }.
+attr_arrayType(Tag, Lenght) ->
+    Value=io_lib:format("~s[~02p]", [Tag, Lenght]),
+    {'soapenc:arrayType', list_to_atom(lists:flatten(Value))}.
 
 -spec build_MethodList([string()], #builder{}) -> export_element().
 build_MethodList(Data, _S) when Data =:= undefined -> null;
 build_MethodList(Data,  _State) ->
     TagArray =  [build_string(E) || E <- Data],
-    {'MethodList', [attr_arrayType(length(TagArray))], TagArray}.
+    {'MethodList', [attr_arrayType("xsd:string",length(TagArray))], TagArray}.
 
 -spec build_ParameterNames([string()], #builder{}) -> export_element().
 build_ParameterNames(Data, _S) when Data =:= undefined -> null;
 build_ParameterNames(Data,  _State) ->
     TagArray =  [build_string(E) || E <- Data],
-    {'ParameterNames', [attr_arrayType(length(TagArray))], TagArray}.
+    {'ParameterNames', [attr_arrayType("xsd:string", length(TagArray))], TagArray}.
 
 -spec build_ParameterValueList([#parameter_value_struct{}], #builder{}) -> export_element().
 build_ParameterValueList(Data, _S) when Data =:= undefined -> null;
 build_ParameterValueList(Data,  State) ->
     TagArray =  [build_ParameterValueStruct(E, State) || E <- Data],
-    {'ParameterValueList', [attr_arrayType(length(TagArray))], TagArray}.
+    {'ParameterValueList', [attr_arrayType("cwmp:ParameterValueStruct", length(TagArray))], TagArray}.
 
 
 -spec build_EventList([#event_struct{}], #builder{}) -> export_element().
 build_EventList(Data, _S) when Data =:= undefined -> null;
 build_EventList(Data,  State) ->
     TagArray =  [build_EventStruct(E, State) || E <- Data],
-    {'EventList', [attr_arrayType(length(TagArray))], TagArray}.
+    {'EventList', [attr_arrayType("cwmp:EventStruct", length(TagArray))], TagArray}.
 
 -spec build_ParameterInfoList([#parameter_info_struct{}], #builder{}) -> export_element().
 build_ParameterInfoList(Data, _S) when Data =:= undefined -> null;
 build_ParameterInfoList(Data,  State) ->
     TagArray =  [build_ParameterInfoStruct(E, State) || E <- Data],
-    {'ParameterInfoList', [attr_arrayType(length(TagArray))], TagArray}.
+    {'ParameterInfoList', [attr_arrayType("cwmp:ParameterInfoStruct", length(TagArray))], TagArray}.
 
 -spec build_AccessList([string()], #builder{}) -> export_element().
 build_AccessList(Data, _S) when Data =:= undefined -> null;
 build_AccessList(Data,  _State) ->
     TagArray =  [build_string(E) || E <- Data],
-    {'AccessList', [attr_arrayType(length(TagArray))], TagArray}.
+    {'AccessList', [attr_arrayType("xsd:string", length(TagArray))], TagArray}.
 
 -spec build_SetParameterAttributesList([#set_parameter_attributes_struct{}], #builder{}) -> export_element().
 build_SetParameterAttributesList(Data, _S) when Data =:= undefined -> null;
 build_SetParameterAttributesList(Data, State) ->
     TagArray =  [build_SetParameterAttributesStruct(E, State) || E <- Data],
-    {'SetParameterAttributesList', [attr_arrayType(length(TagArray))], TagArray}.
+    {'SetParameterAttributesList', [attr_arrayType("cwmp:SetParameterAttributesStruct", length(TagArray))], TagArray}.
 
 -spec build_ParameterAttributeList([#parameter_attribute_struct{}], #builder{}) -> export_element().
 build_ParameterAttributeList(Data, _S) when Data =:= undefined -> null;
 build_ParameterAttributeList(Data,  State) ->
     TagArray =  [build_ParameterAttributeStruct(E, State) || E <- Data],
-    {'ParameterAttributeList', [attr_arrayType(length(TagArray))], TagArray}.
+    {'ParameterAttributeList', [attr_arrayType("cwmp:ParameterAttributeStruct", length(TagArray))], TagArray}.
 
 -spec build_TimeWindowList([#time_window_struct{}], #builder{}) -> export_element().
 build_TimeWindowList(Data, _S) when Data =:= undefined -> null;
 build_TimeWindowList(Data,  State) ->
     TagArray =  [build_TimeWindowStruct(E, State) || E <- Data],
-    {'TimeWindowList', [attr_arrayType(length(TagArray))], TagArray}.
+    {'TimeWindowList', [attr_arrayType("cwmp:TimeWindowStruct", length(TagArray))], TagArray}.
 
 -spec build_TransferList([#queued_transfer_struct{}], #builder{}) -> export_element().
 build_TransferList(Data, _S) when Data =:= undefined -> null;
 build_TransferList(Data,  State) ->
     TagArray =  [build_QueuedTransferStruct(E, State) || E <- Data],
-    {'TransferList', [attr_arrayType(length(TagArray))], TagArray}.
+    {'TransferList', [attr_arrayType("cwmp:QueuedTransferStruct", length(TagArray))], TagArray}.
 
 -spec build_AllTransferList([#all_queued_transfer_struct{}], #builder{}) -> export_element().
 build_AllTransferList(Data, _S) when Data =:= undefined -> null;
 build_AllTransferList(Data,  State) ->
     TagArray =  [build_AllQueuedTransferStruct(E, State) || E <- Data],
-    {'AllTransferList', [attr_arrayType(length(TagArray))], TagArray}.
+    {'AllTransferList', [attr_arrayType("cwmp:AllQueuedTransferStruct", length(TagArray))], TagArray}.
 
 %-spec build_VoucherList([#base64{}], #builder{}) -> export_element().
 build_VoucherList(Data, _S) when Data =:= undefined -> null;
 build_VoucherList(Data,  _State) ->
     TagArray =  [build_base64(E) || E <- Data],
-    {'VoucherList', [attr_arrayType(length(TagArray))], TagArray}.
+    {'VoucherList', [attr_arrayType("soapenc:base64", length(TagArray))], TagArray}.
 
 -spec build_OptionList([#option_struct{}], #builder{}) -> export_element().
 build_OptionList(Data, _S) when Data =:= undefined -> null;
 build_OptionList(Data,  State) ->
     TagArray =  [build_OptionStruct(E, State) || E <- Data],
-    {'OptionList', [attr_arrayType(length(TagArray))], TagArray}.
+    {'OptionList', [attr_arrayType("cwmp:OptionStruct", length(TagArray))], TagArray}.
 
 -spec build_FileTypeArg([#arg_struct{}], #builder{}) -> export_element().
 build_FileTypeArg(Data, _S) when Data =:= undefined -> null;
 build_FileTypeArg(Data,  State) ->
     TagArray =  [build_ArgStruct(E, State) || E <- Data],
-    {'FileTypeArg', [attr_arrayType(length(TagArray))], TagArray}.
+    {'FileTypeArg', [attr_arrayType("cwmp:ArgStruct", length(TagArray))], TagArray}.
 
 
 
@@ -924,10 +982,13 @@ main() ->
     ok.
 
 
-build_rpc_data_test_no() ->
+
+build_rpc_data_test() ->
     Builder =  #builder{},
-    XML = build_rpc_data(?RPC_DATA, Builder),
-						%    ?DBG(XML),
+    GetRpcMethods = {rpc_data,{envelope,{header,{id,true,"1"},undefined,undefined},
+                              [{get_rpc_methods}]}},
+    XML = build_rpc_data(GetRpcMethods, Builder), %?RPC_DATA
+    ?DBG(XML),
     ok.
 
 export_test_no() ->
@@ -986,10 +1047,85 @@ export_test_no() ->
 	      {'StartTime',[],[{{2012,10,3},{18,53,34}}]},
 	      {'CompleteTime',[],[{{2012,10,3},{18,53,44}}]}]}]}]},[[]]).
 
+
+
 main_test() ->
-%    xmerl:export_simple([?EXML], xmerl_xml, [{prolog,[]}]),
-%    main(),
+    XML = [
+	   {'soapenv:Envelope',
+	    [{'xmlns:soapenv','http://schemas.xmlsoap.org/soap/envelope/'},
+	     {'xmlns:soapenc','http://schemas.xmlsoap.org/soap/encoding/'},
+	     {'xmlns:xsd','http://www.w3.org/2001/XMLSchema'},
+	     {'xmlns:xsi','http://www.w3.org/2001/XMLSchema-instance'},
+	     {'xmlns:cwmp','urn:dslforum-org:cwmp-1-0'}],
+	    ['soapenv:Header',
+	     {'soapenv:Body',[],	 		 
+	      [{'cwmp:Inform',[],
+		[
+		 {'cwmp:DeviceIdStruct',[],
+		  [{'Manufacturer',[],["Alcatel"]},
+		   {'OUI',[],["001D4C"]},
+		   {'ProductClass',[],["9365 BSR Femto"]},
+		   {'SerialNumber',[],["4321"]}]}
+		 ,
+		 {'EventList',
+		  [
+		   %%{'soapenc:arrayType','cwmp:EventStruct[1]'} 
+		  ],
+		  [
+		   {'cwmp:EventStruct',[],
+		    [
+		      {'EventCodeType',[],["2"]}
+		     %%,
+		     %% {'CommandKeyType',[],[]}
+		    ]
+		   }
+		  ]
+		 }
+
+		 %% ,
+		 
+		 %% {'MaxEnvelopes',[],["1"]},
+		 %% {'CurrentTime',[],["2012-10-03T18:16:02Z"]},
+		 %% {'RetryCount',[],["0"]},
+		 %% {'ParameterValueList',
+		 %%  [{'soapenc:arrayType','cwmp:ParameterValueStruct[10]'}],
+		 %%  [{'cwmp:ParameterValueStruct',[],
+		 %%    [{'Name',[],["Device.DeviceSummary"]},
+		 %%     {'Value',[],["DeviceSummary"]}]},
+		 %%   {'cwmp:ParameterValueStruct',[],
+		 %%    [{'Name',[],["Device.DeviceInfo.HardwareVersion"]},
+		 %%     {'Value',[],["p1"]}]},
+		 %%   {'cwmp:ParameterValueStruct',[],
+		 %%    [{'Name',[],["Device.DeviceInfo.SoftwareVersion"]},
+		 %%     {'Value',[],["BCR-04-00-BSR-XMIM-06.01"]}]},
+		 %%   {'cwmp:ParameterValueStruct',[],
+		 %%    [{'Name',[],
+		 %%      ["Device.ManagementServer.ConnectionRequestURL"]},
+		 %%     {'Value',[],
+		 %%      ["&sn=4321http://127.0.0.1:8095/ConnectionRequest?command=cr"]}]},
+		 %%   {'cwmp:ParameterValueStruct',[],
+		 %%    [{'Name',[],["Device.ManagementServer.ParameterKey"]},
+		 %%     {'Value',[],["ParameterKey"]}]},
+		 %%   {'cwmp:ParameterValueStruct',[],
+		 %%    [{'Name',[],["Device.LAN.IPAddress"]},
+		 %%     {'Value',[],["172.0.0.1"]}]},
+		 %%   {'cwmp:ParameterValueStruct',[],
+		 %%    [{'Name',[],["Device.LAN.MACAddress"]},
+		 %%     {'Value',[],["00-0E-35-D6-24-F7"]}]},
+		 %%   {'cwmp:ParameterValueStruct',[],
+		 %%    [{'Name',[],["Device.Services.BSR.1.SDM.1.mimVersion"]},
+		 %%     {'Value',[],["BCR-04-00-BSR-XMIM-02.00"]}]},
+		 %%   {'cwmp:ParameterValueStruct',[],
+		 %%    [{'Name',[],
+		 %%      ["Device.DeviceInfo.AdditionalHardwareVersion"]},
+		 %%     {'Value',[],["250mW"]}]},
+		 %%   {'cwmp:ParameterValueStruct',[],
+		 %%    [{'Name',[],["Device.Services.BSR.1.RFTrace.1.iMSI"]},
+		 %%     {'Value',[],["iMSI"]}]}]}
+		]
+	       }]}]}
+	  ],
+
+	xmerl:export_simple(XML, xmerl_xml, [{prolog,[]}]),
     ok.
-
-
 -endif.

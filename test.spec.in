@@ -1,6 +1,6 @@
 
 {logdir, "@PATH@/logs"}.
-%%{trace_dir, "@PATH@/test/data"}.
+%{trace_dir, "@PATH@/test/data"}.
 {alias, tr_app, "@PATH@/."}.
 {include, "@PATH@/include"}.
 {include, "@PATH@/deps"}.

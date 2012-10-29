@@ -14,7 +14,6 @@
 
 -include_lib("xmerl/include/xmerl.hrl").
 
--include("tr69/include/tr69.hrl").
 -include("cwmp.hrl").
 
 -import(cwmp_parser, [parse/1]).
@@ -50,12 +49,14 @@ init_per_suite(Config) ->
     TestList = [begin
 		    case string:tokens(File, "_.") of
 			[_Prefix, Name, Sufix] ->
-			    Sufix == ".xml",
+			    Sufix == "xml",
 			    Name
 		    end
 		end
 		|| File <- FileList, isXmlFile(File)],
-    [{trace_rpc_methods, TestList} | Config].
+    TempDir = mktemp(),
+    ok = filelib:ensure_dir(TempDir ++ "/"),
+    [{trace_rpc_methods, TestList}, {trace_temp_dir, TempDir} | Config].
 
 %%--------------------------------------------------------------------
 %% @spec end_per_suite(Config0) -> void() | {save_config,Config1}
@@ -133,14 +134,18 @@ groups() ->
 %% @end
 %%--------------------------------------------------------------------
 all() ->
-    [hdm_trace_test_case].
+    [hdm_read_trace_tc, hdm_validate_trace_tc, hdm_compare_trace_tc].
 
 %%--------------------------------------------------------------------
 %% @spec TestCase() -> Info
 %% Info = [tuple()]
 %% @end
 %%--------------------------------------------------------------------
-hdm_trace_test_case() ->
+hdm_read_trace_tc() ->
+    [].
+hdm_validate_trace_tc() ->
+    [].
+hdm_compare_trace_tc() ->
     [].
 
 %%--------------------------------------------------------------------
@@ -152,12 +157,84 @@ hdm_trace_test_case() ->
 %% Comment = term()
 %% @end
 %%--------------------------------------------------------------------
+
+hdm_trace_test_case(Config) ->
+    TraceDir = ?config(data_dir, Config),
+    Methods = ?config(trace_rpc_methods, Config),
+    TempDir = ?config(trace_temp_dir, Config),
+    lists:foreach(fun (Method) ->
+			  TraceFile = filename:join([TraceDir,
+						     "cwmp_" ++ Method ++ ".xml"]),
+			  XqlFile = filename:join([TraceDir,
+						   "cwmp_" ++ Method ++ ".xql"]),
+			  RpcFile = filename:join([TempDir,
+						   "cwmp_" ++ Method ++ ".xml"]),
+
+			  ct:print("CT parse trace: ~p ~n", [TraceFile]),
+
+			  {Doc, _Rest} = xmerl_scan:file(TraceFile),
+			  Rpc = parse(Doc),
+			  ?CTDBG(Rpc),
+			  ct:print("CT generate trace: ~p ~n", [RpcFile]),
+			  RpcDoc = cwmp_builder:build(Rpc),
+			  ?CTDBG(RpcDoc),
+			  {ok, saved} = savexml(RpcDoc, RpcFile),
+			  ok = compare_test(XqlFile, TraceFile, RpcFile)
+		  end,
+		  Methods),
+    ok.
+
+
+hdm_read_trace_tc(Config) ->
+    TraceDir = ?config(data_dir, Config),
+    Methods = ?config(trace_rpc_methods, Config),
+    lists:foreach(fun (Method) ->
+			  TraceFile = filename:join([TraceDir,
+						     "cwmp_" ++ Method ++ ".xml"]),
+			  ct:print("CT read trace: ~p ~n", [TraceFile]),
+
+			  {Doc, _Rest} = xmerl_scan:file(TraceFile),
+			  Rpc = parse(Doc),
+			  ?CTDBG(Rpc)
+		  end,
+		  Methods),
+    ok.
+
+hdm_validate_trace_tc(Config) ->
+    TraceDir = ?config(data_dir, Config),
+    Methods = ?config(trace_rpc_methods, Config),
+    TempDir = ?config(trace_temp_dir, Config),
+    lists:foreach(fun (Method) ->
+			  TraceFile = filename:join([TraceDir,
+						     "cwmp_" ++ Method ++ ".xml"]),
+			  ct:print("CT validate trace: ~p ~n", [TraceFile]),
+
+			  RpcFile = filename:join([TempDir, "cwmp_" ++ Method ++ ".xml"]),
+			  SchemaFile = filename:join([TraceDir, "../../doc/cwmp-1-2.xsd"]),
+			  {Doc, _Rest} = xmerl_scan:file(TraceFile),
+			  Rpc = parse(Doc),
+			  ?CTDBG(Rpc),
+			  RpcDoc = cwmp_builder:build(Rpc),
+			  ?CTDBG(RpcDoc),
+			  {ok, saved} = savexml(RpcDoc, RpcFile),
+			  ok = validate_cwmp(RpcFile, SchemaFile)
+		  end,
+		  Methods),
+    ok.
+
+hdm_compare_trace_tc(Config) ->
+    ok.
+
+
+%%--------------------------------------------------------------------
+%% Utilities
+%%--------------------------------------------------------------------
 mktemp() ->
     Time = calendar:local_time(),
     Dir = make_dirname(Time),
     filename:join(["/tmp", Dir]).
-    
-make_dirname({{YY,MM,DD},{H,M,S}}) -> 
+
+make_dirname({{YY,MM,DD},{H,M,S}}) ->
     io_lib:format("cwmp"++".~w-~2.2.0w-~2.2.0w_~2.2.0w.~2.2.0w.~2.2.0w",
 		  [YY,MM,DD,H,M,S]).
 
@@ -174,40 +251,22 @@ savexml(Doc, File) ->
     end.
 
 
-compate_test(XqlFile, TraceFile, RpcFile) ->
+compare_test(XqlFile, TraceFile, RpcFile) ->
     Command = "xx",
+
     case os:cmd(Command) of
 	"passed" ->
 	    ok;
 	Error ->
-	    ct:print("Error in compatator: ~p~n", [Error]),
+	    ct:print("Error in comparator: ~p~n", [Error]),
 	    {error, Error}
     end.
 
-    
-
-hdm_trace_test_case(Config) ->
-    Methods = ?config(trace_rpc_methods, Config),
-    TraceDir = ?config(data_dir, Config),
-    TempDir = mktemp(),
-    ok = filelib:ensure_dir(TempDir ++ "/"),
-    lists:foreach(fun (Method) ->
-			  TraceFile = filename:join([TraceDir,
-						     "cwmp_" ++ Method ++ ".xml"]),
-			  XqlFile = filename:join([TraceDir,
-						   "cwmp_" ++ Method ++ ".xql"]),
-			  RpcFile = filename:join([TempDir,
-						   "cwmp_" ++ Method ++ ".xml"]),			  
-
-			  ct:print("CT parse trace: ~p ~n", [TraceFile]),
-			  {Doc, _Rest} = xmerl_scan:file(TraceFile),
-			  Rpc = cwmp_parser:parse(Doc),
-			  ?CTDBG(Rpc),
-			  ct:print("CT generate trace: ~p ~n", [RpcFile]),
-			  RpcDoc = cwmp_builder:build(Rpc),
-			  ?CTDBG(RpcDoc),
-			  {ok, saved} = savexml(RpcDoc, RpcFile),
-			  ok = compate_test(XqlFile, TraceFile, RpcFile)
-		  end,
-		  Methods),
+validate_cwmp(RpcFile, SchemaFile) ->
+    Command = "xmllint --noout --path doc --schema "
+	++ SchemaFile ++ " " ++ RpcFile,
+    Result = os:cmd(Command),
+    ct:print("Validate: <~p ~n", [Result]),
     ok.
+    
+    

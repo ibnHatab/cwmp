@@ -529,7 +529,7 @@ build_ACSVendorFaultCodeType(Data)			-> maybe_tag('ACSVendorFaultCodeType', fun 
 build_TransferFileType(Data)				-> maybe_tag('TransferFileType', fun format_string/1, Data).
 build_DownloadFileType(Data)				-> maybe_tag('DownloadFileType', fun format_int/1, Data).
 build_UploadFileType(Data)				-> maybe_tag('UploadFileType', fun format_string/1, Data).
-build_EventCodeType(Data)				-> maybe_tag('EventCodeType', fun format_string/1, Data).
+build_EventCodeType(Data)				-> maybe_tag('EventCodeType', fun format_int/1, Data).
 build_TimeWindowModeValueType(Data)			-> maybe_tag('TimeWindowModeValueType', fun format_string/1, Data).
 build_CommandKeyType(Data)				-> maybe_tag('CommandKeyType', fun format_string/1, Data).
 build_ObjectNameType(Data)				-> maybe_tag('ObjectNameType', fun format_string/1, Data).

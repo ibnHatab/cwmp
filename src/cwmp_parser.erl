@@ -798,7 +798,7 @@ parse_VoucherList(E, S) ->
 				   parse_error(Elem, State)
 			   end
 		   end,
-		   E, 'cwmp:base64', NewState).
+		   E, 'soapenc:base64', NewState).
 
 -spec parse_OptionStruct(#xmlElement{},#parser{}) -> #option_struct{}.
 parse_OptionStruct(#xmlElement{content = Content} = E, S) ->
