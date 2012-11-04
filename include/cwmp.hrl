@@ -850,9 +850,6 @@
           body   :: [body_type()]
          }).
 
-
-
-
 -type body_type() ::
         #add_object{}                          | #add_object_response{}
       | #autonomous_du_state_change_complete{} | #autonomous_du_state_change_complete_response{}
@@ -888,9 +885,11 @@
 %%%-----------------------------------------------------------------------------
 %%%        RPC Message
 %%%-----------------------------------------------------------------------------
+%% @doc Empty body from ACS
+-record(empty_response,{}).
+
 -record(cwmp_obj, {
-%          type :: cwmp_method(),
-          data :: #envelope{}
+          data :: #envelope{} | #empty_response{}
          }).
 
 %%%-----------------------------------------------------------------------------

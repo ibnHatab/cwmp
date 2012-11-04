@@ -139,7 +139,7 @@ parse_string(#xmlElement{name=Name, content = Content}) ->
 parse_int(#xmlElement{name=Name, content = Content}) ->
     String = string:strip(get_xmlText(Content)),
     ValueString = check_Value(Name, String, int),
-    {Int,_Rest} = string:to_integer(ValueString),
+    {Int,_Rest} = string:to_integer(ValueString), %FIXME: handle error, add tests
     Int.
 
 -spec parse_unsignedInt(#xmlElement{content::[any()]}) -> non_neg_integer().
