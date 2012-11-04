@@ -101,12 +101,12 @@
 -spec builder([builder_option()]) -> function().
 builder(Options) ->
     State = parse_builder_options(Options, #builder{}),
-    fun (O) -> build_rpc_data(O, State) end.
+    fun (O) -> build_rpc_obj(O, State) end.
 
-%% @doc Build the given as SOAP to an rpc_data.
--spec build(#rpc_data{}) -> [export_element()].
+%% @doc Build the given as SOAP to an rpc_obj.
+-spec build(#rpc_obj{}) -> [export_element()].
 build(Any) ->
-    build_rpc_data(Any, #builder{}).
+    build_rpc_obj(Any, #builder{}).
 
 
 %%%-----------------------------------------------------------------------------
@@ -128,8 +128,8 @@ parse_builder_options([{namespaces, Nss} | Rest], State) ->
 
 
 
--spec build_rpc_data(#rpc_data{}, #builder{}) ->  [export_element()].
-build_rpc_data(#rpc_data{data=Data} = _D, State) ->
+-spec build_rpc_obj(#rpc_obj{}, #builder{}) ->  [export_element()].
+build_rpc_obj(#rpc_obj{data=Data} = _D, State) ->
 						%    ?DBG(Data),
     [build_Envelope(Data, State)].
 
@@ -927,7 +927,7 @@ build_FileTypeArg(Data,  State) ->
 %%% Unitary tetsts
 %%%-----------------------------------------------------------------------------
 -define(RPC_DATA,
-	{rpc_data,
+	{rpc_obj,
 	 {envelope,
 	  {header,{id,true,"22_THOM_TR69_ID"},undefined,undefined},
 	  [{get_rpc_methods_response,
@@ -937,7 +937,7 @@ build_FileTypeArg(Data,  State) ->
        ).
 
 -define(RPC_FAULT,
-	{rpc_data,
+	{rpc_obj,
 	 {envelope,
 	  {header,
 	   {id,true,"0_THOM_TR69_ID"},
@@ -983,11 +983,11 @@ main() ->
 
 
 
-build_rpc_data_test() ->
+build_rpc_obj_test() ->
     Builder =  #builder{},
-    GetRpcMethods = {rpc_data,{envelope,{header,{id,true,"1"},undefined,undefined},
+    GetRpcMethods = {rpc_obj,{envelope,{header,{id,true,"1"},undefined,undefined},
                               [{get_rpc_methods}]}},
-    XML = build_rpc_data(GetRpcMethods, Builder), %?RPC_DATA
+    XML = build_rpc_obj(GetRpcMethods, Builder), %?RPC_DATA
     ?DBG(XML),
     ok.
 

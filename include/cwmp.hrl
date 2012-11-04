@@ -4,7 +4,7 @@
 
 -type cwmp_version() :: 1 | 2.
 
--type rpc_data_type() :: string | int | unsignedInt | boolean | dateTime | base64 | anySimpleType.
+-type rpc_obj_type() :: string | int | unsignedInt | boolean | dateTime | base64 | anySimpleType.
 
 -type qName()     :: string().
 -type url()       :: tuple().
@@ -888,7 +888,7 @@
 %%%-----------------------------------------------------------------------------
 %%%        RPC Message
 %%%-----------------------------------------------------------------------------
--record(rpc_data, {
+-record(rpc_obj, {
 %          type :: cwmp_method(),
           data :: #envelope{}
          }).

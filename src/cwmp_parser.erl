@@ -113,12 +113,12 @@ parser(Options) ->
     State = parse_parser_options(Options, #parser{}),
     fun (O) -> parse(O, State) end.
 
-%% @doc Parse the given xmlElement to rpc_data terms.
--spec parse(#xmlElement{}) -> #rpc_data{}.
+%% @doc Parse the given xmlElement to rpc_obj terms.
+-spec parse(#xmlElement{}) -> #rpc_obj{}.
 parse(S) ->
     parse(S, #parser{}).
 
--spec parse(#xmlElement{}, #parser{}) -> #rpc_data{}.
+-spec parse(#xmlElement{}, #parser{}) -> #rpc_obj{}.
 parse(Doc, S) ->
     %% try
         parse_Document(Doc, S).
@@ -131,7 +131,7 @@ parse(Doc, S) ->
     %% 	    Error
     %% end.
 
--spec parse_Document(#xmlElement{}, #parser{}) -> #rpc_data{}.
+-spec parse_Document(#xmlElement{}, #parser{}) -> #rpc_obj{}.
 parse_Document(#xmlElement{name=QName, namespace = Namespace} = Doc, State) when is_tuple(Doc) ->
     Nss = parse_Namespace(Namespace),
     RefinedState = State#parser{ns=Nss, state=soap},
@@ -140,7 +140,7 @@ parse_Document(#xmlElement{name=QName, namespace = Namespace} = Doc, State) when
 		      parse_Envelope(Doc, RefinedState);
 		  _ -> parse_error(Doc, RefinedState)
               end,
-    #rpc_data{data = Envelop}.
+    #rpc_obj{data = Envelop}.
 
 -spec parse_Namespace(#xmlNamespace{}) -> #rpc_ns{}.
 parse_Namespace(Nss) ->
