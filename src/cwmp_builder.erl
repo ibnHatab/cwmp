@@ -987,7 +987,8 @@ build_cwmp_obj_test() ->
     Builder =  #builder{},
     GetRpcMethods = {cwmp_obj,{envelope,{header,{id,true,"1"},undefined,undefined},
                               [{get_rpc_methods}]}},
-    XML = build_cwmp_obj(GetRpcMethods, Builder), %?RPC_DATA
+    XML_Object = build_cwmp_obj(GetRpcMethods, Builder), %?RPC_DATA
+    XML = xmerl:export_simple(XML_Object, xmerl_xml, [{prolog,[]}])
     ?DBG(XML),
     ok.
 
