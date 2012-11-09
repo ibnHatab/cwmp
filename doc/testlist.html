@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>testlist</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-11-05 14:54:40 EET"/>
+<meta name="author" content="Andreea NICOLA"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="doc-style.css" />
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<div id="org-div-home-and-up" style="text-align:right;font-size:70%;white-space:nowrap;">
+ <a accesskey="h" href="sitemap.html"> UP </a>
+ |
+ <a accesskey="H" href="main.html"> HOME </a>
+</div>
+
+<h1 class="title">testlist</h1>
+
+
+
+
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> RUN </h2>
+<div class="outline-text-2" id="text-1">
+
+<p>watchfs '<b>/</b>.erl' 'rebar eunit -v skip<sub>deps</sub>=true suite=xmerl'
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> RPC protocol Unitary tests </h2>
+<div class="outline-text-2" id="text-2">
+
+
+
+</div>
+
+<div id="outline-container-2.1" class="outline-3">
+<h3 id="sec-2.1"><span class="section-number-3">2.1</span> Protocol </h3>
+<div class="outline-text-3" id="text-2.1">
+
+<p>list<sub>to</sub><sub>atom</sub>(element(2, split<sub>ns</sub>("soap:Envelope"))).
+</p>
+
+
+</div>
+
+<div id="outline-container-2.1.1" class="outline-4">
+<h4 id="sec-2.1.1"><span class="section-number-4">2.1.1</span> SOAP Parse tests </h4>
+<div class="outline-text-4" id="text-2.1.1">
+
+<p>File souces are in: <a href="#https://github.com/dpavlin/perl-cwmp.git">perl-cwmp</a>
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col align="left" /><col align="left" /><col align="left" /><col align="left" />
+</colgroup>
+<tbody>
+<tr><td>CPE methods</td><td>Responding</td><td>Calling</td><td></td></tr>
+<tr><td>GetRPCMethods</td><td>REQUIRED</td><td>OPTIONAL</td><td>X</td></tr>
+<tr><td>SetParameterValues</td><td>REQUIRED</td><td>REQUIRED</td><td>X</td></tr>
+<tr><td>GetParameterValues</td><td>REQUIRED</td><td>REQUIRED</td><td>X</td></tr>
+<tr><td>GetParameterNames</td><td>REQUIRED</td><td>REQUIRED</td><td>X</td></tr>
+<tr><td>SetParameterAttributes</td><td>REQUIRED</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>GetParameterAttributes</td><td>REQUIRED</td><td>OPTIONAL</td><td>X</td></tr>
+<tr><td>AddObject</td><td>REQUIRED</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>DeleteObject</td><td>REQUIRED</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>Reboot</td><td>REQUIRED</td><td>OPTIONAL</td><td>X</td></tr>
+<tr><td>Download</td><td>REQUIRED</td><td>REQUIRED</td><td></td></tr>
+<tr><td>ScheduleDownload</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>Upload</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>FactoryReset</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>GetQueuedTransfers  (DEPRECATED)</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>GetAllQueuedTransfers</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>CancelTransfer</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>ScheduleInform</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>ChangeDUState</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>SetVouchers           (DEPRECATED)</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>GetOptions            (DEPRECATED)</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+</tbody>
+</table>
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col align="left" /><col align="left" /><col align="left" /><col align="left" />
+</colgroup>
+<tbody>
+<tr><td>ACS methods</td><td>Calling</td><td>Responding</td><td></td></tr>
+<tr><td>GetRPCMethods</td><td>OPTIONAL</td><td>REQUIRED</td><td></td></tr>
+<tr><td>Inform</td><td>REQUIRED</td><td>REQUIRED</td><td>X</td></tr>
+<tr><td>TransferComplete</td><td>REQUIRED</td><td>REQUIRED</td><td></td></tr>
+<tr><td>AutonomousTransferComplete</td><td>OPTIONAL</td><td>REQUIRED</td><td></td></tr>
+<tr><td>DUStateChangeComplete</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>AutonomousDUStateChangeComplete</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>RequestDownload</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+<tr><td>Kicked                (DEPRECATED)</td><td>OPTIONAL</td><td>OPTIONAL</td><td></td></tr>
+</tbody>
+</table>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2.2" class="outline-3">
+<h3 id="sec-2.2"><span class="section-number-3">2.2</span> SOAP decoding [16/16] </h3>
+<div class="outline-text-3" id="text-2.2">
+
+<ul>
+<li>
+<b>[X]</b> Parse SOAP boolean types
+</li>
+<li>
+<b>[X]</b> Parse SOAP dateTime types 
+</li>
+<li>
+<b>[X]</b> Parse SOAP int types
+</li>
+<li>
+<b>[X]</b> Parse SOAP unsignedInt types
+</li>
+<li>
+<b>[X]</b> Parse SOAP string types
+</li>
+<li>
+<b>[X]</b> Parse ISO 8601 date time aka <a href="http://www.w3.org/TR/xmlschema-2/#dateTime">xs:dateTime</a>
+</li>
+<li>
+<b>[X]</b> Check SOAP version from envelop
+
+</li>
+<li>
+<b>[X]</b> Parse SOAP URI types
+</li>
+<li>
+<b>[X]</b> Parse SOAP namespace types (copy from libs)
+
+</li>
+<li>
+<b>[X]</b> parse<sub>EventCodeType</sub>
+
+</li>
+<li>
+<b>[X]</b> parse<sub>ArraySize</sub>
+
+</li>
+<li>
+<b>[X]</b> parse<sub>FileType</sub>
+
+</li>
+<li>
+<b>[X]</b> parse<sub>FaultCode</sub>
+
+</li>
+<li>
+<b>[X]</b> parse<sub>Notification</sub>
+
+</li>
+<li>
+<b>[X]</b> parse/format base64
+
+</li>
+<li>
+<b>[X]</b> parse<sub>WindowMode</sub> 
+</li>
+</ul>
+
+<p>FEX: <a href="http://www.broadband-forum.org/technical/download/TR-069_Amendment-3.pdf">http://www.broadband-forum.org/technical/download/TR-069_Amendment-3.pdf</a>
+</p>
+
+</div>
+
+</div>
+
+<div id="outline-container-2.3" class="outline-3">
+<h3 id="sec-2.3"><span class="section-number-3">2.3</span> SOAP encoding [1/1] </h3>
+<div class="outline-text-3" id="text-2.3">
+
+<ul>
+<li>
+<b>[X]</b> build anyURI 
+</li>
+</ul>
+
+<p>%%%  ftp<sub>URL</sub> = "ftp:" "//" [ ftp<sub>userinfo</sub> "@"] host [ ":" port ] ftp<sub>abs</sub><sub>path</sub>
+%%%  http<sub>URL</sub> = "http:" "//" host [ ":" port ] [ abs<sub>path</sub> [ "?" query ]]
+%%%  http<sub>URL</sub> = "https:" "//" host [ ":" port ] [ abs<sub>path</sub> [ "?" query ]]
+</p>
+
+</div>
+
+</div>
+
+<div id="outline-container-2.4" class="outline-3">
+<h3 id="sec-2.4"><span class="section-number-3">2.4</span> ACS location update [1/1] </h3>
+<div class="outline-text-3" id="text-2.4">
+
+<ul>
+<li>
+<b>[X]</b> Parse URI / xmerl<sub>tests</sub>:parse<sub>URI</sub><sub>test</sub>
+
+
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> System tests </h2>
+<div class="outline-text-2" id="text-3">
+
+
+</div>
+
+<div id="outline-container-3.1" class="outline-3">
+<h3 id="sec-3.1"><span class="section-number-3">3.1</span> Application state management [0/3] </h3>
+<div class="outline-text-3" id="text-3.1">
+
+<ul>
+<li>
+<b>[<span style="visibility:hidden;">X</span>]</b> GProc cookies OFO
+<a href="http://rustyklophaus.com/articles/20090916-GProcErlangGlobalProcessRegistry.html">http://rustyklophaus.com/articles/20090916-GProcErlangGlobalProcessRegistry.html</a>
+</li>
+<li>
+<b>[<span style="visibility:hidden;">X</span>]</b> ETS save
+
+</li>
+<li>
+<b>[<span style="visibility:hidden;">X</span>]</b> Application:get<sub>env</sub>/2 
+oriv/sys.config
+
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble">
+<p class="date"> Date: 2012-11-05 14:54:40 EET</p>
+</div>
+</div>
+</body>
+</html>
