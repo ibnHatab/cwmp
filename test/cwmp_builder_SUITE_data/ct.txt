@@ -1,0 +1,93 @@
+>> "Rpc": {cwmp_obj,
+              {envelope,
+                  {header,{id,true,"1"},undefined,undefined},
+                  [{inform,
+                       {device_id_struct,"Alcatel","001D4C","9365 BSR Femto",
+                           "4321"},
+                       [{event_struct,2,[]}],
+                       1,
+                       {{2012,10,3},{18,16,2}},
+                       0,
+                       [{parameter_value_struct,"Device.DeviceSummary",
+                            "DeviceSummary"},
+                        {parameter_value_struct,
+                            "Device.DeviceInfo.HardwareVersion","p1"},
+                        {parameter_value_struct,
+                            "Device.DeviceInfo.SoftwareVersion",
+                            "BCR-04-00-BSR-XMIM-06.01"},
+                        {parameter_value_struct,
+                            "Device.ManagementServer.ConnectionRequestURL",
+                            "&sn=4321http://127.0.0.1:8095/ConnectionRequest?command=cr"},
+                        {parameter_value_struct,
+                            "Device.ManagementServer.ParameterKey",
+                            "ParameterKey"},
+                        {parameter_value_struct,"Device.LAN.IPAddress",
+                            "172.0.0.1"},
+                        {parameter_value_struct,"Device.LAN.MACAddress",
+                            "00-0E-35-D6-24-F7"},
+                        {parameter_value_struct,
+                            "Device.Services.BSR.1.SDM.1.mimVersion",
+                            "BCR-04-00-BSR-XMIM-02.00"},
+                        {parameter_value_struct,
+                            "Device.DeviceInfo.AdditionalHardwareVersion",
+                            "250mW"},
+                        {parameter_value_struct,
+                            "Device.Services.BSR.1.RFTrace.1.iMSI",
+                            "iMSI"}]}]}}
+>> "Rpc": {cwmp_obj,
+              {envelope,
+                  {header,{id,true,"1"},undefined,undefined},
+                  [{autonomous_transfer_complete,
+                       {http,"announceURL-FwUpgr",80,"/",[]},
+                       {http,"transferURL-FwUpgr",80,"/",[]},
+                       true,1,12345,
+                       {http,"targetFileName-FwUpgr",80,"/",[]},
+                       {transfer_complete_fault_struct,0,[]},
+                       {{2012,10,3},{18,53,34}},
+                       {{2012,10,3},{18,53,44}}}]}}
+
+>> "Rpc": {cwmp_obj,{envelope,{header,{id,true,"1"},undefined,undefined},
+                              [{get_rpc_methods}]}}
+(ct@marvel)1> ----------------------------------------------------
+2012-11-12 16:59:50.806
+Validate: <"/tmp/cwmp.2012-11-12_16.59.50/cwmp_GetRPCMethods.xml validates\n" 
+
+
+(ct@marvel)1> ----------------------------------------------------
+2012-11-12 16:59:50.806
+CT validate trace: "/local/vlad/repos/otp/cwmp/test/hdm_trace_SUITE_data/cwmp_GetRPCMethodsRespons.xml" 
+
+
+(ct@marvel)1> Warning: "Namespace missmatch" in <"string"> caused by '{xsi,cwmp}'.
+(ct@marvel)1> 
+>> "Rpc": {cwmp_obj,
+              {envelope,
+                  {header,{id,true,"1"},undefined,undefined},
+                  [{get_rpc_methods_response,
+                       ["GetRPCMethods","Inform","TransferComplete",
+                        "AutonomousTransferComplete","DUStateChangeComplete",
+                        "AutonomousDUStateChangeComplete"]}]}}
+(ct@marvel)1> ----------------------------------------------------
+2012-11-12 16:59:50.835
+Validate: <"/tmp/cwmp.2012-11-12_16.59.50/cwmp_GetRPCMethodsRespons.xml validates\n" 
+
+
+(ct@marvel)1> ----------------------------------------------------
+2012-11-12 16:59:50.836
+CT validate trace: "/local/vlad/repos/otp/cwmp/test/hdm_trace_SUITE_data/cwmp_InformResponse.xml" 
+
+
+(ct@marvel)1> 
+>> "Rpc": {cwmp_obj,{envelope,{header,{id,true,"1"},undefined,undefined},
+                              [{get_rpc_methods}]}}
+(ct@marvel)1> ----------------------------------------------------
+2012-11-12 16:59:50.854
+Validate: <"/tmp/cwmp.2012-11-12_16.59.50/cwmp_InformResponse.xml validates\n" 
+
+
+(ct@marvel)1> Testing otp.cwmp.hdm_trace_SUITE: TEST COMPLETE, 1 ok, 0 failed of 1 test cases
+
+(ct@marvel)1> Updating /local/vlad/repos/otp/cwmp/logs/index.html... (ct@marvel)1> done
+(ct@marvel)1> Updating /local/vlad/repos/otp/cwmp/logs/all_runs.html... (ct@marvel)1> done
+(ct@marvel)1> 
+(ct@marvel)1> 

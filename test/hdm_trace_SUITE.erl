@@ -134,7 +134,11 @@ groups() ->
 %% @end
 %%--------------------------------------------------------------------
 all() ->
-    [hdm_read_trace_tc, hdm_validate_trace_tc, hdm_compare_trace_tc].
+    [
+     %hdm_read_trace_tc,
+     hdm_validate_trace_tc
+     %, hdm_compare_trace_tc
+    ].
 
 %%--------------------------------------------------------------------
 %% @spec TestCase() -> Info
@@ -177,7 +181,7 @@ hdm_trace_test_case(Config) ->
 			  ?CTDBG(Rpc),
 			  ct:print("CT generate trace: ~p ~n", [RpcFile]),
 			  RpcDoc = cwmp_builder:build(Rpc),
-			  ?CTDBG(RpcDoc),
+			  %%?CTDBG(RpcDoc),
 			  {ok, saved} = savexml(RpcDoc, RpcFile),
 			  ok = compare_test(XqlFile, TraceFile, RpcFile)
 		  end,

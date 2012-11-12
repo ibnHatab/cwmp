@@ -44,6 +44,7 @@ clean:
 	@rm -rf logs
 	@rm -rf test/*.beam
 	@rm -rf .eunit
+	@rm -rf test/cwmp_builder_SUITE_data/*.xml
 
 distclean:
 	$(REBAR) clean delete-deps
