@@ -111,16 +111,16 @@ all() ->
     [my_test_case
      , build_AddObject_tc
      , build_AddObjectResponse_tc
-     , build_AutonomousDUStateChangeComplete_tc
-     , build_AutonomousDUStateChangeCompleteResponse_tc
-     , build_AutonomousTransferComplete_tc
-     , build_AutonomousTransferCompleteResponse_tc
-     , build_CancelTransfer_tc
-     , build_CancelTransferResponse_tc
-     , build_ChangeDUState_tc
-     , build_ChangeDUStateResponse_tc
-     , build_DeleteObject_tc
-     , build_DeleteObjectResponse_tc
+      , build_AutonomousDUStateChangeComplete_tc
+      , build_AutonomousDUStateChangeCompleteResponse_tc
+      , build_AutonomousTransferComplete_tc
+      , build_AutonomousTransferCompleteResponse_tc
+      , build_CancelTransfer_tc
+      , build_CancelTransferResponse_tc
+      , build_ChangeDUState_tc
+      , build_ChangeDUStateResponse_tc     
+      , build_DeleteObject_tc             
+      , build_DeleteObjectResponse_tc     
      , build_Download_tc
      , build_DownloadResponse_tc
      , build_DUStateChangeComplete_tc
@@ -138,26 +138,26 @@ all() ->
      , build_GetParameterNamesResponse_tc
      , build_GetParameterValues_tc
      , build_GetParameterValuesResponse_tc
-     , build_GetQueuedTransfers_tc
-     , build_GetQueuedTransfersResponse_tc
-     , build_GetRPCMethods_tc
-     , build_GetRPCMethodsResponse_tc
-     , build_Inform_tc
-     , build_InformResponse_tc
-     , build_Kicked_tc
-     , build_KickedResponse_tc
-     , build_Reboot_tc
-     , build_RebootResponse_tc
-     , build_RequestDownload_tc
-     , build_RequestDownloadResponse_tc
-     , build_ScheduleDownload_tc
-     , build_ScheduleDownloadResponse_tc
-     , build_ScheduleInform_tc
-     , build_ScheduleInformResponse_tc
-     , build_SetParameterAttributes_tc
-     , build_SetParameterAttributesResponse_tc
-     , build_SetParameterValues_tc
-     , build_SetParameterValuesResponse_tc
+      , build_GetQueuedTransfers_tc
+      , build_GetQueuedTransfersResponse_tc
+      , build_GetRPCMethods_tc
+      , build_GetRPCMethodsResponse_tc		
+      , build_Inform_tc
+      , build_InformResponse_tc
+      , build_Kicked_tc
+      , build_KickedResponse_tc
+      , build_Reboot_tc
+      , build_RebootResponse_tc
+      , build_RequestDownload_tc
+      , build_RequestDownloadResponse_tc
+      , build_ScheduleDownload_tc
+      , build_ScheduleDownloadResponse_tc
+      , build_ScheduleInform_tc
+      , build_ScheduleInformResponse_tc
+      , build_SetParameterAttributes_tc
+      , build_SetParameterAttributesResponse_tc
+      , build_SetParameterValues_tc
+      , build_SetParameterValuesResponse_tc
      , build_SetVouchers_tc
      , build_SetVouchersResponse_tc
      , build_TransferComplete_tc
@@ -262,16 +262,18 @@ build_AddObject_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{add_object}]}},
+	     [{add_object,
+	      "name","parameter"}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "AddObject").
-    
+
 
 build_AddObjectResponse_tc() -> "build_AddObjectResponse".
 build_AddObjectResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{add_object_response}]}},
+	     [{add_object_response,
+	      1,0}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "AddObjectResponse").
     
 
@@ -280,9 +282,17 @@ build_AutonomousDUStateChangeComplete_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{autonomous_du_state_change_complete}]}},
+	     [{autonomous_du_state_change_complete,
+	       {auton_op_result_struct,
+		 {op_result_struct,"uuid","depl_unit","1","on",true,"ExecutionUnitRefList",
+		 {{2012,10,3},{18,53,34}},
+                 {{2012,10,3},{18,53,44}},
+                 {deployment_unit_fault_struct,1,"fault"}
+		 },""}}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "AutonomousDUStateChangeComplete").
-    
+
+
+
 
 build_AutonomousDUStateChangeCompleteResponse_tc() -> "build_AutonomousDUStateChangeCompleteResponse".
 build_AutonomousDUStateChangeCompleteResponse_tc(Config) ->
@@ -298,7 +308,14 @@ build_AutonomousTransferComplete_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{autonomous_transfer_complete}]}},
+	     [{autonomous_transfer_complete,
+                       {http,"announceURL-FwUpgr",80,"/",[]},
+                       {http,"transferURL-FwUpgr",80,"/",[]},
+                       true,1,12345,
+                       {http,"targetFileName-FwUpgr",80,"/",[]},
+                       {transfer_complete_fault_struct,0,[]},
+                       {{2012,10,3},{18,53,34}},
+                       {{2012,10,3},{18,53,44}}}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "AutonomousTransferComplete").
     
 
@@ -316,7 +333,8 @@ build_CancelTransfer_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{cancel_transfer}]}},
+	     [{cancel_transfer,
+	      "command_key"}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "CancelTransfer").
     
 
@@ -334,7 +352,11 @@ build_ChangeDUState_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{change_du_state}]}},
+	     [{change_du_state,
+                [{install_op_struct,
+                    {http,"announceURL-FwUpgr",80,"/",[]},"","","",""}
+	        ],"command_key_type"
+             }]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "ChangeDUState").
     
 
@@ -352,7 +374,7 @@ build_DeleteObject_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{delete_object}]}},
+	     [{delete_object,"name","parameter"}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "DeleteObject").
     
 
@@ -361,7 +383,7 @@ build_DeleteObjectResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{delete_object_response}]}},
+	     [{delete_object_response,1}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "DeleteObjectResponse").
     
 
@@ -370,7 +392,18 @@ build_Download_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{download}]}},
+	     [{download,
+	      [],
+	      1,
+	      {http,"announceURL-FwUpgr",80,"/",[]},
+	      [],
+	      [],
+	      1024,
+	      [],
+	      300,
+	      {http,"successURL-FwUpgr",80,"/",[]},
+	      {http,"failureURL-FwUpgr",80,"/",[]}
+	      }]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "Download").
     
 
@@ -379,7 +412,9 @@ build_DownloadResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{download_response}]}},
+	     [{download_response,0,
+	       {{2012,10,3},{18,53,34}},
+               {{2012,10,3},{18,53,44}}}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "DownloadResponse").
     
 
@@ -388,7 +423,12 @@ build_DUStateChangeComplete_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{d_u_state_change_complete}]}},
+	     [{du_state_change_complete,
+	       {{op_result_struct,"uuid","depl_unit","1","on",true,"ExecutionUnitRefList",
+		 {{2012,10,3},{18,53,34}},
+                 {{2012,10,3},{18,53,44}},
+                 {deployment_unit_fault_struct,1,"fault"}}
+	       ,""}}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "DUStateChangeComplete").
     
 
@@ -397,7 +437,7 @@ build_DUStateChangeCompleteResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{d_u_state_change_complete_response}]}},
+	     [{du_state_change_complete_response}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "DUStateChangeCompleteResponse").
     
 
@@ -424,7 +464,8 @@ build_Fault_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{fault}]}},
+	     [{fault,9000,"",
+	      {set_parameter_values_fault,"name",9000,""}}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "Fault").
     
 
@@ -442,8 +483,9 @@ build_GetAllQueuedTransfersResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{get_all_queued_transfers_response}]}},
-    ok = cwmp_obj_BuildCheck(Config, Data, "GetAllQueuedTransfersResponse").
+	     [{get_all_queued_transfers_response,
+             [{queued_transfer_struct,"",3}]}]}},
+     ok = cwmp_obj_BuildCheck(Config, Data, "GetAllQueuedTransfersResponse").
     
 
 build_GetOptions_tc() -> "build_GetOptions".
@@ -451,7 +493,7 @@ build_GetOptions_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{get_options}]}},
+	     [{get_options,"op_name"}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetOptions").
     
 
@@ -460,7 +502,10 @@ build_GetOptionsResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{get_options_response}]}},
+	     [{get_options_response,[{option_struct,"",1,2,1,
+		 {{2012,10,3},{18,53,34}},
+                 {{2012,10,3},{18,53,44}},
+		  0}]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetOptionsResponse").
     
 
@@ -469,7 +514,8 @@ build_GetParameterAttributes_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{get_parameter_attributes}]}},
+	     [{get_parameter_attributes,
+	      ["",""]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetParameterAttributes").
     
 
@@ -478,7 +524,8 @@ build_GetParameterAttributesResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{get_parameter_attributes_response}]}},
+	     [{get_parameter_attributes_response,
+	      [{parameter_attribute_struct,"",2,[""]}]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetParameterAttributesResponse").
     
 
@@ -487,7 +534,7 @@ build_GetParameterNames_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{get_parameter_names}]}},
+	     [{get_parameter_names,"param_path",true}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetParameterNames").
     
 
@@ -496,7 +543,10 @@ build_GetParameterNamesResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{get_parameter_names_response}]}},
+	     [{get_parameter_names_response,
+	      [{parameter_info_struct,"param_path",true},
+	       {parameter_info_struct,"param_path1",true}
+	      ]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetParameterNamesResponse").
     
 
@@ -505,7 +555,7 @@ build_GetParameterValues_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{get_parameter_values}]}},
+	     [{get_parameter_values,["",""]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetParameterValues").
     
 
@@ -514,7 +564,14 @@ build_GetParameterValuesResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{get_parameter_values_response}]}},
+	     [{get_parameter_values_response,
+	      [{parameter_value_struct,
+                            "Device.DeviceInfo.AdditionalHardwareVersion",
+                            "250mW"},
+               {parameter_value_struct,
+                            "Device.Services.BSR.1.RFTrace.1.iMSI",
+                            "iMSI"}
+	       ]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetParameterValuesResponse").
     
 
@@ -532,7 +589,8 @@ build_GetQueuedTransfersResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{get_queued_transfers_response}]}},
+	     [{get_queued_transfers_response,
+	      [{queued_transfer_struct,"command_key",1}]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetQueuedTransfersResponse").
     
 
@@ -541,7 +599,7 @@ build_GetRPCMethods_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{get_rpc_methods}]}},
+	    	     [{get_rpc_methods}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetRPCMethods").
     
 
@@ -550,25 +608,24 @@ build_GetRPCMethodsResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{get_rpc_methods_response}]}},
+	     [{get_rpc_methods_response,
+                      ["GetRPCMethods",
+			"Inform",
+			"TransferComplete",
+                        "AutonomousTransferComplete",
+			"DUStateChangeComplete",
+                        "AutonomousDUStateChangeComplete"]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetRPCMethodsResponse").
     
 
-%% build_Inform_tc() -> "build_Inform".
-%% build_Inform_tc(Config) ->
-%%     Data = {cwmp_obj,
-%% 	    {envelope,
-%% 	     {header,{id,true,"1"},undefined,undefined},
-%% 	     [{inform}]}},
-%%     ok = cwmp_obj_BuildCheck(Config, Data, "Inform").
-    
+  
 
 build_InformResponse_tc() -> "build_InformResponse".
 build_InformResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{inform_response}]}},
+	     [{inform_response,1}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "InformResponse").
     
 
@@ -577,25 +634,26 @@ build_Kicked_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{kicked}]}},
+	     [{kicked,"command","reffer","arg","next"}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "Kicked").
     
 
-build_KickedResponse_tc() -> "build_KickedResponse".
-build_KickedResponse_tc(Config) ->
-    Data = {cwmp_obj,
-	    {envelope,
-	     {header,{id,true,"1"},undefined,undefined},
-	     [{kicked_response}]}},
-    ok = cwmp_obj_BuildCheck(Config, Data, "KickedResponse").
-    
+ build_KickedResponse_tc() -> "build_KickedResponse".
+ build_KickedResponse_tc(Config) ->
+     Data = {cwmp_obj,
+ 	    {envelope,
+ 	     {header,{id,true,"1"},undefined,undefined},
+ 	     [{kicked_response,
+              {"",""}}]}},
+     ok = cwmp_obj_BuildCheck(Config, Data, "KickedResponse").
+
 
 build_Reboot_tc() -> "build_Reboot".
 build_Reboot_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{reboot}]}},
+	     [{reboot,"command_key"}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "Reboot").
     
 
@@ -613,7 +671,9 @@ build_RequestDownload_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{request_download}]}},
+	     [{request_download,1,
+	      [{arg_struct,"Device.DeviceInfo.AdditionalHardwareVersion",
+                            "250mW"}]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "RequestDownload").
     
 
@@ -631,7 +691,10 @@ build_ScheduleDownload_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{schedule_download}]}},
+	     [{schedule_download,"",
+	      {http,"announceURL-FwUpgr",80,"/",[]},
+	      "","",2010,"",
+	      [{time_window_struct,2,3,2,"",2}]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "ScheduleDownload").
     
 
@@ -649,7 +712,7 @@ build_ScheduleInform_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{schedule_inform}]}},
+	     [{schedule_inform,1,""}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "ScheduleInform").
     
 
@@ -667,7 +730,9 @@ build_SetParameterAttributes_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{set_parameter_attributes}]}},
+	     [{set_parameter_attributes,
+	      [{"",true,1,false,["1","2"]}]
+	      }]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "SetParameterAttributes").
     
 
@@ -685,8 +750,15 @@ build_SetParameterValues_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{set_parameter_values}]}},
-    ok = cwmp_obj_BuildCheck(Config, Data, "SetParameterValues").
+	     [{set_parameter_values,
+              [{parameter_value_struct,
+                            "Device.DeviceInfo.AdditionalHardwareVersion",
+                            "250mW"},
+               {parameter_value_struct,
+                            "Device.Services.BSR.1.RFTrace.1.iMSI",
+                            "iMSI"}
+	       ],""}]}},
+     ok = cwmp_obj_BuildCheck(Config, Data, "SetParameterValues").
     
 
 build_SetParameterValuesResponse_tc() -> "build_SetParameterValuesResponse".
@@ -694,7 +766,7 @@ build_SetParameterValuesResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{set_parameter_values_response}]}},
+	     [{set_parameter_values_response,0}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "SetParameterValuesResponse").
     
 
@@ -703,7 +775,8 @@ build_SetVouchers_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{set_vouchers}]}},
+	     [{set_vouchers,
+	      [0,1,0,1]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "SetVouchers").
     
 
@@ -721,7 +794,10 @@ build_TransferComplete_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{transfer_complete}]}},
+	     [{transfer_complete,"",
+	      {transfer_complete_fault_struct,1,"1 BOOT"},
+	      {{2012,10,3},{18,53,34}},
+                 {{2012,10,3},{18,53,44}}}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "TransferComplete").
     
 
@@ -739,7 +815,9 @@ build_Upload_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{upload}]}},
+	     [{upload,"","Device.Services.BSR.1.RFTrace.1.iMSI",
+	      {http,"announceURL-FwUpgr",80,"/",[]},
+	      "","",300}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "Upload").
     
 
@@ -748,7 +826,9 @@ build_UploadResponse_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{upload_response}]}},
+	     [{upload_response,1,
+	      {{2012,10,3},{18,53,34}},
+                 {{2012,10,3},{18,53,44}}}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "UploadResponse").
     
 
