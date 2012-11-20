@@ -109,61 +109,61 @@ groups() ->
 %%--------------------------------------------------------------------
 all() ->
     [my_test_case
-     , build_AddObject_tc
-     , build_AddObjectResponse_tc
-      , build_AutonomousDUStateChangeComplete_tc
-      , build_AutonomousDUStateChangeCompleteResponse_tc
-      , build_AutonomousTransferComplete_tc
-      , build_AutonomousTransferCompleteResponse_tc
-      , build_CancelTransfer_tc
-      , build_CancelTransferResponse_tc
-      , build_ChangeDUState_tc
-      , build_ChangeDUStateResponse_tc     
-      , build_DeleteObject_tc             
-      , build_DeleteObjectResponse_tc     
+     %% , build_AddObject_tc
+     %% , build_AddObjectResponse_tc
+     %%  , build_AutonomousDUStateChangeComplete_tc
+     %%  , build_AutonomousDUStateChangeCompleteResponse_tc
+     %%  , build_AutonomousTransferComplete_tc
+     %%  , build_AutonomousTransferCompleteResponse_tc
+     %%  , build_CancelTransfer_tc
+     %%  , build_CancelTransferResponse_tc
+     %%  , build_ChangeDUState_tc
+     %%  , build_ChangeDUStateResponse_tc     
+     %%  , build_DeleteObject_tc             
+     %%  , build_DeleteObjectResponse_tc     
      , build_Download_tc
-     , build_DownloadResponse_tc
+     %% , build_DownloadResponse_tc
      , build_DUStateChangeComplete_tc
-     , build_DUStateChangeCompleteResponse_tc
-     , build_FactoryReset_tc
-     , build_FactoryResetResponse_tc
-     , build_Fault_tc
-     , build_GetAllQueuedTransfers_tc
-     , build_GetAllQueuedTransfersResponse_tc
-     , build_GetOptions_tc
-     , build_GetOptionsResponse_tc
-     , build_GetParameterAttributes_tc
-     , build_GetParameterAttributesResponse_tc
-     , build_GetParameterNames_tc
-     , build_GetParameterNamesResponse_tc
-     , build_GetParameterValues_tc
-     , build_GetParameterValuesResponse_tc
-      , build_GetQueuedTransfers_tc
-      , build_GetQueuedTransfersResponse_tc
-      , build_GetRPCMethods_tc
-      , build_GetRPCMethodsResponse_tc		
-      , build_Inform_tc
-      , build_InformResponse_tc
-      , build_Kicked_tc
-      , build_KickedResponse_tc
-      , build_Reboot_tc
-      , build_RebootResponse_tc
-      , build_RequestDownload_tc
-      , build_RequestDownloadResponse_tc
-      , build_ScheduleDownload_tc
-      , build_ScheduleDownloadResponse_tc
-      , build_ScheduleInform_tc
-      , build_ScheduleInformResponse_tc
-      , build_SetParameterAttributes_tc
-      , build_SetParameterAttributesResponse_tc
-      , build_SetParameterValues_tc
-      , build_SetParameterValuesResponse_tc
-     , build_SetVouchers_tc
-     , build_SetVouchersResponse_tc
-     , build_TransferComplete_tc
-     , build_TransferCompleteResponse_tc
-     , build_Upload_tc
-     , build_UploadResponse_tc
+     %% , build_DUStateChangeCompleteResponse_tc
+     %% , build_FactoryReset_tc
+     %% , build_FactoryResetResponse_tc
+     %% , build_Fault_tc
+     %% , build_GetAllQueuedTransfers_tc
+     %% , build_GetAllQueuedTransfersResponse_tc
+     %% , build_GetOptions_tc
+     %% , build_GetOptionsResponse_tc
+     %% , build_GetParameterAttributes_tc
+     %% , build_GetParameterAttributesResponse_tc
+     %% , build_GetParameterNames_tc
+     %% , build_GetParameterNamesResponse_tc
+     %% , build_GetParameterValues_tc
+     %% , build_GetParameterValuesResponse_tc
+     %%  , build_GetQueuedTransfers_tc
+     %%  , build_GetQueuedTransfersResponse_tc
+     %%  , build_GetRPCMethods_tc
+     %%  , build_GetRPCMethodsResponse_tc		
+     %%  , build_Inform_tc
+     %%  , build_InformResponse_tc
+     %%  , build_Kicked_tc
+     %%  , build_KickedResponse_tc
+     %%  , build_Reboot_tc
+     %%  , build_RebootResponse_tc
+     %%  , build_RequestDownload_tc
+     %%  , build_RequestDownloadResponse_tc
+     %%  , build_ScheduleDownload_tc
+     %%  , build_ScheduleDownloadResponse_tc
+     %%  , build_ScheduleInform_tc
+     %%  , build_ScheduleInformResponse_tc
+     %%  , build_SetParameterAttributes_tc
+     %%  , build_SetParameterAttributesResponse_tc
+     %%  , build_SetParameterValues_tc
+     %%  , build_SetParameterValuesResponse_tc
+     %% , build_SetVouchers_tc
+     %% , build_SetVouchersResponse_tc
+     %% , build_TransferComplete_tc
+     %% , build_TransferCompleteResponse_tc
+     %% , build_Upload_tc
+     %% , build_UploadResponse_tc
     ].
 
 %%--------------------------------------------------------------------
@@ -175,6 +175,7 @@ cwmp_obj_BuildCheck(Config, Data, Method) ->
     DataDir = ?config(data_dir, Config),
     SchemaFile = filename:join([DataDir, "../../doc/cwmp-1-2.xsd"]),
     RpcFile = filename:join([DataDir, "cwmp_" ++ Method ++ ".xml"]),
+    ct:print(">> ~p~n", [RpcFile]),
     {ok, saved} = savexml(RpcDoc, RpcFile),
     validate_cwmp(RpcFile, SchemaFile).
 
@@ -387,22 +388,23 @@ build_DeleteObjectResponse_tc(Config) ->
     ok = cwmp_obj_BuildCheck(Config, Data, "DeleteObjectResponse").
     
 
+
 build_Download_tc() -> "build_Download".
 build_Download_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
 	     [{download,
-	      [],
-	      1,
-	      {http,"announceURL-FwUpgr",80,"/",[]},
-	      [],
-	      [],
-	      1024,
-	      [],
-	      300,
-	      {http,"successURL-FwUpgr",80,"/",[]},
-	      {http,"failureURL-FwUpgr",80,"/",[]}
+	       "",
+	       1,
+	       {http,"announceURL-FwUpgr",80,"/",[]},
+	       [],
+	       [],
+	       1024,
+	       "",
+	       300,
+	       {http,"successURL-FwUpgr",80,"/",[]},
+	       {http,"failureURL-FwUpgr",80,"/",[]}
 	      }]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "Download").
     
@@ -416,7 +418,11 @@ build_DownloadResponse_tc(Config) ->
 	       {{2012,10,3},{18,53,34}},
                {{2012,10,3},{18,53,44}}}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "DownloadResponse").
-    
+
+cwmp_BuildCheck(_Config, Data, Method) ->
+    ct:print("cwmp_obj_BuildCheck ~p~n", [Method]),
+    RpcDoc = cwmp_builder:build(Data),
+    ct:print(">>> ~p ~n", [RpcDoc]).
 
 build_DUStateChangeComplete_tc() -> "build_DUStateChangeComplete".
 build_DUStateChangeComplete_tc(Config) ->
@@ -427,9 +433,10 @@ build_DUStateChangeComplete_tc(Config) ->
 	       {{op_result_struct,"uuid","depl_unit","1","on",true,"ExecutionUnitRefList",
 		 {{2012,10,3},{18,53,34}},
                  {{2012,10,3},{18,53,44}},
-                 {deployment_unit_fault_struct,1,"fault"}}
-	       ,""}}]}},
-    ok = cwmp_obj_BuildCheck(Config, Data, "DUStateChangeComplete").
+                 {deployment_unit_fault_struct, 1,"fault"}
+		}}
+	       ,""}]}},
+    cwmp_BuildCheck(Config, Data, "DUStateChangeComplete").
     
 
 build_DUStateChangeCompleteResponse_tc() -> "build_DUStateChangeCompleteResponse".
