@@ -792,7 +792,8 @@ build_OpResultStruct(Data, State) ->
 		 build_ExecutionUnitRefList(Data#op_result_struct.execution_unit_ref_list),
 		 build_StartTime(Data#op_result_struct.start_time),
 		 build_CompleteTime(Data#op_result_struct.complete_time),
-		 build_Fault(Data#op_result_struct.fault, State)
+		 %% build_Fault(Data#op_result_struct.fault, State)
+		 build_DeploymentUnitFaultStruct(Data#op_result_struct.fault, State)
 		], P /= null]}.
 
 -spec build_AutonOpResultStruct(#auton_op_result_struct{}, #builder{}) -> export_element().
