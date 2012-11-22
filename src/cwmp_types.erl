@@ -501,7 +501,7 @@ build_Manufacturer(Data)		-> maybe_tag('Manufacturer', fun format_string/1, Data
 build_Mode(Data)			-> maybe_tag('Mode', fun format_int/1, Data).
 build_Name(Data)			-> maybe_tag('Name', fun format_string/1, Data).
 build_Next(Data)			-> maybe_tag('Next', fun format_string/1, Data).
-build_NextURL(Data)			-> maybe_tag('NextURL', fun format_string/1, Data).
+build_NextURL(Data)			-> maybe_tag('NextURL', fun build_anyURI/1, Data).
 build_OptionName(Data)			-> maybe_tag('OptionName', fun format_string/1, Data).
 build_OUI(Data)				-> maybe_tag('OUI', fun format_string/1, Data).
 build_ParameterPath(Data)		-> maybe_tag('ParameterPath', fun format_string/1, Data).

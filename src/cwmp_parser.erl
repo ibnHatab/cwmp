@@ -556,7 +556,7 @@ parse_TimeWindowStruct(#xmlElement{content = Content} = E, S) ->
                             'MaxRetries' ->
                                 TimeWindowStruct#time_window_struct{max_retries = parse_MaxRetries(Elem)};
 
-                            _ ->
+			    _ ->
                                 parse_error(Elem, State)
                         end
                 end,
@@ -1438,7 +1438,7 @@ parse_ScheduleDownload(#xmlElement{content = Content} = E, S) ->
 
                             'Username' ->
                                 ScheduleDownload#schedule_download{username = parse_Username(Elem)};
-
+			    
                             'Password' ->
                                 ScheduleDownload#schedule_download{password = parse_Password(Elem)};
 
@@ -1446,14 +1446,14 @@ parse_ScheduleDownload(#xmlElement{content = Content} = E, S) ->
                                 ScheduleDownload#schedule_download{file_size = parse_FileSize(Elem)};
 
                             'TargetFileName' ->
-                                ScheduleDownload#schedule_download{target_file_name = parse_TargetFileName(Elem)};
+				ScheduleDownload#schedule_download{target_file_name = parse_TargetFileName(Elem)};
 
                             'TimeWindowList' ->
                                 ScheduleDownload#schedule_download{time_window_list = parse_TimeWindowList(Elem, State)};
 
                             _ ->
                                 parse_error(Elem, State)
-                        end
+			end
                 end,
                 #schedule_download{}, lists:filter(fun cwmp_lib:xmlElement/1, Content)).
 

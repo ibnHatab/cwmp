@@ -146,24 +146,24 @@ all() ->
      , build_InformResponse_tc
      , build_Kicked_tc
      , build_KickedResponse_tc
-     %%  , build_Reboot_tc
-     %%  , build_RebootResponse_tc
-     %%  , build_RequestDownload_tc
-     %%  , build_RequestDownloadResponse_tc
-     %%  , build_ScheduleDownload_tc
-     %%  , build_ScheduleDownloadResponse_tc
-     %%  , build_ScheduleInform_tc
-     %%  , build_ScheduleInformResponse_tc
-     %%  , build_SetParameterAttributes_tc
-     %%  , build_SetParameterAttributesResponse_tc
-     %%  , build_SetParameterValues_tc
-     %%  , build_SetParameterValuesResponse_tc
-     %% , build_SetVouchers_tc
-     %% , build_SetVouchersResponse_tc
-     %% , build_TransferComplete_tc
-     %% , build_TransferCompleteResponse_tc
-     %% , build_Upload_tc
-     %% , build_UploadResponse_tc
+     , build_Reboot_tc
+     , build_RebootResponse_tc
+     , build_RequestDownload_tc
+     , build_RequestDownloadResponse_tc
+     , build_ScheduleDownload_tc
+     , build_ScheduleDownloadResponse_tc
+     , build_ScheduleInform_tc
+     , build_ScheduleInformResponse_tc
+     %% , build_SetParameterAttributes_tc
+     , build_SetParameterAttributesResponse_tc
+     , build_SetParameterValues_tc
+     , build_SetParameterValuesResponse_tc
+     , build_SetVouchers_tc
+     , build_SetVouchersResponse_tc
+     , build_TransferComplete_tc
+     , build_TransferCompleteResponse_tc
+     , build_Upload_tc
+     , build_UploadResponse_tc
     ].
 
 %%--------------------------------------------------------------------
@@ -661,9 +661,9 @@ build_Kicked_tc(Config) ->
  	    {envelope,
  	     {header,{id,true,"1"},undefined,undefined},
  	     [{kicked_response,
-              {"",""}}]}},
+             {http,"successURL-FwUpgr",80,"/",[]}}]}},
      ok = cwmp_obj_BuildCheck(Config, Data, "KickedResponse").
-
+     
 
 build_Reboot_tc() -> "build_Reboot".
 build_Reboot_tc(Config) ->
@@ -708,10 +708,22 @@ build_ScheduleDownload_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{schedule_download,"",
-	      {http,"announceURL-FwUpgr",80,"/",[]},
-	      "","",2010,"",
-	      [{time_window_struct,2,3,2,"",2}]}]}},
+	     [{schedule_download,
+	       "",
+	       1,
+	       {http,"announceURL-FwUpgr",80,"/",[]},
+	       "",
+	       "",
+	       2010,
+	       "",
+	       [{time_window_struct,
+		 2,
+		 3,
+		 "",
+		 "",
+		 2
+		}]
+	       }]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "ScheduleDownload").
     
 
@@ -748,8 +760,13 @@ build_SetParameterAttributes_tc(Config) ->
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
 	     [{set_parameter_attributes,
-	      [{"",true,1,false,["1","2"]}]
+	      [{"",
+		true,
+		1,
+		false,
+		["1","2"]}]
 	      }]}},
+    cwmp_print(Config, Data, "SetParameterAttributes"),
     ok = cwmp_obj_BuildCheck(Config, Data, "SetParameterAttributes").
     
 
@@ -793,7 +810,10 @@ build_SetVouchers_tc(Config) ->
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
 	     [{set_vouchers,
-	      [0,1,0,1]}]}},
+	      [<<0>>,
+	       <<1>>,
+	       <<0>>,
+	       <<1>>]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "SetVouchers").
     
 
@@ -832,9 +852,14 @@ build_Upload_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{upload,"","Device.Services.BSR.1.RFTrace.1.iMSI",
-	      {http,"announceURL-FwUpgr",80,"/",[]},
-	      "","",300}]}},
+	     [{upload,
+	       "",
+	       1,
+	       {http,"announceURL-FwUpgr",80,"/",[]},
+	       "",
+	       "",
+	       300
+	      }]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "Upload").
     
 
