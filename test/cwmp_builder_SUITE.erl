@@ -108,63 +108,63 @@ groups() ->
 %% @end
 %%--------------------------------------------------------------------
 all() ->
-    [my_test_case
-     , build_AddObject_tc
-     , build_AddObjectResponse_tc
-     , build_AutonomousDUStateChangeComplete_tc
-     , build_AutonomousDUStateChangeCompleteResponse_tc
-     , build_AutonomousTransferComplete_tc
-     , build_AutonomousTransferCompleteResponse_tc
-     , build_CancelTransfer_tc
-     , build_CancelTransferResponse_tc
-     , build_ChangeDUState_tc
-     , build_ChangeDUStateResponse_tc     
-     , build_DeleteObject_tc             
-     , build_DeleteObjectResponse_tc     
-     , build_Download_tc
-     , build_DownloadResponse_tc
-     , build_DUStateChangeComplete_tc
-     , build_DUStateChangeCompleteResponse_tc
-     , build_FactoryReset_tc
-     , build_FactoryResetResponse_tc
-     , build_Fault_tc
-     , build_GetAllQueuedTransfers_tc
-     , build_GetAllQueuedTransfersResponse_tc
-     , build_GetOptions_tc
-     , build_GetOptionsResponse_tc
-     , build_GetParameterAttributes_tc
-     %%, build_GetParameterAttributesResponse_tc
-     , build_GetParameterNames_tc
-     %% , build_GetParameterNamesResponse_tc
-     , build_GetParameterValues_tc
-     , build_GetParameterValuesResponse_tc
-     , build_GetQueuedTransfers_tc
-     , build_GetQueuedTransfersResponse_tc
-     , build_GetRPCMethods_tc
-     , build_GetRPCMethodsResponse_tc		
-     , build_Inform_tc
-     , build_InformResponse_tc
-     , build_Kicked_tc
-     , build_KickedResponse_tc
-     , build_Reboot_tc
-     , build_RebootResponse_tc
-     , build_RequestDownload_tc
-     , build_RequestDownloadResponse_tc
-     , build_ScheduleDownload_tc
-     , build_ScheduleDownloadResponse_tc
-     , build_ScheduleInform_tc
-     , build_ScheduleInformResponse_tc
-     %% , build_SetParameterAttributes_tc
-     , build_SetParameterAttributesResponse_tc
-     , build_SetParameterValues_tc
-     , build_SetParameterValuesResponse_tc
-     , build_SetVouchers_tc
-     , build_SetVouchersResponse_tc
-     , build_TransferComplete_tc
-     , build_TransferCompleteResponse_tc
-     , build_Upload_tc
-     , build_UploadResponse_tc
+    [ build_AddObject_tc
+      , build_AddObjectResponse_tc
+      , build_AutonomousDUStateChangeComplete_tc
+      , build_AutonomousDUStateChangeCompleteResponse_tc
+      , build_AutonomousTransferComplete_tc
+      , build_AutonomousTransferCompleteResponse_tc
+      , build_CancelTransfer_tc
+      , build_CancelTransferResponse_tc
+      , build_ChangeDUState_tc
+      , build_ChangeDUStateResponse_tc     
+      , build_DeleteObject_tc             
+      , build_DeleteObjectResponse_tc     
+      , build_Download_tc
+      , build_DownloadResponse_tc
+      , build_DUStateChangeComplete_tc
+      , build_DUStateChangeCompleteResponse_tc
+      , build_FactoryReset_tc
+      , build_FactoryResetResponse_tc
+      , build_Fault_tc
+      , build_GetAllQueuedTransfers_tc
+      , build_GetAllQueuedTransfersResponse_tc
+      , build_GetOptions_tc
+      , build_GetOptionsResponse_tc
+      , build_GetParameterAttributes_tc
+      , build_GetParameterAttributesResponse_tc
+      , build_GetParameterNames_tc
+      , build_GetParameterNamesResponse_tc
+      , build_GetParameterValues_tc
+      , build_GetParameterValuesResponse_tc
+      , build_GetQueuedTransfers_tc
+      , build_GetQueuedTransfersResponse_tc
+      , build_GetRPCMethods_tc
+      , build_GetRPCMethodsResponse_tc		
+      , build_Inform_tc
+      , build_InformResponse_tc
+      , build_Kicked_tc
+      , build_KickedResponse_tc
+      , build_Reboot_tc
+      , build_RebootResponse_tc
+      , build_RequestDownload_tc
+      , build_RequestDownloadResponse_tc
+      , build_ScheduleDownload_tc
+      , build_ScheduleDownloadResponse_tc
+      , build_ScheduleInform_tc
+      , build_ScheduleInformResponse_tc
+      , build_SetParameterAttributes_tc
+      , build_SetParameterAttributesResponse_tc
+      , build_SetParameterValues_tc
+      , build_SetParameterValuesResponse_tc
+      , build_SetVouchers_tc
+      , build_SetVouchersResponse_tc
+      , build_TransferComplete_tc
+      , build_TransferCompleteResponse_tc
+      , build_Upload_tc
+      , build_UploadResponse_tc
     ].
+
 
 %%--------------------------------------------------------------------
 %% Utilities
@@ -198,19 +198,6 @@ validate_cwmp(RpcFile, SchemaFile) ->
     ct:print("Validate: <~p ~n", [Result]),
     ok.
 
-cwmp_print(_Config, Data, Method) ->
-    ct:print("cwmp_obj_BuildCheck ~p~n", [Method]),
-    RpcDoc = cwmp_builder:build(Data),
-    ct:print(">>> ~p ~n",[RpcDoc]).
-
-%%--------------------------------------------------------------------
-%% @spec TestCase() -> Info
-%% Info = [tuple()]
-%% @end
-%%--------------------------------------------------------------------
-my_test_case() ->
-    "my_test_case".
-
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
 %%               ok | exit() | {skip,Reason} | {comment,Comment} |
@@ -220,8 +207,6 @@ my_test_case() ->
 %% Comment = term()
 %% @end
 %%--------------------------------------------------------------------
-my_test_case(_Config) ->
-    ok.
 
 build_Inform_tc() -> "build_Inform".
 build_Inform_tc(Config) ->
@@ -541,7 +526,7 @@ build_GetParameterAttributesResponse_tc(Config) ->
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
 	     [{get_parameter_attributes_response,
-	      [{parameter_attribute_struct,"",2,[""]}]}]}},
+	       [{parameter_attribute_struct,"",2,[""]}]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetParameterAttributesResponse").
     
     
@@ -583,11 +568,11 @@ build_GetParameterValuesResponse_tc(Config) ->
 	     {header,{id,true,"1"},undefined,undefined},
 	     [{get_parameter_values_response,
 	      [{parameter_value_struct,
-                            "Device.DeviceInfo.AdditionalHardwareVersion",
-                            "250mW"},
+		"Device.DeviceInfo.AdditionalHardwareVersion",
+		"250mW"},
                {parameter_value_struct,
-                            "Device.Services.BSR.1.RFTrace.1.iMSI",
-                            "iMSI"}
+		"Device.Services.BSR.1.RFTrace.1.iMSI",
+		"iMSI"}
 	       ]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetParameterValuesResponse").
     
@@ -626,14 +611,14 @@ build_GetRPCMethodsResponse_tc(Config) ->
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
 	     [{get_rpc_methods_response,
-                      ["GetRPCMethods",
-			"Inform",
-			"TransferComplete",
-                        "AutonomousTransferComplete",
-			"DUStateChangeComplete",
-                        "AutonomousDUStateChangeComplete"]}]}},
+	       ["GetRPCMethods",
+		"Inform",
+		"TransferComplete",
+		"AutonomousTransferComplete",
+		"DUStateChangeComplete",
+		"AutonomousDUStateChangeComplete"]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "GetRPCMethodsResponse").
-    
+
 
   
 
@@ -651,11 +636,15 @@ build_Kicked_tc(Config) ->
     Data = {cwmp_obj,
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
-	     [{kicked,"command","reffer","arg","next"}]}},
+	     [{kicked,
+	       "command",
+	       "reffer",
+	       "arg",
+	       "next"}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "Kicked").
     
 
- build_KickedResponse_tc() -> "build_KickedResponse".
+build_KickedResponse_tc() -> "build_KickedResponse".
  build_KickedResponse_tc(Config) ->
      Data = {cwmp_obj,
  	    {envelope,
@@ -689,8 +678,9 @@ build_RequestDownload_tc(Config) ->
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
 	     [{request_download,1,
-	      [{arg_struct,"Device.DeviceInfo.AdditionalHardwareVersion",
-                            "250mW"}]}]}},
+	      [{arg_struct,
+		"Device.DeviceInfo.AdditionalHardwareVersion",
+		"250mW"}]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "RequestDownload").
     
 
@@ -760,13 +750,13 @@ build_SetParameterAttributes_tc(Config) ->
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
 	     [{set_parameter_attributes,
-	      [{"",
+	      [{set_parameter_attributes_struct,
+		"",
 		true,
 		1,
 		false,
 		["1","2"]}]
 	      }]}},
-    cwmp_print(Config, Data, "SetParameterAttributes"),
     ok = cwmp_obj_BuildCheck(Config, Data, "SetParameterAttributes").
     
 
@@ -786,12 +776,13 @@ build_SetParameterValues_tc(Config) ->
 	     {header,{id,true,"1"},undefined,undefined},
 	     [{set_parameter_values,
               [{parameter_value_struct,
-                            "Device.DeviceInfo.AdditionalHardwareVersion",
-                            "250mW"},
+		"Device.DeviceInfo.AdditionalHardwareVersion",
+		"250mW"},
                {parameter_value_struct,
-                            "Device.Services.BSR.1.RFTrace.1.iMSI",
-                            "iMSI"}
-	       ],""}]}},
+		"Device.Services.BSR.1.RFTrace.1.iMSI",
+		"iMSI"}
+	       ],
+	       ""}]}},
      ok = cwmp_obj_BuildCheck(Config, Data, "SetParameterValues").
     
 
@@ -812,8 +803,8 @@ build_SetVouchers_tc(Config) ->
 	     [{set_vouchers,
 	      [<<0>>,
 	       <<1>>,
-	       <<0>>,
-	       <<1>>]}]}},
+	       <<10>>,
+	       <<36>>]}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "SetVouchers").
     
 
@@ -832,9 +823,9 @@ build_TransferComplete_tc(Config) ->
 	    {envelope,
 	     {header,{id,true,"1"},undefined,undefined},
 	     [{transfer_complete,"",
-	      {transfer_complete_fault_struct,1,"1 BOOT"},
-	      {{2012,10,3},{18,53,34}},
-                 {{2012,10,3},{18,53,44}}}]}},
+	       {transfer_complete_fault_struct,1,"1 BOOT"},
+	       {{2012,10,3},{18,53,34}},
+	       {{2012,10,3},{18,53,44}}}]}},
     ok = cwmp_obj_BuildCheck(Config, Data, "TransferComplete").
     
 
