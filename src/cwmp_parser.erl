@@ -5,7 +5,7 @@
 
 -include_lib("xmerl/include/xmerl.hrl").
 
--include("tr69/include/tr69.hrl").
+-include("cpe_host/src/host_internal.hrl").
 -include("cwmp.hrl").
 
 -export([parser/1, parse/1]).
