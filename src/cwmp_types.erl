@@ -265,7 +265,7 @@ parse_StartTime(E)            -> parse_dateTime(E).
 parse_State(E)                -> parse_unsignedInt(E).
 parse_Status(E)               -> parse_int(E).
 parse_SuccessURL(E)           -> parse_anyURI(E).
-parse_TargetFileName(E)       -> parse_anyURI(E). %FIXME: string or URI
+parse_TargetFileName(E)       -> parse_string(E). %FIXME: string or URI
 parse_TransferURL(E)          -> parse_anyURI(E).
 parse_URL(E)                  -> parse_anyURI(E).
 parse_UserMessage(E)          -> parse_string(E).
@@ -494,14 +494,14 @@ build_AnnounceURL(Data)			-> maybe_tag('AnnounceURL', fun build_anyURI/1, Data).
 build_Arg(Data)				-> maybe_tag('Arg', fun format_string/1, Data).
 build_Command(Data)			-> maybe_tag('Command', fun format_string/1, Data).
 build_ExecutionEnvRef(Data)		-> maybe_tag('ExecutionEnvRef', fun format_string/1, Data).
-build_FailureURL(Data)			-> maybe_tag('FailureURL', fun format_string/1, Data).
+build_FailureURL(Data)			-> maybe_tag('FailureURL', fun build_anyURI/1, Data).
 build_InstanceNumber(Data)		-> maybe_tag('InstanceNumber', fun format_unsignedInt/1, Data).
 build_IsTransferable(Data)		-> maybe_tag('IsTransferable', fun format_int/1, Data).
 build_Manufacturer(Data)		-> maybe_tag('Manufacturer', fun format_string/1, Data).
 build_Mode(Data)			-> maybe_tag('Mode', fun format_int/1, Data).
 build_Name(Data)			-> maybe_tag('Name', fun format_string/1, Data).
 build_Next(Data)			-> maybe_tag('Next', fun format_string/1, Data).
-build_NextURL(Data)			-> maybe_tag('NextURL', fun format_string/1, Data).
+build_NextURL(Data)			-> maybe_tag('NextURL', fun build_anyURI/1, Data).
 build_OptionName(Data)			-> maybe_tag('OptionName', fun format_string/1, Data).
 build_OUI(Data)				-> maybe_tag('OUI', fun format_string/1, Data).
 build_ParameterPath(Data)		-> maybe_tag('ParameterPath', fun format_string/1, Data).
@@ -512,8 +512,8 @@ build_SerialNumber(Data)		-> maybe_tag('SerialNumber', fun format_string/1, Data
 build_State(Data)			-> maybe_tag('State', fun format_unsignedInt/1, Data).
 build_Status(Data)			-> maybe_tag('Status', fun format_int/1, Data).
 build_string(Data)			-> maybe_tag('string', fun format_string/1, Data).
-build_SuccessURL(Data)			-> maybe_tag('SuccessURL', fun format_string/1, Data).
-build_TargetFileName(Data)		-> maybe_tag('TargetFileName', fun build_anyURI/1, Data).
+build_SuccessURL(Data)			-> maybe_tag('SuccessURL', fun build_anyURI/1, Data).
+build_TargetFileName(Data)		-> maybe_tag('TargetFileName', fun format_string/1, Data).
 build_TransferURL(Data)			-> maybe_tag('TransferURL', fun build_anyURI/1, Data).
 build_URL(Data)				-> maybe_tag('URL', fun build_anyURI/1, Data).
 build_UserMessage(Data)			-> maybe_tag('UserMessage', fun format_string/1, Data).

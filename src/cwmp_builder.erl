@@ -336,7 +336,7 @@ build_GetParameterNamesResponse(Data, _S) when Data =:= undefined -> null;
 build_GetParameterNamesResponse(Data, State) ->
     {'cwmp:GetParameterNamesResponse', [],
      [P || P <- [
-		 build_ParameterList(Data#get_parameter_names_response.parameter_list, State)
+		 build_ParameterInfoList(Data#get_parameter_names_response.parameter_list, State)
 		], P /= null]}.
 
 -spec build_SetParameterAttributes(#set_parameter_attributes{}, #builder{}) -> export_element().
@@ -344,7 +344,7 @@ build_SetParameterAttributes(Data, _S) when Data =:= undefined -> null;
 build_SetParameterAttributes(Data, State) ->
     {'cwmp:SetParameterAttributes', [],
      [P || P <- [
-		 build_ParameterList(Data#set_parameter_attributes.parameter_list, State)
+		 build_SetParameterAttributesList(Data#set_parameter_attributes.parameter_list, State)
 		], P /= null]}.
 
 -spec build_GetParameterAttributes(#get_parameter_attributes{}, #builder{}) -> export_element().
@@ -360,7 +360,7 @@ build_GetParameterAttributesResponse(Data, _S) when Data =:= undefined -> null;
 build_GetParameterAttributesResponse(Data, State) ->
     {'cwmp:GetParameterAttributesResponse', [],
      [P || P <- [
-		 build_ParameterList(Data#get_parameter_attributes_response.parameter_list, State)
+		 build_ParameterAttributeList(Data#get_parameter_attributes_response.parameter_list, State)
 		], P /= null]}.
 
 -spec build_AddObject(#add_object{}, #builder{}) -> export_element().
@@ -792,7 +792,8 @@ build_OpResultStruct(Data, State) ->
 		 build_ExecutionUnitRefList(Data#op_result_struct.execution_unit_ref_list),
 		 build_StartTime(Data#op_result_struct.start_time),
 		 build_CompleteTime(Data#op_result_struct.complete_time),
-		 build_Fault(Data#op_result_struct.fault, State)
+		 %% build_Fault(Data#op_result_struct.fault, State)
+		 build_DeploymentUnitFaultStruct(Data#op_result_struct.fault, State)
 		], P /= null]}.
 
 -spec build_AutonOpResultStruct(#auton_op_result_struct{}, #builder{}) -> export_element().
