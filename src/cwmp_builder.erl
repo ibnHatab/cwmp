@@ -1,5 +1,5 @@
-%%% File    : cwmp_builder.erl
-%%% Description :
+%%% File: cwmp_builder.erl
+%%% Description:
 
 -module(cwmp_builder).
 
@@ -17,7 +17,7 @@
 		     ]).
 
 -import(cwmp_types, [ build_AccessListChange/1,
-			 build_CompleteTime/1,
+		      build_CompleteTime/1,
 			 build_CurrentTime/1,
 			 build_DelaySeconds/1,
 			 build_DeploymentUnitRef/1,
@@ -153,61 +153,61 @@ build_Header(_D, _State) ->
 build_Body(Body, State) ->
     {'soapenv:Body', [],
      [case Method of
-	  #fault{} = Data -> build_Fault(Data, State);
-	  #get_rpc_methods{} = Data -> build_TagName(Data, "GetRPCMethods");
-	  #get_rpc_methods_response{} = Data -> build_GetRPCMethodsResponse(Data, State);
-	  #set_parameter_values{} = Data -> build_SetParameterValues(Data, State);
-	  #set_parameter_values_response{} = Data -> build_SetParameterValuesResponse(Data, State);
-	  #get_parameter_values{} = Data -> build_GetParameterValues(Data, State);
-	  #get_parameter_values_response{} = Data -> build_GetParameterValuesResponse(Data, State);
-	  #get_parameter_names{} = Data -> build_GetParameterNames(Data, State);
-	  #get_parameter_names_response{} = Data -> build_GetParameterNamesResponse(Data, State);
-	  #set_parameter_attributes{} = Data -> build_SetParameterAttributes(Data, State);
-	  #set_parameter_attributes_response{} = Data -> build_TagName(Data, "SetParameterAttributesResponse");
-	  #get_parameter_attributes{} = Data -> build_GetParameterAttributes(Data, State);
-	  #get_parameter_attributes_response{} = Data -> build_GetParameterAttributesResponse(Data, State);
-	  #add_object{} = Data -> build_AddObject(Data, State);
-	  #add_object_response{} = Data -> build_AddObjectResponse(Data, State);
-	  #delete_object{} = Data -> build_DeleteObject(Data, State);
-	  #delete_object_response{} = Data -> build_DeleteObjectResponse(Data, State);
-	  #download{} = Data -> build_Download(Data, State);
-	  #download_response{} = Data -> build_DownloadResponse(Data, State);
-	  #reboot{} = Data -> build_Reboot(Data, State);
-	  #reboot_response{} = Data -> build_TagName(Data, "RebootResponse");
-	  #get_queued_transfers{} = Data -> build_TagName(Data, "GetQueuedTransfers");
-	  #get_queued_transfers_response{} = Data -> build_GetQueuedTransfersResponse(Data, State);
-	  #schedule_inform{} = Data -> build_ScheduleInform(Data, State);
-	  #schedule_inform_response{} = Data -> build_TagName(Data, "ScheduleInformResponse");
-	  #set_vouchers{} = Data -> build_SetVouchers(Data, State);
-	  #set_vouchers_response{} = Data -> build_TagName(Data, "SetVouchersResponse");
-	  #get_options{} = Data -> build_GetOptions(Data, State);
-	  #get_options_response{} = Data -> build_GetOptionsResponse(Data, State);
-	  #upload{} = Data -> build_Upload(Data, State);
-	  #upload_response{} = Data -> build_UploadResponse(Data, State);
-	  #factory_reset{} = Data -> build_TagName(Data, "FactoryReset");
-	  #factory_reset_response{} = Data -> build_TagName(Data, "FactoryResetResponse");
-	  #get_all_queued_transfers{} = Data -> build_TagName(Data, "GetAllQueuedTransfers");
-	  #get_all_queued_transfers_response{} = Data -> build_GetAllQueuedTransfersResponse(Data, State);
-	  #schedule_download{} = Data -> build_ScheduleDownload(Data, State);
-	  #schedule_download_response{} = Data -> build_TagName(Data, "ScheduleDownloadResponse");
-	  #cancel_transfer{} = Data -> build_CancelTransfer(Data, State);
-	  #cancel_transfer_response{} = Data -> build_TagName(Data, "CancelTransferResponse");
-	  #change_du_state{} = Data -> build_ChangeDUState(Data, State);
-	  #change_du_state_response{} = Data -> build_TagName(Data, "ChangeDUStateResponse");
-	  #inform{} = Data -> build_Inform(Data, State);
-	  #inform_response{} = Data -> build_InformResponse(Data, State);
-	  #transfer_complete{} = Data -> build_TransferComplete(Data, State);
-	  #transfer_complete_response{} = Data -> build_TagName(Data, "TransferCompleteResponse");
-	  #autonomous_transfer_complete{} = Data -> build_AutonomousTransferComplete(Data, State);
-	  #autonomous_transfer_complete_response{} = Data -> build_TagName(Data, "AutonomousTransferCompleteResponse");
-	  #kicked{} = Data -> build_Kicked(Data, State);
-	  #kicked_response{} = Data -> build_KickedResponse(Data, State);
-	  #request_download{} = Data -> build_RequestDownload(Data, State);
-	  #request_download_response{} = Data -> build_TagName(Data, "RequestDownloadResponse");
-	  #du_state_change_complete{} = Data -> build_DUStateChangeComplete(Data, State);
-	  #du_state_change_complete_response{} = Data -> build_TagName(Data, "DUStateChangeCompleteResponse");
-	  #autonomous_du_state_change_complete{} = Data -> build_AutonomousDUStateChangeComplete(Data, State);
-	  #autonomous_du_state_change_complete_response{} = Data -> build_TagName(Data, "AutonomousDUStateChangeCompleteResponse");
+	  #fault{} = Data						-> build_Fault(Data, State);
+	  #get_rpc_methods{} = Data					-> build_TagName(Data, "GetRPCMethods");
+	  #get_rpc_methods_response{} = Data				-> build_GetRPCMethodsResponse(Data, State);
+	  #set_parameter_values{} = Data				-> build_SetParameterValues(Data, State);
+	  #set_parameter_values_response{} = Data			-> build_SetParameterValuesResponse(Data, State);
+	  #get_parameter_values{} = Data				-> build_GetParameterValues(Data, State);
+	  #get_parameter_values_response{} = Data			-> build_GetParameterValuesResponse(Data, State);
+	  #get_parameter_names{} = Data					-> build_GetParameterNames(Data, State);
+	  #get_parameter_names_response{} = Data			-> build_GetParameterNamesResponse(Data, State);
+	  #set_parameter_attributes{} = Data				-> build_SetParameterAttributes(Data, State);
+	  #set_parameter_attributes_response{} = Data			-> build_TagName(Data, "SetParameterAttributesResponse");
+	  #get_parameter_attributes{} = Data				-> build_GetParameterAttributes(Data, State);
+	  #get_parameter_attributes_response{} = Data			-> build_GetParameterAttributesResponse(Data, State);
+	  #add_object{} = Data						-> build_AddObject(Data, State);
+	  #add_object_response{} = Data					-> build_AddObjectResponse(Data, State);
+	  #delete_object{} = Data					-> build_DeleteObject(Data, State);
+	  #delete_object_response{} = Data				-> build_DeleteObjectResponse(Data, State);
+	  #download{} = Data						-> build_Download(Data, State);
+	  #download_response{} = Data					-> build_DownloadResponse(Data, State);
+	  #reboot{} = Data						-> build_Reboot(Data, State);
+	  #reboot_response{} = Data					-> build_TagName(Data, "RebootResponse");
+	  #get_queued_transfers{} = Data				-> build_TagName(Data, "GetQueuedTransfers");
+	  #get_queued_transfers_response{} = Data			-> build_GetQueuedTransfersResponse(Data, State);
+	  #schedule_inform{} = Data					-> build_ScheduleInform(Data, State);
+	  #schedule_inform_response{} = Data				-> build_TagName(Data, "ScheduleInformResponse");
+	  #set_vouchers{} = Data					-> build_SetVouchers(Data, State);
+	  #set_vouchers_response{} = Data				-> build_TagName(Data, "SetVouchersResponse");
+	  #get_options{} = Data						-> build_GetOptions(Data, State);
+	  #get_options_response{} = Data				-> build_GetOptionsResponse(Data, State);
+	  #upload{} = Data						-> build_Upload(Data, State);
+	  #upload_response{} = Data					-> build_UploadResponse(Data, State);
+	  #factory_reset{} = Data					-> build_TagName(Data, "FactoryReset");
+	  #factory_reset_response{} = Data				-> build_TagName(Data, "FactoryResetResponse");
+	  #get_all_queued_transfers{} = Data				-> build_TagName(Data, "GetAllQueuedTransfers");
+	  #get_all_queued_transfers_response{} = Data			-> build_GetAllQueuedTransfersResponse(Data, State);
+	  #schedule_download{} = Data					-> build_ScheduleDownload(Data, State);
+	  #schedule_download_response{} = Data				-> build_TagName(Data, "ScheduleDownloadResponse");
+	  #cancel_transfer{} = Data					-> build_CancelTransfer(Data, State);
+	  #cancel_transfer_response{} = Data				-> build_TagName(Data, "CancelTransferResponse");
+	  #change_du_state{} = Data					-> build_ChangeDUState(Data, State);
+	  #change_du_state_response{} = Data				-> build_TagName(Data, "ChangeDUStateResponse");
+	  #inform{} = Data						-> build_Inform(Data, State);
+	  #inform_response{} = Data					-> build_InformResponse(Data, State);
+	  #transfer_complete{} = Data					-> build_TransferComplete(Data, State);
+	  #transfer_complete_response{} = Data				-> build_TagName(Data, "TransferCompleteResponse");
+	  #autonomous_transfer_complete{} = Data			-> build_AutonomousTransferComplete(Data, State);
+	  #autonomous_transfer_complete_response{} = Data		-> build_TagName(Data, "AutonomousTransferCompleteResponse");
+	  #kicked{} = Data						-> build_Kicked(Data, State);
+	  #kicked_response{} = Data					-> build_KickedResponse(Data, State);
+	  #request_download{} = Data					-> build_RequestDownload(Data, State);
+	  #request_download_response{} = Data				-> build_TagName(Data, "RequestDownloadResponse");
+	  #du_state_change_complete{} = Data				-> build_DUStateChangeComplete(Data, State);
+	  #du_state_change_complete_response{} = Data			-> build_TagName(Data, "DUStateChangeCompleteResponse");
+	  #autonomous_du_state_change_complete{} = Data			-> build_AutonomousDUStateChangeComplete(Data, State);
+	  #autonomous_du_state_change_complete_response{} = Data	-> build_TagName(Data, "AutonomousDUStateChangeCompleteResponse");
 	  _ ->
 	      build_error(Method, State)
       end || Method <- Body]}.
@@ -234,20 +234,20 @@ build_SoapFault(Data, State) ->
 %%%-----------------------------------------------------------------------------
 
 %% Type aliases
-build_ParameterList(Data, State) -> build_ParameterValueList(Data, State).
-build_ParameterKey(Data, _State) -> build_ParameterKeyType(Data).
-build_ObjectName(Data, _State) -> build_ObjectNameType(Data).
-build_CommandKey(Data, _State) ->  build_CommandKeyType(Data).
-build_FileType(Data, _State) ->  build_DownloadFileType(Data).
-build_UUID(Data) ->  build_DeploymentUnitUUID(Data).
-build_DeviceId(Data, State) -> build_DeviceIdStruct(Data, State).
-build_Event(Data, State) -> build_EventList(Data, State).
-build_FaultStruct(Data, State) -> build_TransferCompleteFaultStruct(Data, State).
-build_EventCode(Data, _State) -> build_EventCodeType(Data).
-build_Notification(Data, _State) -> build_ParameterAttributeNotificationValueType(Data).
-build_WindowMode(Data, _State) -> build_TimeWindowModeValueType(Data).
-build_CurrentState(Data, _State) -> build_DeploymentUnitState(Data).
-build_OperationPerformed(Data, _State) -> build_string(Data).
+build_ParameterList(Data, State)	-> build_ParameterValueList(Data, State).
+build_ParameterKey(Data, _State)	-> build_ParameterKeyType(Data).
+build_ObjectName(Data, _State)		-> build_ObjectNameType(Data).
+build_CommandKey(Data, _State)		-> build_CommandKeyType(Data).
+build_FileType(Data, _State)		-> build_DownloadFileType(Data).
+build_UUID(Data)			-> build_DeploymentUnitUUID(Data).
+build_DeviceId(Data, State)		-> build_DeviceIdStruct(Data, State).
+build_Event(Data, State)		-> build_EventList(Data, State).
+build_FaultStruct(Data, State)		-> build_TransferCompleteFaultStruct(Data, State).
+build_EventCode(Data, _State)		-> build_EventCodeType(Data).
+build_Notification(Data, _State)	-> build_ParameterAttributeNotificationValueType(Data).
+build_WindowMode(Data, _State)		-> build_TimeWindowModeValueType(Data).
+build_CurrentState(Data, _State)	-> build_DeploymentUnitState(Data).
+build_OperationPerformed(Data, _State)	-> build_string(Data).
 
 %%%-----------------------------------------------------------------------------
 %%%        Build RPC Message

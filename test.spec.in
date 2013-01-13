@@ -5,8 +5,7 @@
 {alias, tr_app, "@PATH@/."}.		      
 {include, "@PATH@/include"}.
 {include, "@PATH@/deps"}.
-{suites, tr_app, [
-		  cwmp_builder_SUITE
-		  %% soap_parser_SUITE,
-		  %%hdm_trace_SUITE
+{suites, tr_app, [cwmp_builder_SUITE
+		  , soap_parser_SUITE
+		  , hdm_trace_SUITE
 		 ]}.

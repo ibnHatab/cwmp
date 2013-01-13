@@ -38,12 +38,14 @@ orgs-README:
 	@mv README.txt README
 
 
-clean:
+clean: ct-clean
 	$(REBAR) clean
 	@rm -rf $(DOCDIR)
 	@rm -rf logs
-	@rm -rf test/*.beam
 	@rm -rf .eunit
+
+ct-clean:
+	@rm -rf test/*.beam
 	@rm -rf test/cwmp_builder_SUITE_data/*.xml
 
 distclean:
@@ -54,7 +56,8 @@ install: all
 	cp -r ebin $(DESTDIR)/lib/tr-$(TR_VSN)/
 
 utest:
-	$(REBAR) -v eunit skip_deps=true suite=cwmp_builder
+	$(REBAR) -v eunit skip_deps=true
+# suite=cwmp_builder
 
 ut-shell:
 	exec erl -pa $(PWD)/apps/*/ebin -pa $(PWD)/deps/*/ebin -pa $(PWD)/.eunit -boot start_sasl -s reloader 
@@ -63,7 +66,7 @@ ut-shell:
 test.spec: test.spec.in
 	cat test.spec.in | sed -e "s,@PATH@,$(PWD)," > $(PWD)/test.spec
 
-ctest:  test.spec compile
+ctest:  test.spec ct-clean
 	-@mkdir logs
 	ct_run -pa $(PWD)/lib/*/ebin -pz ./ebin -spec test.spec
 

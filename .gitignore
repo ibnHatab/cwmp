@@ -8,3 +8,7 @@ logs/*
 test.spec
 
 deps
+
+#erlide
+.project
+.settings
