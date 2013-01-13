@@ -149,7 +149,7 @@ build_Envelope(#envelope{header=Header, body=Body} = _D, State) ->
 build_Header(_D, _State) ->
     'soapenv:Header'.
 
--spec build_Body(body_type(), #builder{}) ->  export_element().
+-spec build_Body([body_type()], #builder{}) ->  export_element().
 build_Body(Body, State) ->
     {'soapenv:Body', [],
      [case Method of
@@ -254,7 +254,7 @@ build_OperationPerformed(Data, _State)	-> build_string(Data).
 %%%-----------------------------------------------------------------------------
 
 %% Build empty tags
--spec build_TagName(record(), string()) -> export_element().
+-spec build_TagName(tuple(), string()) -> export_element().
 build_TagName(Data, _TagName) when Data =:= undefined -> null;
 build_TagName(_Data, TagName) -> { list_to_atom("cwmp:" ++ TagName), [], []}.
 
@@ -904,7 +904,7 @@ build_AllTransferList(Data,  State) ->
     TagArray =  [build_AllQueuedTransferStruct(E, State) || E <- Data],
     {'AllTransferList', [attr_arrayType("cwmp:AllQueuedTransferStruct", length(TagArray))], TagArray}.
 
-%-spec build_VoucherList([#base64{}], #builder{}) -> export_element().
+-spec build_VoucherList([binary()], #builder{}) -> export_element().
 build_VoucherList(Data, _S) when Data =:= undefined -> null;
 build_VoucherList(Data,  _State) ->
     TagArray =  [build_base64(E) || E <- Data],

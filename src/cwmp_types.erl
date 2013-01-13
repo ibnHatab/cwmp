@@ -169,8 +169,9 @@ parse_dateTime(#xmlElement{name=Name, content = Content} = _E) when is_tuple(_E)
 parse_dateTime(String) when is_list(String) ->
     convert_iso8601_date(String).
 
-parse_base64(Msg) when is_list(Msg) ->
-    base64:decode(Msg).
+parse_base64(#xmlElement{name=_Name, content = Content} = _E) when is_tuple(_E)->
+    String = string:strip(get_xmlText(Content)),
+    base64:decode(String).
 
 -spec parse_attribute(#xmlElement{}, atom(), atom()) -> any() | undefined.
 parse_attribute(Elem, AttrName, boolean) ->
@@ -544,7 +545,7 @@ build_DefaultDeploymentUnitOperationType(Data)		-> maybe_tag('DefaultDeploymentU
 
 %% Missed types
 build_FaultCode(Data)			-> maybe_tag('FaultCode', fun format_int/1, Data).
-build_base64(Data)			-> maybe_tag('FaultCode', fun format_base64/1, Data).
+build_base64(Data)			-> maybe_tag('base64', fun format_base64/1, Data).
 
 %% end
 

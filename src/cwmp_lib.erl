@@ -155,7 +155,7 @@ check_namespace(RefQName, #xmlElement{name = QName} = Elem, #parser{ns=Nss} = St
 	{RefName, RefNs, _InhNs} ->
 	    State#parser{ ns = Nss#rpc_ns{ inherited = Ns }};
 	_ ->
-	    parse_warning(Elem, RefNs, "Namespace missmatch"),
+	    parse_warning(Elem, atom_to_list(RefNs), "Namespace missmatch"),
 	    State
     end.
 

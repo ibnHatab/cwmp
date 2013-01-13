@@ -169,8 +169,8 @@ hdm_trace_test_case(Config) ->
     lists:foreach(fun (Method) ->
 			  TraceFile = filename:join([TraceDir,
 						     "cwmp_" ++ Method ++ ".xml"]),
-			  XqlFile = filename:join([TraceDir,
-						   "cwmp_" ++ Method ++ ".xql"]),
+			  %%see FIXME below XqlFile = filename:join([TraceDir,
+			  %% 			   "cwmp_" ++ Method ++ ".xql"]),
 			  RpcFile = filename:join([TempDir,
 						   "cwmp_" ++ Method ++ ".xml"]),
 

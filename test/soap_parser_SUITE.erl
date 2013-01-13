@@ -695,11 +695,14 @@ base64_loop_tc(_Config) ->
     ok.
 base64_loop_check(String) ->
     %setup
-    EncMsg = cwmp_types:format_base64(String),
+    {'base64',[],[Value]} = cwmp_types:build_base64(String),
+
+    E = make_Element('base64', Value),
+
+    Data = cwmp_types:parse_base64(E),
     %execute
-    EncDecMsg = cwmp_types:parse_base64(EncMsg),
     %assert
-    String = EncDecMsg.
+    Data = String.
 
 
 %%--------------------------------------------------------------------
