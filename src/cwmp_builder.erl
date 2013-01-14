@@ -71,7 +71,7 @@
 			 build_Value/1,
 			 build_Version/1,
 
-			 build_DownloadFileType/1,
+			 build_FileType/1,
 			 build_EventCodeType/1,
 			 build_TimeWindowModeValueType/1,
 			 build_CommandKeyType/1,
@@ -238,11 +238,12 @@ build_ParameterList(Data, State)	-> build_ParameterValueList(Data, State).
 build_ParameterKey(Data, _State)	-> build_ParameterKeyType(Data).
 build_ObjectName(Data, _State)		-> build_ObjectNameType(Data).
 build_CommandKey(Data, _State)		-> build_CommandKeyType(Data).
-build_FileType(Data, _State)		-> build_DownloadFileType(Data).
+%% build_FileType(Data, _State)		-> build_DownloadFileType(Data).
 build_UUID(Data)			-> build_DeploymentUnitUUID(Data).
 build_DeviceId(Data, State)		-> build_DeviceIdStruct(Data, State).
 build_Event(Data, State)		-> build_EventList(Data, State).
 build_FaultStruct(Data, State)		-> build_TransferCompleteFaultStruct(Data, State).
+
 build_EventCode(Data, _State)		-> build_EventCodeType(Data).
 build_Notification(Data, _State)	-> build_ParameterAttributeNotificationValueType(Data).
 build_WindowMode(Data, _State)		-> build_TimeWindowModeValueType(Data).
@@ -404,7 +405,7 @@ build_Download(Data, State) ->
     {'cwmp:Download', [],
      [P || P <- [
 		 build_CommandKey(Data#download.command_key, State),
-		 build_FileType(Data#download.file_type, State),
+		 build_FileType(Data#download.file_type),
 		 build_URL(Data#download.url),
 		 build_Username(Data#download.username),
 		 build_Password(Data#download.password),
@@ -480,7 +481,7 @@ build_Upload(Data, State) ->
     {'cwmp:Upload', [],
      [P || P <- [
 		 build_CommandKey(Data#upload.command_key, State),
-		 build_FileType(Data#upload.file_type, State),
+		 build_FileType(Data#upload.file_type),
 		 build_URL(Data#upload.url),
 		 build_Username(Data#upload.username),
 		 build_Password(Data#upload.password),
@@ -511,7 +512,7 @@ build_ScheduleDownload(Data, State) ->
     {'cwmp:ScheduleDownload', [],
      [P || P <- [
 		 build_CommandKey(Data#schedule_download.command_key, State),
-		 build_FileType(Data#schedule_download.file_type, State),
+		 build_FileType(Data#schedule_download.file_type),
 		 build_URL(Data#schedule_download.url),
 		 build_Username(Data#schedule_download.username),
 		 build_Password(Data#schedule_download.password),
@@ -577,7 +578,7 @@ build_AutonomousTransferComplete(Data, State) ->
 		 build_AnnounceURL(Data#autonomous_transfer_complete.announce_url),
 		 build_TransferURL(Data#autonomous_transfer_complete.transfer_url),
 		 build_IsDownload(Data#autonomous_transfer_complete.is_download),
-		 build_FileType(Data#autonomous_transfer_complete.file_type, State),
+		 build_FileType(Data#autonomous_transfer_complete.file_type),
 		 build_FileSize(Data#autonomous_transfer_complete.file_size),
 		 build_TargetFileName(Data#autonomous_transfer_complete.target_file_name),
 		 build_FaultStruct(Data#autonomous_transfer_complete.fault_struct, State),
@@ -609,8 +610,8 @@ build_RequestDownload(Data, _S) when Data =:= undefined -> null;
 build_RequestDownload(Data, State) ->
     {'cwmp:RequestDownload', [],
      [P || P <- [
-		 build_FileType(Data#request_download.file_type, State),
-		 build_FileTypeArg(Data#request_download.file_type_arg, State)
+		 build_FileType(Data#request_download.file_type),
+		 build_FileTypeArg(Data#request_download.file_type_arg,  State)
 		], P /= null]}.
 
 -spec build_DUStateChangeComplete(#du_state_change_complete{}, #builder{}) -> export_element().
@@ -740,7 +741,7 @@ build_AllQueuedTransferStruct(Data, State) ->
 		 build_CommandKey(Data#all_queued_transfer_struct.command_key, State),
 		 build_State(Data#all_queued_transfer_struct.state),
 		 build_IsDownload(Data#all_queued_transfer_struct.is_download),
-		 build_FileType(Data#all_queued_transfer_struct.file_type, State),
+		 build_FileType(Data#all_queued_transfer_struct.file_type),
 		 build_FileSize(Data#all_queued_transfer_struct.file_size),
 		 build_TargetFileName(Data#all_queued_transfer_struct.target_file_name)
 		], P /= null]}.

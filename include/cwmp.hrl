@@ -163,8 +163,6 @@
 	  , {7, "8 Vendor Log File, [1-9]\d*"}
 	  , {'X', "X OUI Vendor speceific, ID"}
 	]).
--type transfer_file_type() :: integer() | string().
-
 
 %% @doc This type is used for Download and RequestDownload
 -define(SUPPORTED_DOWNLOAD_FILE_TYPE,
@@ -176,7 +174,6 @@
 	  , {5, "5 Ringer, File"}
 	  , {'X', "X OUI Vendor speceific, ID"}
 	]).
--type download_file_type() :: integer() | string().
 
 %% @doc This type is used for Upload
 -define(SUPPORTED_UPLOAD_FILE_TYPE,
@@ -187,7 +184,8 @@
 	  , {4, "4 Vendor Log File, [1-9]\d*"}
 	  , {'X', "X OUI Vendor speceific, ID"}
 	]).
--type upload_file_type() :: integer() | string().
+
+-type file_type() :: integer() | atom().
 
 -define(SUPPORTED_EVENT_CODE_TYPE,
         %%    This pattern allows the following Event Codes:
@@ -329,7 +327,7 @@
 	  command_key :: command_key_type(),
 	  state :: transfer_state_type(),
 	  is_download :: boolean(),
-	  file_type :: string(),
+	  file_type :: file_type(),
 	  file_size :: non_neg_integer(),
 	  target_file_name :: string()
 	 }).
@@ -572,7 +570,7 @@
 %% @doc Download message - Annex A.3.2.8
 -record(download, {
 	   command_key :: command_key_type(),
-	   file_type :: download_file_type(),
+	   file_type :: file_type(),
 	   url :: url(),
 	   username :: string(),
 	   password :: string(),
@@ -646,7 +644,7 @@
 %% @doc Upload message - Annex A.4.1.5
 -record(upload, {
 	   command_key :: command_key_type(),
-	   file_type :: upload_file_type(),
+	   file_type :: file_type(),
 	   url :: url(),
 	   username :: string(),
 	   password :: string(),
@@ -682,7 +680,7 @@
 %% @doc ScheduleDownload message - Annex A.4.1.8
 -record(schedule_download, {
 	   command_key :: command_key_type(),
-	   file_type :: download_file_type(),
+	   file_type :: file_type(),
 	   url :: url(),
 	   username :: string(),
 	   password :: string(),
@@ -752,7 +750,7 @@
 	   announce_url :: url(),
 	   transfer_url :: url(),
 	   is_download :: boolean(),
-	   file_type :: string(),
+	   file_type :: file_type(),
 	   file_size :: non_neg_integer(),
 	   target_file_name :: string(),
 	   fault_struct :: #transfer_complete_fault_struct{},
@@ -784,7 +782,7 @@
 
 %% @doc RequestDownload message - Annex A.4.2.2
 -record(request_download, {
-	  file_type :: download_file_type(),
+	  file_type :: file_type(),
 	  file_type_arg :: [#arg_struct{}]
 	 }).
 

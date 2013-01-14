@@ -3,25 +3,186 @@
 
 -module(cwmp_types).
 
--compile(export_all).
-
 -include_lib("xmerl/include/xmerl.hrl").
 
 -include("cpe_host/src/host_internal.hrl").
 -include("cwmp.hrl").
 
--export([ parse_string/1,
-	  parse_boolean/1,
-	  parse_int/1,
-	  parse_dateTime/1,
-	  parse_base64/1,
-	  parse_anyURI/1,
-	  parse_attribute/3,
-	  parse_anySimpleType/1
+
+-export([
+	 parse_AccessListChange/1,
+	 parse_AnnounceURL/1,
+	 parse_Arg/1,
+	 parse_Command/1,
+	 parse_CommandKeyType/1,
+	 parse_CompleteTime/1,
+	 parse_CurrentTime/1,
+	 parse_DelaySeconds/1,
+	 parse_DeploymentUnitOperationType/1,
+	 parse_DeploymentUnitRef/1,
+	 parse_DeploymentUnitState/1,
+	 parse_EventCodeType/2,
+	 parse_ExecutionEnvRef/1,
+	 parse_ExecutionUnitRefList/1,
+	 parse_ExpirationDate/1,
+	 parse_FailureURL/1,
+	 parse_FaultCode/1,
+	 parse_FaultString/1,
+	 parse_FileSize/1,
+	 parse_FileType/2,
+	 parse_InstanceNumber/1,
+	 parse_IsDownload/1,
+	 parse_IsTransferable/1,
+	 parse_Manufacturer/1,
+	 parse_MaxEnvelopes/1,
+	 parse_MaxRetries/1,
+	 parse_Mode/1,
+	 parse_Name/1,
+	 parse_Next/1,
+	 parse_NextLevel/1,
+	 parse_NextURL/1,
+	 parse_Notification/1,
+	 parse_NotificationChange/1,
+	 parse_ObjectNameType/1,
+	 parse_OptionName/1,
+	 parse_OUI/1,
+	 parse_ParameterKeyType/1,
+	 parse_ParameterPath/1,
+	 parse_Password/1,
+	 parse_ProductClass/1,
+	 parse_Referer/1,
+	 parse_Resolved/1,
+	 parse_RetryCount/1,
+	 parse_SerialNumber/1,
+	 parse_StartDate/1,
+	 parse_StartTime/1,
+	 parse_State/1,
+	 parse_Status/1,
+	 parse_SuccessURL/1,
+	 parse_TargetFileName/1,
+	 parse_TransferURL/1,
+	 parse_URL/1,
+	 parse_UserMessage/1,
+	 parse_Username/1,
+	 parse_UUID/1,
+	 parse_Value/1,
+	 parse_Version/1,
+	 parse_VoucherSN/1,
+	 parse_WindowEnd/1,
+	 parse_WindowMode/1,
+	 parse_WindowStart/1,
+	 parse_Writable/1,
+
+	 parse_string/1,
+	 parse_boolean/1,
+
+	 parse_base64/1,
+	 parse_anyURI/1,
+	 parse_attribute/3,
+	 parse_anySimpleType/1,
+	 parse_XS_Array/4,
+
+	 format_string/1
 	]).
 
--export([ build_anyURI/1
+-export([ build_AccessListChange/1,
+	  build_CompleteTime/1,
+			 build_CurrentTime/1,
+			 build_DelaySeconds/1,
+			 build_DeploymentUnitRef/1,
+			 build_ExecutionUnitRefList/1,
+			 build_ExpirationDate/1,
+			 build_FaultString/1,
+			 build_FileSize/1,
+			 build_IsDownload/1,
+			 build_MaxEnvelopes/1,
+			 build_MaxRetries/1,
+			 build_NextLevel/1,
+			 build_NotificationChange/1,
+			 build_ParameterName/1,
+			 build_Resolved/1,
+			 build_RetryCount/1,
+			 build_StartDate/1,
+			 build_StartTime/1,
+			 build_VoucherSN/1,
+			 build_WindowEnd/1,
+			 build_WindowStart/1,
+			 build_Writable/1,
+
+			 build_AnnounceURL/1,
+			 build_Arg/1,
+			 build_Command/1,
+			 build_ExecutionEnvRef/1,
+			 build_FailureURL/1,
+			 build_InstanceNumber/1,
+			 build_IsTransferable/1,
+			 build_Manufacturer/1,
+			 build_Mode/1,
+			 build_Name/1,
+			 build_Next/1,
+			 build_NextURL/1,
+			 build_OptionName/1,
+			 build_OUI/1,
+			 build_ParameterPath/1,
+			 build_Password/1,
+			 build_ProductClass/1,
+			 build_Referer/1,
+			 build_SerialNumber/1,
+			 build_State/1,
+			 build_Status/1,
+			 build_string/1,
+			 build_SuccessURL/1,
+			 build_TargetFileName/1,
+			 build_TransferURL/1,
+			 build_URL/1,
+			 build_UserMessage/1,
+			 build_Username/1,
+			 build_Value/1,
+			 build_Version/1,
+
+			build_FileType/1,
+			build_EventCodeType/1,
+			build_TimeWindowModeValueType/1,
+			build_CommandKeyType/1,
+			build_ObjectNameType/1,
+			build_ParameterKeyType/1,
+			%% build_AccessListValueType/1,
+			build_ParameterAttributeNotificationValueType/1,
+			%% build_TransferStateType/1,
+			build_DeploymentUnitUUID/1,
+			build_DeploymentUnitState/1,
+			%% build_DefaultDeploymentUnitOperationType/1,
+
+
+			%% Missed types
+			build_FaultCode/1,
+			build_base64/1
+		       ]).
+
+
+-export([
+	 convert_iso8601_date/1,
+	 parse_int/1,
+	 parse_unsignedInt/1,
+	 parse_ArraySize/3,
+	 
+	 build_anyURI/1 
 	]).
+
+
+%% -export([ parse_string/1,
+%% 	  parse_boolean/1,
+%% 	  parse_int/1,
+%% 	  parse_dateTime/1,
+%% 	  parse_base64/1,
+%% 	  parse_anyURI/1,
+%% 	  parse_attribute/3,
+%% 	  parse_anySimpleType/1
+%% 	]).
+
+%% -export([ build_anyURI/1
+%% 	]).
+
 
 
 -import(cwmp_lib, [return_error/2, parse_error/2, parse_error/3, parse_warning/3,
@@ -523,25 +684,28 @@ build_Username(Data)			-> maybe_tag('Username', fun format_string/1, Data).
 build_Value(Data)			-> maybe_tag('Value', fun format_string/1, Data).
 build_Version(Data)			-> maybe_tag('Version', fun format_string/1, Data).
 
-build_CPEFaultCodeType(Data)				-> maybe_tag('CPEFaultCodeType', fun format_unsignedInt/1, Data).
-build_CPEExtensionFaultCodeType(Data)			-> maybe_tag('CPEExtensionFaultCodeType', fun format_unsignedInt/1, Data).
-build_CPEVendorFaultCodeType(Data)			-> maybe_tag('CPEVendorFaultCodeType', fun format_unsignedInt/1, Data).
-build_ACSFaultCodeType(Data)				-> maybe_tag('ACSFaultCodeType', fun format_unsignedInt/1, Data).
-build_ACSVendorFaultCodeType(Data)			-> maybe_tag('ACSVendorFaultCodeType', fun format_unsignedInt/1, Data).
-build_TransferFileType(Data)				-> maybe_tag('TransferFileType', fun format_string/1, Data).
-build_DownloadFileType(Data)				-> maybe_tag('DownloadFileType', fun format_int/1, Data).
-build_UploadFileType(Data)				-> maybe_tag('UploadFileType', fun format_string/1, Data).
+%% build_CPEFaultCodeType(Data)				-> maybe_tag('CPEFaultCodeType', fun format_unsignedInt/1, Data).
+%% build_CPEExtensionFaultCodeType(Data)			-> maybe_tag('CPEExtensionFaultCodeType', fun format_unsignedInt/1, Data).
+%% build_CPEVendorFaultCodeType(Data)			-> maybe_tag('CPEVendorFaultCodeType', fun format_unsignedInt/1, Data).
+%% build_ACSFaultCodeType(Data)				-> maybe_tag('ACSFaultCodeType', fun format_unsignedInt/1, Data).
+%% build_ACSVendorFaultCodeType(Data)			-> maybe_tag('ACSVendorFaultCodeType', fun format_unsignedInt/1, Data).
+
+%% build_TransferFileType(Data)				-> maybe_tag('TransferFileType', fun format_string/1, Data).
+%% build_UploadFileType(Data)				-> maybe_tag('UploadFileType', fun format_string/1, Data).
+build_FileType(Data)                                    -> maybe_tag('FileType', fun format_int/1, Data).
+
+
 build_EventCodeType(Data)				-> maybe_tag('EventCodeType', fun format_int/1, Data).
 build_TimeWindowModeValueType(Data)			-> maybe_tag('TimeWindowModeValueType', fun format_string/1, Data).
 build_CommandKeyType(Data)				-> maybe_tag('CommandKeyType', fun format_string/1, Data).
 build_ObjectNameType(Data)				-> maybe_tag('ObjectNameType', fun format_string/1, Data).
 build_ParameterKeyType(Data)				-> maybe_tag('ParameterKeyType', fun format_string/1, Data).
-build_AccessListValueType(Data)				-> maybe_tag('AccessListValueType', fun format_string/1, Data).
+%% build_AccessListValueType(Data)				-> maybe_tag('AccessListValueType', fun format_string/1, Data).
 build_ParameterAttributeNotificationValueType(Data)	-> maybe_tag('ParameterAttributeNotificationValueType', fun format_int/1, Data).
-build_TransferStateType(Data)				-> maybe_tag('TransferStateType', fun format_int/1, Data).
+%% build_TransferStateType(Data)				-> maybe_tag('TransferStateType', fun format_int/1, Data).
 build_DeploymentUnitUUID(Data)				-> maybe_tag('DeploymentUnitUUID', fun format_string/1, Data).
 build_DeploymentUnitState(Data)				-> maybe_tag('DeploymentUnitState', fun format_string/1, Data).
-build_DefaultDeploymentUnitOperationType(Data)		-> maybe_tag('DefaultDeploymentUnitOperationType', fun format_string/1, Data).
+%% build_DefaultDeploymentUnitOperationType(Data)		-> maybe_tag('DefaultDeploymentUnitOperationType', fun format_string/1, Data).
 
 
 %% Missed types
@@ -695,20 +859,20 @@ parse_FaultCode_test() ->
 	,?assertEqual(E,9000)
     .
 
-base64_loop_test() ->
-    [
-     begin
-%	 ?DBG(Msg),
-	 EncMsg = format_base64(Msg),
-%	 ?DBG(EncMsg),
-	 EncDecMsg = parse_base64(EncMsg),
-%	 ?DBG(EncDecMsg),
-	 ?assertEqual(Msg, EncDecMsg)
-     end || Msg <- [
-		    <<"mama mila ramu">>,
-		    term_to_binary({test, "Text"})
-		   ]
-    ].
+%% base64_loop_test() ->
+%%     [
+%%      begin
+%% %	 ?DBG(Msg),
+%% 	 EncMsg = format_base64(Msg),
+%% %	 ?DBG(EncMsg),
+%% 	 EncDecMsg = parse_base64(EncMsg),
+%% %	 ?DBG(EncDecMsg),
+%% 	 ?assertEqual(Msg, EncDecMsg)
+%%      end || Msg <- [
+%% 		    <<"mama mila ramu">>,
+%% 		    term_to_binary({test, "Text"})
+%% 		   ]
+%%     ].
 
 -endif.
 
