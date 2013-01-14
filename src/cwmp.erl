@@ -22,18 +22,19 @@ ensure_started(App) ->
 %% @doc Starts the app for inclusion in a supervisor tree
 start_link() ->
     ok = ensure_started(crypto),
-    ok = cwmp_sup:start_link().
+    cwmp_sup:start_link().
 
 %% @spec start() -> ok
 %% @doc Start the cwmp server.
 start() ->
     ok = ensure_started(crypto),
-    ok = application:start(cwmp).
+    ok = application:start(cwmp),
+    ok.
 
 %% @spec stop() -> ok
 %% @doc Stop the cwmp server.
 stop() ->
     ok = application:stop(cwmp),
-    ok = oapplication:stop(crypto),
+    ok = application:stop(crypto),
     ok.
 

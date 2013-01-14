@@ -327,7 +327,8 @@ parse_ArraySize(Value, ContentTag, Nss) ->
 
 	    if
 		ValueNs /= ContentNs ->
-		    parse_warning(ValueName, {ValueNs, ContentNs}, "Namespace missmatch");
+		    parse_warning(ValueName,
+				  io_lib:format("~p vs ~p", [ValueNs, ContentNs]), "Namespace missmatch");
 		true ->
 		    pass
 	    end,
