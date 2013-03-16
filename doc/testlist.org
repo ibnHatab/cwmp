@@ -1,61 +1,74 @@
 #+STARTUP: showall hidestars
-
-#+OPTIONS: author:nil creator:nil
-#+OPTIONS: toc:nil
-
+#+TAGS: DOCS(d) CODING(c) TESTING(t) PLANING(p)
 #+LINK_UP: sitemap.html
 #+LINK_HOME: main.html
-#+STYLE: <link rel="stylesheet" type="text/css" href="doc-style.css" />
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+DESCRIPTION: Augment design process with system property discovering aid.
+#+KEYWORDS: SmallCell, 
+#+LANGUAGE: en
 
-#+TAGS: DOCS(d) CODING(c) TESTING(t) PLANING(p)
+#+STYLE: <link rel="stylesheet" type="text/css" href="org-manual.css" />
+
+#+AUTHOR:    Mirela Nicola
+#+EMAIL:     mirela_nikola@yahoo.com
+#+DATE:      2013-03-07 Thu
+
 
 * RUN
-	watchfs '*/*.erl' 'rebar eunit -v skip_deps=true suite=xmerl'
+  : watchfs '*/*.erl' 'rebar eunit -v skip_deps=true suite=xmerl'
 
 * RPC protocol Unitary tests
   
 ** Protocol
-   list_to_atom(element(2, split_ns("soap:Envelope"))).
+   
+  : list_to_atom(element(2, split_ns("soap:Envelope"))).
    
 
 *** SOAP Parse tests
     File souces are in: [[%20https://github.com/dpavlin/perl-cwmp.git][perl-cwmp]]
 
+**** CPE Implementation
 
-   | CPE methods                        | Responding | Calling  |   |
-   | GetRPCMethods                      | REQUIRED   | OPTIONAL | X |
-   | SetParameterValues                 | REQUIRED   | REQUIRED | X |
-   | GetParameterValues                 | REQUIRED   | REQUIRED | X |
-   | GetParameterNames                  | REQUIRED   | REQUIRED | X |
-   | SetParameterAttributes             | REQUIRED   | OPTIONAL |   |
-   | GetParameterAttributes             | REQUIRED   | OPTIONAL | X |
-   | AddObject                          | REQUIRED   | OPTIONAL |   |
-   | DeleteObject                       | REQUIRED   | OPTIONAL |   |
-   | Reboot                             | REQUIRED   | OPTIONAL | X |
-   | Download                           | REQUIRED   | REQUIRED |   |
-   | ScheduleDownload                   | OPTIONAL   | OPTIONAL |   |
-   | Upload                             | OPTIONAL   | OPTIONAL |   |
-   | FactoryReset                       | OPTIONAL   | OPTIONAL |   |
-   | GetQueuedTransfers  (DEPRECATED)   | OPTIONAL   | OPTIONAL |   |
-   | GetAllQueuedTransfers              | OPTIONAL   | OPTIONAL |   |
-   | CancelTransfer                     | OPTIONAL   | OPTIONAL |   |
-   | ScheduleInform                     | OPTIONAL   | OPTIONAL |   |
-   | ChangeDUState                      | OPTIONAL   | OPTIONAL |   |
-   | SetVouchers           (DEPRECATED) | OPTIONAL   | OPTIONAL |   |
-   | GetOptions            (DEPRECATED) | OPTIONAL   | OPTIONAL |   |
-
-   | ACS methods                        | Calling  | Responding |   |
-   | GetRPCMethods                      | OPTIONAL | REQUIRED   |   |
-   | Inform                             | REQUIRED | REQUIRED   | X |
-   | TransferComplete                   | REQUIRED | REQUIRED   |   |
-   | AutonomousTransferComplete         | OPTIONAL | REQUIRED   |   |
-   | DUStateChangeComplete              | OPTIONAL | OPTIONAL   |   |
-   | AutonomousDUStateChangeComplete    | OPTIONAL | OPTIONAL   |   |
-   | RequestDownload                    | OPTIONAL | OPTIONAL   |   |
-   | Kicked                (DEPRECATED) | OPTIONAL | OPTIONAL   |   |
+    | /CPE methods/                      | /Responding/ | /Calling/ | /Implemented/ |
+    |------------------------------------+--------------+-----------+---------------|
+    | GetRPCMethods                      | REQUIRED     | OPTIONAL  | X             |
+    | SetParameterValues                 | REQUIRED     | REQUIRED  | X             |
+    | GetParameterValues                 | REQUIRED     | REQUIRED  | X             |
+    | GetParameterNames                  | REQUIRED     | REQUIRED  | X             |
+    | SetParameterAttributes             | REQUIRED     | OPTIONAL  |               |
+    | GetParameterAttributes             | REQUIRED     | OPTIONAL  | X             |
+    | AddObject                          | REQUIRED     | OPTIONAL  |               |
+    | DeleteObject                       | REQUIRED     | OPTIONAL  |               |
+    | Reboot                             | REQUIRED     | OPTIONAL  | X             |
+    | Download                           | REQUIRED     | REQUIRED  |               |
+    | ScheduleDownload                   | OPTIONAL     | OPTIONAL  |               |
+    | Upload                             | OPTIONAL     | OPTIONAL  |               |
+    | FactoryReset                       | OPTIONAL     | OPTIONAL  |               |
+    | GetQueuedTransfers  (DEPRECATED)   | OPTIONAL     | OPTIONAL  |               |
+    | GetAllQueuedTransfers              | OPTIONAL     | OPTIONAL  |               |
+    | CancelTransfer                     | OPTIONAL     | OPTIONAL  |               |
+    | ScheduleInform                     | OPTIONAL     | OPTIONAL  |               |
+    | ChangeDUState                      | OPTIONAL     | OPTIONAL  |               |
+    | SetVouchers           (DEPRECATED) | OPTIONAL     | OPTIONAL  |               |
+    | GetOptions            (DEPRECATED) | OPTIONAL     | OPTIONAL  |               |
 
 
-    
+**** ACS Implementation
+
+    | /ACS methods/                      | /Calling/ | /Responding/ | /Implemented/ |
+    |------------------------------------+-----------+--------------+---------------|
+    | GetRPCMethods                      | OPTIONAL  | REQUIRED     |               |
+    | Inform                             | REQUIRED  | REQUIRED     | X             |
+    | TransferComplete                   | REQUIRED  | REQUIRED     |               |
+    | AutonomousTransferComplete         | OPTIONAL  | REQUIRED     |               |
+    | DUStateChangeComplete              | OPTIONAL  | OPTIONAL     |               |
+    | AutonomousDUStateChangeComplete    | OPTIONAL  | OPTIONAL     |               |
+    | RequestDownload                    | OPTIONAL  | OPTIONAL     |               |
+    | Kicked                (DEPRECATED) | OPTIONAL  | OPTIONAL     |               |
+
+
+     
 ** SOAP decoding [16/16]
    - [X] Parse SOAP boolean types
    - [X] Parse SOAP dateTime types 
@@ -67,7 +80,7 @@
      
    - [X] Parse SOAP URI types
    - [X] Parse SOAP namespace types (copy from libs)
-   
+  
    - [X] parse_EventCodeType
 
    - [X] parse_ArraySize
@@ -86,19 +99,22 @@
        
 ** SOAP encoding [1/1]
    - [X] build anyURI 
+
+#+begin_example     
    %%%  ftp_URL = "ftp:" "//" [ ftp_userinfo "@"] host [ ":" port ] ftp_abs_path
    %%%  http_URL = "http:" "//" host [ ":" port ] [ abs_path [ "?" query ]]
    %%%  http_URL = "https:" "//" host [ ":" port ] [ abs_path [ "?" query ]]
-   
+#+end_example   
 
 ** ACS location update [1/1]
    - [X] Parse URI / xmerl_tests:parse_URI_test
      
      
 * System tests
-** Application state management [0/3]
-   - [ ] GProc cookies OFO
+** Application state management [1/3]
+   - [X] GProc cookies OFO
         http://rustyklophaus.com/articles/20090916-GProcErlangGlobalProcessRegistry.html
+
    - [ ] ETS save
 
    - [ ] Application:get_env/2 
