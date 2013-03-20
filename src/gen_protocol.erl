@@ -21,25 +21,26 @@
 
 %% Protocol Object methods
 
+
 %% create_protocol
-%% @doc This method initialize protocol.
+%%  This method initialize protocol.
 -callback create_protocol(Config :: term()) ->
     {ok, Config :: term()} | {error, Reason :: term()}.
 
 %% open
-%% Active open on protocol object
+%%  Active open on protocol object
 -callback open(InvokingProtocol :: protocol(),
 	       ParticipandSet :: list()) ->
     {ok, session()} | {error, Reason :: term()}.
 
 %% open_enable
-%% @doc Request for passive open on low-level protocol object
+%%  Request for passive open on low-level protocol object
 -callback open_enable(InvokingProtocol :: protocol(),
 		      ParticipandSet :: list()) ->
     ok | {error, Reason :: term()}.
 
 %% open_done
-%% @doc Async response for passive open on high-level protocol object
+%%  Async response for passive open on high-level protocol object
 -callback open_done(InvokingProtocol :: protocol(),
 		    ParticipandSet :: list()) ->
     {ok, session()} | {error, Reason :: term()}.

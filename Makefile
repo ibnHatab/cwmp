@@ -40,13 +40,14 @@ orgs-README:
 
 clean: ct-clean
 	$(REBAR) clean
-	@rm -rf $(DOCDIR)
-	@rm -rf logs
-	@rm -rf .eunit
+	-@rm -rf $(DOCDIR)
+	-@rm -rf logs
+	-@rm -rf .eunit
+	-@rm README README.txt
 
 ct-clean:
-	@rm -rf test/*.beam
-	@rm -rf test/cwmp_builder_SUITE_data/*.xml
+	-@rm -rf test/*.beam
+	-@rm -rf test/cwmp_builder_SUITE_data/*.xml
 
 distclean:
 	$(REBAR) clean delete-deps
